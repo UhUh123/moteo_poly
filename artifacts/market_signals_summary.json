@@ -1,0 +1,108 @@
+{
+  "rows": 610,
+  "matched_predictions": 415,
+  "paper_trades": 249,
+  "paper_trades_pre_end": 212,
+  "side_counts": {
+    "BUY_NO": 151,
+    "BUY_YES": 98,
+    "NO_TRADE": 166,
+    "NO_DATA": 195
+  },
+  "ended_counts": {
+    "1": 235,
+    "0": 375
+  },
+  "top_pre_end_signals": [
+    {
+      "paper_side": "BUY_YES",
+      "paper_net_edge": "0.61417",
+      "paper_price": "0.06",
+      "paper_fair_probability": "0.67699",
+      "event_title": "Highest temperature in Beijing on May 5?",
+      "group_item_title": "28°C or below",
+      "prediction_c": "28.040701107743466"
+    },
+    {
+      "paper_side": "BUY_NO",
+      "paper_net_edge": "0.537612",
+      "paper_price": "0.45",
+      "paper_fair_probability": "0.999987",
+      "event_title": "Highest temperature in Jakarta on May 5?",
+      "group_item_title": "34°C",
+      "prediction_c": "29.29088729636456"
+    },
+    {
+      "paper_side": "BUY_NO",
+      "paper_net_edge": "0.433131",
+      "paper_price": "0.55",
+      "paper_fair_probability": "0.995506",
+      "event_title": "Highest temperature in San Francisco on May 5?",
+      "group_item_title": "62-63°F",
+      "prediction_c": "14.061808847105477"
+    },
+    {
+      "paper_side": "BUY_NO",
+      "paper_net_edge": "0.412054",
+      "paper_price": "0.54",
+      "paper_fair_probability": "0.964474",
+      "event_title": "Highest temperature in Toronto on May 5?",
+      "group_item_title": "17°C or higher",
+      "prediction_c": "14.694859945339182"
+    },
+    {
+      "paper_side": "BUY_NO",
+      "paper_net_edge": "0.411571",
+      "paper_price": "0.5",
+      "paper_fair_probability": "0.924071",
+      "event_title": "Highest temperature in Shanghai on May 5?",
+      "group_item_title": "25°C",
+      "prediction_c": "23.126048663334064"
+    },
+    {
+      "paper_side": "BUY_NO",
+      "paper_net_edge": "0.38685",
+      "paper_price": "0.59",
+      "paper_fair_probability": "0.988945",
+      "event_title": "Highest temperature in Miami on May 5?",
+      "group_item_title": "86-87°F",
+      "prediction_c": "27.723492866429737"
+    },
+    {
+      "paper_side": "BUY_YES",
+      "paper_net_edge": "0.371313",
+      "paper_price": "0.008",
+      "paper_fair_probability": "0.37971",
+      "event_title": "Highest temperature in Tokyo on May 5?",
+      "group_item_title": "19°C",
+      "prediction_c": "19.135431870510757"
+    },
+    {
+      "paper_side": "BUY_YES",
+      "paper_net_edge": "0.368443",
+      "paper_price": "0.05",
+      "paper_fair_probability": "0.420818",
+      "event_title": "Highest temperature in Atlanta on May 5?",
+      "group_item_title": "76-77°F",
+      "prediction_c": "25.059307636081016"
+    },
+    {
+      "paper_side": "BUY_NO",
+      "paper_net_edge": "0.367837",
+      "paper_price": "0.62",
+      "paper_fair_probability": "0.999617",
+      "event_title": "Highest temperature in Tokyo on May 5?",
+      "group_item_title": "23°C or higher",
+      "prediction_c": "19.135431870510757"
+    },
+    {
+      "paper_side": "BUY_NO",
+      "paper_net_edge": "0.357111",
+      "paper_price": "0.58",
+      "paper_fair_probability": "0.949291",
+      "event_title": "Highest temperature in Atlanta on May 5?",
+      "group_item_title": "80-81°F",
+      "prediction_c": "25.059307636081016"
+    }
+  ]
+}

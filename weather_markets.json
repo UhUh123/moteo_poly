@@ -1,0 +1,872 @@
+[
+  {
+    "title": "Highest temperature in Houston on May 5?",
+    "slug": "highest-temperature-in-houston-on-may-5-2026",
+    "location": "William P. Hobby",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/us/tx/houston/KHOU",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/us/tx/houston/KHOU"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the William P. Hobby Airport Station in degrees Fahrenheit on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the William P. Hobby Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/us/tx/houston/KHOU.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Fahrenheit (eg, 21°F). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Lowest temperature in Shanghai on May 6?",
+    "slug": "lowest-temperature-in-shanghai-on-may-6-2026",
+    "location": "Shanghai Pudong International",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/cn/shanghai/ZSPD",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/cn/shanghai/ZSPD"
+    ],
+    "description": "This market will resolve to the temperature range that contains the lowest temperature recorded at the Shanghai Pudong International Airport Station in degrees Celsius on 6 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the lowest temperature recorded for all times on this day by the Forecast for the Shanghai Pudong International Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/cn/shanghai/ZSPD.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Lowest temperature in Tokyo on May 5?",
+    "slug": "lowest-temperature-in-tokyo-on-may-5-2026",
+    "location": "Tokyo Haneda",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/jp/tokyo/RJTT",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/jp/tokyo/RJTT"
+    ],
+    "description": "This market will resolve to the temperature range that contains the lowest temperature recorded at the Tokyo Haneda Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the lowest temperature recorded for all times on this day by the Forecast for the Tokyo Haneda Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/jp/tokyo/RJTT.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in NYC on May 4?",
+    "slug": "highest-temperature-in-nyc-on-may-4-2026",
+    "location": "LaGuardia",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/us/ny/new-york-city/KLGA",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/us/ny/new-york-city/KLGA"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the LaGuardia Airport Station in degrees Fahrenheit on 4 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the LaGuardia Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/us/ny/new-york-city/KLGA.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Fahrenheit (eg, 21°F). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Seoul on May 4?",
+    "slug": "highest-temperature-in-seoul-on-may-4-2026",
+    "location": "Incheon Intl",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/kr/incheon/RKSI",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/kr/incheon/RKSI"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Incheon Intl Airport Station in degrees Celsius on 4 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Incheon Intl Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/kr/incheon/RKSI.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Chongqing on May 5?",
+    "slug": "highest-temperature-in-chongqing-on-may-5-2026",
+    "location": "Chongqing Jiangbei International",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/cn/chongqing/ZUCK",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/cn/chongqing/ZUCK"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Chongqing Jiangbei International Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Chongqing Jiangbei International Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/cn/chongqing/ZUCK.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Munich on May 5?",
+    "slug": "highest-temperature-in-munich-on-may-5-2026",
+    "location": "Munich",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/de/munich/EDDM",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/de/munich/EDDM"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Munich Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Munich Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/de/munich/EDDM.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Singapore on May 5?",
+    "slug": "highest-temperature-in-singapore-on-may-5-2026",
+    "location": "Singapore Changi",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/sg/singapore/WSSS",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/sg/singapore/WSSS"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Singapore Changi Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Singapore Changi Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/sg/singapore/WSSS.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Dallas on May 5?",
+    "slug": "highest-temperature-in-dallas-on-may-5-2026",
+    "location": "Dallas Love Field",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/us/tx/dallas/KDAL",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/us/tx/dallas/KDAL"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Dallas Love Field Station in degrees Fahrenheit on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Dallas Love Field Station once information is finalized, available here: https://www.wunderground.com/history/daily/us/tx/dallas/KDAL.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Fahrenheit (eg, 21°F). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Qingdao on May 5?",
+    "slug": "highest-temperature-in-qingdao-on-may-5-2026",
+    "location": "Qingdao Jiaodong International",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/cn/qingdao/ZSQD",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/cn/qingdao/ZSQD"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Qingdao Jiaodong International Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Qingdao Jiaodong International Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/cn/qingdao/ZSQD.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Lagos on May 5?",
+    "slug": "highest-temperature-in-lagos-on-may-5-2026",
+    "location": "Murtala Muhammad International",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/ng/lagos/DNMM",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/ng/lagos/DNMM"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Murtala Muhammad International Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Murtala Muhammad International Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/ng/lagos/DNMM.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Warsaw on May 4?",
+    "slug": "highest-temperature-in-warsaw-on-may-4-2026",
+    "location": "Warsaw Chopin",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/pl/warsaw/EPWA",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/pl/warsaw/EPWA"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Warsaw Chopin Airport Station in degrees Celsius on 4 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Warsaw Chopin Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/pl/warsaw/EPWA.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "May 2026 Temperature Increase (ºC)",
+    "slug": "may-2026-temperature-increase-c",
+    "location": "",
+    "resolution_source_url": "https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.txt",
+    "all_urls": [
+      "https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.txt"
+    ],
+    "description": "This market will resolve according to the value reported by the Global Land-Ocean Temperature Index for May 2026 when it is released.\n\nAn anomaly within a named bracket for May 2026 is necessary and sufficient to resolve this market immediately once the data becomes available, regardless of whether the figure for May 2026 is later revised.\n\nThe primary resolution source for this market will be the figure found in the table titled \"GLOBAL Land-Ocean Temperature Index in 0.01 degrees Celsius\" under the column \"May\" in the row \"2026\" (https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.txt).\n\nIf NASA’s “Global Temperature Index” is rendered permanently unavailable, other information from NASA may be used.\nIf no information for May 2026 is provided by NASA by July 1, 2026, 11:59 PM ET, this market will resolve to the lowest range bracket."
+  },
+  {
+    "title": "Highest temperature in Tokyo on May 5?",
+    "slug": "highest-temperature-in-tokyo-on-may-5-2026",
+    "location": "Tokyo Haneda",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/jp/tokyo/RJTT",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/jp/tokyo/RJTT"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Tokyo Haneda Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Tokyo Haneda Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/jp/tokyo/RJTT.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Taipei on May 5?",
+    "slug": "highest-temperature-in-taipei-on-may-5-2026",
+    "location": "Taipei Songshan",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/tw/taipei/RCSS",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/tw/taipei/RCSS"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Taipei Songshan Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Taipei Songshan Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/tw/taipei/RCSS.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Milan on May 5?",
+    "slug": "highest-temperature-in-milan-on-may-5-2026",
+    "location": "Malpensa Intl",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/it/milan/LIMC",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/it/milan/LIMC"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Malpensa Intl Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Malpensa Intl Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/it/milan/LIMC.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Sao Paulo on May 5?",
+    "slug": "highest-temperature-in-sao-paulo-on-may-5-2026",
+    "location": "Sao Paulo-Guarulhos International",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/br/guarulhos/SBGR",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/br/guarulhos/SBGR"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Sao Paulo-Guarulhos International Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Sao Paulo-Guarulhos International Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/br/guarulhos/SBGR.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Amsterdam on May 5?",
+    "slug": "highest-temperature-in-amsterdam-on-may-5-2026",
+    "location": "Amsterdam",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/nl/schiphol/EHAM",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/nl/schiphol/EHAM"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Amsterdam Airport Schiphol Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Amsterdam Airport Schiphol Station once information is finalized, available here: https://www.wunderground.com/history/daily/nl/schiphol/EHAM.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Kuala Lumpur on May 5?",
+    "slug": "highest-temperature-in-kuala-lumpur-on-may-5-2026",
+    "location": "Kuala Lumpur Intl",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/my/sepang-district/WMKK",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/my/sepang-district/WMKK"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Kuala Lumpur Intl Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Kuala Lumpur Intl Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/my/sepang-district/WMKK.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Lowest temperature in NYC on May 6?",
+    "slug": "lowest-temperature-in-nyc-on-may-6-2026",
+    "location": "LaGuardia",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/us/ny/new-york-city/KLGA",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/us/ny/new-york-city/KLGA"
+    ],
+    "description": "This market will resolve to the temperature range that contains the lowest temperature recorded at the LaGuardia Airport Station in degrees Fahrenheit on 6 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the lowest temperature recorded for all times on this day by the Forecast for the LaGuardia Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/us/ny/new-york-city/KLGA.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Fahrenheit (eg, 21°F). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Taipei on May 4?",
+    "slug": "highest-temperature-in-taipei-on-may-4-2026",
+    "location": "Taipei Songshan",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/tw/taipei/RCSS",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/tw/taipei/RCSS"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Taipei Songshan Airport Station in degrees Celsius on 4 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Taipei Songshan Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/tw/taipei/RCSS.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Guangzhou on May 5?",
+    "slug": "highest-temperature-in-guangzhou-on-may-5-2026",
+    "location": "Guangzhou Baiyun International",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/cn/guangzhou/ZGGG",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/cn/guangzhou/ZGGG"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Guangzhou Baiyun International Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Guangzhou Baiyun International Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/cn/guangzhou/ZGGG.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Hong Kong on May 5?",
+    "slug": "highest-temperature-in-hong-kong-on-may-5-2026",
+    "location": "Hong Kong on May 5",
+    "resolution_source_url": "https://www.weather.gov.hk/en/cis/climat.htm",
+    "all_urls": [
+      "https://www.weather.gov.hk/en/cis/climat.htm"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded by the Hong Kong Observatory in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from the Hong Kong Observatory, specifically the \"Absolute Daily Max (deg. C)\" the specified date once information is finalized in the relevant \"Daily Extract\", available here: https://www.weather.gov.hk/en/cis/climat.htm\n\nThis market can not resolve to \"Yes\" until data for this date has been finalized.\n\nThe resolution source for this market measures temperatures in Celsius to one decimal place (eg, 9.1°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Shenzhen on May 5?",
+    "slug": "highest-temperature-in-shenzhen-on-may-5-2026",
+    "location": "Shenzhen Bao'an International",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/cn/shenzhen/ZGSZ",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/cn/shenzhen/ZGSZ"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Shenzhen Bao'an International Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Shenzhen Bao'an International Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/cn/shenzhen/ZGSZ.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in London on May 4?",
+    "slug": "highest-temperature-in-london-on-may-4-2026",
+    "location": "London City",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/gb/london/EGLC",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/gb/london/EGLC"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the London City Airport Station in degrees Celsius on 4 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the London City Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/gb/london/EGLC.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Manila on May 5?",
+    "slug": "highest-temperature-in-manila-on-may-5-2026",
+    "location": "Ninoy Aquino International",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/ph/manila/RPLL",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/ph/manila/RPLL"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Ninoy Aquino International Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Ninoy Aquino International Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/ph/manila/RPLL.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Madrid on May 5?",
+    "slug": "highest-temperature-in-madrid-on-may-5-2026",
+    "location": "Adolfo Suárez Madrid-Barajas",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/es/madrid/LEMD",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/es/madrid/LEMD"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Adolfo Suárez Madrid-Barajas Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Adolfo Suárez Madrid-Barajas Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/es/madrid/LEMD.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Singapore on May 4?",
+    "slug": "highest-temperature-in-singapore-on-may-4-2026",
+    "location": "Singapore Changi",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/sg/singapore/WSSS",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/sg/singapore/WSSS"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Singapore Changi Airport Station in degrees Celsius on 4 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Singapore Changi Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/sg/singapore/WSSS.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Jeddah on May 5?",
+    "slug": "highest-temperature-in-jeddah-on-may-5-2026",
+    "location": "King Abdulaziz International",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/sa/jeddah/OEJN",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/sa/jeddah/OEJN"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the King Abdulaziz International Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the King Abdulaziz International Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/sa/jeddah/OEJN.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Jakarta on May 5?",
+    "slug": "highest-temperature-in-jakarta-on-may-5-2026",
+    "location": "Halim Perdanakusuma Intl",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/id/jakarta/WIHH",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/id/jakarta/WIHH"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Halim Perdanakusuma Intl Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Halim Perdanakusuma Intl Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/id/jakarta/WIHH.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Jakarta on May 4?",
+    "slug": "highest-temperature-in-jakarta-on-may-4-2026",
+    "location": "Halim Perdanakusuma Intl",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/id/jakarta/WIHH",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/id/jakarta/WIHH"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Halim Perdanakusuma Intl Airport Station in degrees Celsius on 4 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Halim Perdanakusuma Intl Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/id/jakarta/WIHH.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Beijing on May 4?",
+    "slug": "highest-temperature-in-beijing-on-may-4-2026",
+    "location": "Beijing Capital International",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/cn/beijing/ZBAA",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/cn/beijing/ZBAA"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Beijing Capital International Airport Station in degrees Celsius on 4 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Beijing Capital International Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/cn/beijing/ZBAA.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Helsinki on May 5?",
+    "slug": "highest-temperature-in-helsinki-on-may-5-2026",
+    "location": "Helsinki Vantaa",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/fi/vantaa/EFHK",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/fi/vantaa/EFHK"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Helsinki Vantaa Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Helsinki Vantaa Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/fi/vantaa/EFHK.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Chongqing on May 4?",
+    "slug": "highest-temperature-in-chongqing-on-may-4-2026",
+    "location": "Chongqing Jiangbei International",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/cn/chongqing/ZUCK",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/cn/chongqing/ZUCK"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Chongqing Jiangbei International Airport Station in degrees Celsius on 4 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Chongqing Jiangbei International Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/cn/chongqing/ZUCK.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Lowest temperature in Miami on May 6?",
+    "slug": "lowest-temperature-in-miami-on-may-6-2026",
+    "location": "Miami Intl",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/us/fl/miami/KMIA",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/us/fl/miami/KMIA"
+    ],
+    "description": "This market will resolve to the temperature range that contains the lowest temperature recorded at the Miami Intl Airport Station in degrees Fahrenheit on 6 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the lowest temperature recorded for all times on this day by the Forecast for the Miami Intl Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/us/fl/miami/KMIA.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Fahrenheit (eg, 21°F). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Tel Aviv on May 5?",
+    "slug": "highest-temperature-in-tel-aviv-on-may-5-2026",
+    "location": "Ben Gurion International Airport",
+    "resolution_source_url": "https://www.weather.gov/wrh/timeseries?site=LLBG",
+    "all_urls": [
+      "https://www.weather.gov/wrh/timeseries?site=LLBG"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded by NOAA at the Ben Gurion International Airport in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from NOAA, specifically the highest reading under the \"Temp\" column on the specified date once information is finalized for all hours on that date, available here: https://www.weather.gov/wrh/timeseries?site=LLBG\n\nTo toggle between Fahrenheit and Celsius, click the \"Switch to Metric Units\" button until the relevant table displays °C.\n\nThis market can not resolve to \"Yes\" until data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Ankara on May 5?",
+    "slug": "highest-temperature-in-ankara-on-may-5-2026",
+    "location": "Esenboğa Intl",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/tr/%C3%A7ubuk/LTAC",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/tr/%C3%A7ubuk/LTAC"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Esenboğa Intl Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Esenboğa Intl Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/tr/%C3%A7ubuk/LTAC.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Madrid on May 4?",
+    "slug": "highest-temperature-in-madrid-on-may-4-2026",
+    "location": "Adolfo Suárez Madrid-Barajas",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/es/madrid/LEMD",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/es/madrid/LEMD"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Adolfo Suárez Madrid-Barajas Airport Station in degrees Celsius on 4 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Adolfo Suárez Madrid-Barajas Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/es/madrid/LEMD.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Lowest temperature in Seoul on May 6?",
+    "slug": "lowest-temperature-in-seoul-on-may-6-2026",
+    "location": "Incheon Intl",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/kr/incheon/RKSI",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/kr/incheon/RKSI"
+    ],
+    "description": "This market will resolve to the temperature range that contains the lowest temperature recorded at the Incheon Intl Airport Station in degrees Celsius on 6 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the lowest temperature recorded for all times on this day by the Forecast for the Incheon Intl Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/kr/incheon/RKSI.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Mexico City on May 5?",
+    "slug": "highest-temperature-in-mexico-city-on-may-5-2026",
+    "location": "Benito Juárez International",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/mx/mexico-city/MMMX",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/mx/mexico-city/MMMX"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Benito Juárez International Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Benito Juárez International Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/mx/mexico-city/MMMX.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Lowest temperature in Hong Kong on May 6?",
+    "slug": "lowest-temperature-in-hong-kong-on-may-6-2026",
+    "location": "Hong Kong on May 6",
+    "resolution_source_url": "https://www.weather.gov.hk/en/cis/climat.htm",
+    "all_urls": [
+      "https://www.weather.gov.hk/en/cis/climat.htm"
+    ],
+    "description": "This market will resolve to the temperature range that contains the lowest temperature recorded by the Hong Kong Observatory in degrees Celsius on 6 May '26.\n\nThe resolution source for this market will be information from the Hong Kong Observatory, specifically the \"Absolute Daily Min (deg. C)\" the specified date once information is finalized in the relevant \"Daily Extract\", available here: https://www.weather.gov.hk/en/cis/climat.htm\n\nThis market can not resolve to \"Yes\" until data for this date has been finalized.\n\nThe resolution source for this market measures temperatures in Celsius to one decimal place (eg, 9.1°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Cape Town on May 5?",
+    "slug": "highest-temperature-in-cape-town-on-may-5-2026",
+    "location": "Cape Town International",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/za/matroosfontein/FACT",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/za/matroosfontein/FACT"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Cape Town International Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Cape Town International Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/za/matroosfontein/FACT.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Buenos Aires on May 5?",
+    "slug": "highest-temperature-in-buenos-aires-on-may-5-2026",
+    "location": "Minister Pistarini Intl",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/ar/ezeiza/SAEZ",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/ar/ezeiza/SAEZ"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Minister Pistarini Intl Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Minister Pistarini Intl Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/ar/ezeiza/SAEZ.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Miami on May 4?",
+    "slug": "highest-temperature-in-miami-on-may-4-2026",
+    "location": "Miami Intl",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/us/fl/miami/KMIA",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/us/fl/miami/KMIA"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Miami Intl Airport Station in degrees Fahrenheit on 4 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Miami Intl Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/us/fl/miami/KMIA.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Fahrenheit (eg, 21°F). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Wuhan on May 5?",
+    "slug": "highest-temperature-in-wuhan-on-may-5-2026",
+    "location": "Wuhan Tianhe International",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/cn/wuhan/ZHHH",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/cn/wuhan/ZHHH"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Wuhan Tianhe International Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Wuhan Tianhe International Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/cn/wuhan/ZHHH.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Paris on May 5?",
+    "slug": "highest-temperature-in-paris-on-may-5-2026",
+    "location": "Paris-Le Bourget",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/fr/bonneuil-en-france/LFPB",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/fr/bonneuil-en-france/LFPB"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Paris-Le Bourget Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Paris-Le Bourget Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/fr/bonneuil-en-france/LFPB.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Lucknow on May 5?",
+    "slug": "highest-temperature-in-lucknow-on-may-5-2026",
+    "location": "Chaudhary Charan Singh Intl",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/in/lucknow/VILK",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/in/lucknow/VILK"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Chaudhary Charan Singh Intl Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Chaudhary Charan Singh Intl Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/in/lucknow/VILK.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Lowest temperature in Seoul on May 5?",
+    "slug": "lowest-temperature-in-seoul-on-may-5-2026",
+    "location": "Incheon Intl",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/kr/incheon/RKSI",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/kr/incheon/RKSI"
+    ],
+    "description": "This market will resolve to the temperature range that contains the lowest temperature recorded at the Incheon Intl Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the lowest temperature recorded for all times on this day by the Forecast for the Incheon Intl Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/kr/incheon/RKSI.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Lowest temperature in Shanghai on May 5?",
+    "slug": "lowest-temperature-in-shanghai-on-may-5-2026",
+    "location": "Shanghai Pudong International",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/cn/shanghai/ZSPD",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/cn/shanghai/ZSPD"
+    ],
+    "description": "This market will resolve to the temperature range that contains the lowest temperature recorded at the Shanghai Pudong International Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the lowest temperature recorded for all times on this day by the Forecast for the Shanghai Pudong International Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/cn/shanghai/ZSPD.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Seattle on May 5?",
+    "slug": "highest-temperature-in-seattle-on-may-5-2026",
+    "location": "Seattle-Tacoma International",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/us/wa/seatac/KSEA",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/us/wa/seatac/KSEA"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Seattle-Tacoma International Airport Station in degrees Fahrenheit on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Seattle-Tacoma International Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/us/wa/seatac/KSEA.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Fahrenheit (eg, 21°F). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Karachi on May 5?",
+    "slug": "highest-temperature-in-karachi-on-may-5-2026",
+    "location": "Masroor Airbase",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/pk/karachi/OPKC",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/pk/karachi/OPKC"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Masroor Airbase Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Masroor Airbase Station once information is finalized, available here: https://www.wunderground.com/history/daily/pk/karachi/OPKC.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Austin on May 5?",
+    "slug": "highest-temperature-in-austin-on-may-5-2026",
+    "location": "Austin-Bergstrom International",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/us/tx/austin/KAUS",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/us/tx/austin/KAUS"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Austin-Bergstrom International Airport Station in degrees Fahrenheit on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Austin-Bergstrom International Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/us/tx/austin/KAUS.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Fahrenheit (eg, 21°F). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Miami on May 5?",
+    "slug": "highest-temperature-in-miami-on-may-5-2026",
+    "location": "Miami Intl",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/us/fl/miami/KMIA",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/us/fl/miami/KMIA"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Miami Intl Airport Station in degrees Fahrenheit on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Miami Intl Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/us/fl/miami/KMIA.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Fahrenheit (eg, 21°F). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Toronto on May 5?",
+    "slug": "highest-temperature-in-toronto-on-may-5-2026",
+    "location": "Toronto Pearson Intl",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/ca/mississauga/CYYZ",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/ca/mississauga/CYYZ"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Toronto Pearson Intl Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Toronto Pearson Intl Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/ca/mississauga/CYYZ.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in NYC on May 5?",
+    "slug": "highest-temperature-in-nyc-on-may-5-2026",
+    "location": "LaGuardia",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/us/ny/new-york-city/KLGA",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/us/ny/new-york-city/KLGA"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the LaGuardia Airport Station in degrees Fahrenheit on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the LaGuardia Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/us/ny/new-york-city/KLGA.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Fahrenheit (eg, 21°F). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Los Angeles on May 5?",
+    "slug": "highest-temperature-in-los-angeles-on-may-5-2026",
+    "location": "Los Angeles International",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/us/ca/los-angeles/KLAX",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/us/ca/los-angeles/KLAX"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Los Angeles International Airport Station in degrees Fahrenheit on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Los Angeles International Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/us/ca/los-angeles/KLAX.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Fahrenheit (eg, 21°F). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Lowest temperature in NYC on May 5?",
+    "slug": "lowest-temperature-in-nyc-on-may-5-2026",
+    "location": "LaGuardia",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/us/ny/new-york-city/KLGA",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/us/ny/new-york-city/KLGA"
+    ],
+    "description": "This market will resolve to the temperature range that contains the lowest temperature recorded at the LaGuardia Airport Station in degrees Fahrenheit on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the lowest temperature recorded for all times on this day by the Forecast for the LaGuardia Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/us/ny/new-york-city/KLGA.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Fahrenheit (eg, 21°F). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Atlanta on May 5?",
+    "slug": "highest-temperature-in-atlanta-on-may-5-2026",
+    "location": "Hartsfield-Jackson International",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/us/ga/atlanta/KATL",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/us/ga/atlanta/KATL"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Hartsfield-Jackson International Airport Station in degrees Fahrenheit on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Hartsfield-Jackson International Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/us/ga/atlanta/KATL.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Fahrenheit (eg, 21°F). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Lowest temperature in Paris on May 5?",
+    "slug": "lowest-temperature-in-paris-on-may-5-2026",
+    "location": "Paris-Le Bourget",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/fr/bonneuil-en-france/LFPB",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/fr/bonneuil-en-france/LFPB"
+    ],
+    "description": "This market will resolve to the temperature range that contains the lowest temperature recorded at the Paris-Le Bourget Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the lowest temperature recorded for all times on this day by the Forecast for the Paris-Le Bourget Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/fr/bonneuil-en-france/LFPB.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Chengdu on May 5?",
+    "slug": "highest-temperature-in-chengdu-on-may-5-2026",
+    "location": "Chengdu Shuangliu International",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/cn/chengdu/ZUUU",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/cn/chengdu/ZUUU"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Chengdu Shuangliu International Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Chengdu Shuangliu International Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/cn/chengdu/ZUUU.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Ankara on May 4?",
+    "slug": "highest-temperature-in-ankara-on-may-4-2026",
+    "location": "Esenboğa Intl",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/tr/%C3%A7ubuk/LTAC",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/tr/%C3%A7ubuk/LTAC"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Esenboğa Intl Airport Station in degrees Celsius on 4 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Esenboğa Intl Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/tr/%C3%A7ubuk/LTAC.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Shanghai on May 4?",
+    "slug": "highest-temperature-in-shanghai-on-may-4-2026",
+    "location": "Shanghai Pudong International",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/cn/shanghai/ZSPD",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/cn/shanghai/ZSPD"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Shanghai Pudong International Airport Station in degrees Celsius on 4 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Shanghai Pudong International Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/cn/shanghai/ZSPD.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Lowest temperature in Miami on May 5?",
+    "slug": "lowest-temperature-in-miami-on-may-5-2026",
+    "location": "Miami Intl",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/us/fl/miami/KMIA",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/us/fl/miami/KMIA"
+    ],
+    "description": "This market will resolve to the temperature range that contains the lowest temperature recorded at the Miami Intl Airport Station in degrees Fahrenheit on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the lowest temperature recorded for all times on this day by the Forecast for the Miami Intl Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/us/fl/miami/KMIA.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Fahrenheit (eg, 21°F). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Kuala Lumpur on May 4?",
+    "slug": "highest-temperature-in-kuala-lumpur-on-may-4-2026",
+    "location": "Kuala Lumpur Intl",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/my/sepang-district/WMKK",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/my/sepang-district/WMKK"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Kuala Lumpur Intl Airport Station in degrees Celsius on 4 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Kuala Lumpur Intl Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/my/sepang-district/WMKK.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in London on May 5?",
+    "slug": "highest-temperature-in-london-on-may-5-2026",
+    "location": "London City",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/gb/london/EGLC",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/gb/london/EGLC"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the London City Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the London City Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/gb/london/EGLC.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Paris on May 4?",
+    "slug": "highest-temperature-in-paris-on-may-4-2026",
+    "location": "Paris-Le Bourget",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/fr/bonneuil-en-france/LFPB",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/fr/bonneuil-en-france/LFPB"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Paris-Le Bourget Airport Station in degrees Celsius on 4 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Paris-Le Bourget Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/fr/bonneuil-en-france/LFPB.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Wellington on May 4?",
+    "slug": "highest-temperature-in-wellington-on-may-4-2026",
+    "location": "Wellington Intl",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/nz/wellington/NZWN",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/nz/wellington/NZWN"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Wellington Intl Airport Station in degrees Celsius on 4 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Wellington Intl Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/nz/wellington/NZWN.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Wellington on May 5?",
+    "slug": "highest-temperature-in-wellington-on-may-5-2026",
+    "location": "Wellington Intl",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/nz/wellington/NZWN",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/nz/wellington/NZWN"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Wellington Intl Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Wellington Intl Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/nz/wellington/NZWN.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Chicago on May 5?",
+    "slug": "highest-temperature-in-chicago-on-may-5-2026",
+    "location": "Chicago O'Hare Intl",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/us/il/chicago/KORD",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/us/il/chicago/KORD"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Chicago O'Hare Intl Airport Station in degrees Fahrenheit on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Chicago O'Hare Intl Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/us/il/chicago/KORD.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Fahrenheit (eg, 21°F). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Seoul on May 5?",
+    "slug": "highest-temperature-in-seoul-on-may-5-2026",
+    "location": "Incheon Intl",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/kr/incheon/RKSI",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/kr/incheon/RKSI"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Incheon Intl Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Incheon Intl Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/kr/incheon/RKSI.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Chengdu on May 4?",
+    "slug": "highest-temperature-in-chengdu-on-may-4-2026",
+    "location": "Chengdu Shuangliu International",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/cn/chengdu/ZUUU",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/cn/chengdu/ZUUU"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Chengdu Shuangliu International Airport Station in degrees Celsius on 4 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Chengdu Shuangliu International Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/cn/chengdu/ZUUU.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Shanghai on May 5?",
+    "slug": "highest-temperature-in-shanghai-on-may-5-2026",
+    "location": "Shanghai Pudong International",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/cn/shanghai/ZSPD",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/cn/shanghai/ZSPD"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Shanghai Pudong International Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Shanghai Pudong International Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/cn/shanghai/ZSPD.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Shenzhen on May 4?",
+    "slug": "highest-temperature-in-shenzhen-on-may-4-2026",
+    "location": "Shenzhen Bao'an International",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/cn/shenzhen/ZGSZ",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/cn/shenzhen/ZGSZ"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Shenzhen Bao'an International Airport Station in degrees Celsius on 4 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Shenzhen Bao'an International Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/cn/shenzhen/ZGSZ.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Lowest temperature in London on May 6?",
+    "slug": "lowest-temperature-in-london-on-may-6-2026",
+    "location": "London City",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/gb/london/EGLC",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/gb/london/EGLC"
+    ],
+    "description": "This market will resolve to the temperature range that contains the lowest temperature recorded at the London City Airport Station in degrees Celsius on 6 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the lowest temperature recorded for all times on this day by the Forecast for the London City Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/gb/london/EGLC.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Beijing on May 5?",
+    "slug": "highest-temperature-in-beijing-on-may-5-2026",
+    "location": "Beijing Capital International",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/cn/beijing/ZBAA",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/cn/beijing/ZBAA"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Beijing Capital International Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Beijing Capital International Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/cn/beijing/ZBAA.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Busan on May 5?",
+    "slug": "highest-temperature-in-busan-on-may-5-2026",
+    "location": "Gimhae Intl",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/kr/busan/RKPK",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/kr/busan/RKPK"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Gimhae Intl Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Gimhae Intl Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/kr/busan/RKPK.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Moscow on May 5?",
+    "slug": "highest-temperature-in-moscow-on-may-5-2026",
+    "location": "Vnukovo International Airport",
+    "resolution_source_url": "https://www.weather.gov/wrh/timeseries?site=UUWW",
+    "all_urls": [
+      "https://www.weather.gov/wrh/timeseries?site=UUWW"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded by NOAA at the Vnukovo International Airport in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from NOAA, specifically the highest reading under the \"Temp\" column on the specified date once information is finalized for all hours on that date, available here: https://www.weather.gov/wrh/timeseries?site=UUWW\n\nTo toggle between Fahrenheit and Celsius, click the \"Switch to Metric Units\" button until the relevant table displays °C.\n\nThis market can not resolve to \"Yes\" until data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Denver on May 5?",
+    "slug": "highest-temperature-in-denver-on-may-5-2026",
+    "location": "Buckley Space Force Base",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/us/co/aurora/KBKF",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/us/co/aurora/KBKF"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Buckley Space Force Base Station in degrees Fahrenheit on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Buckley Space Force Base Station once information is finalized, available here: https://www.wunderground.com/history/daily/us/co/aurora/KBKF.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Fahrenheit (eg, 21°F). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Istanbul on May 5?",
+    "slug": "highest-temperature-in-istanbul-on-may-5-2026",
+    "location": "Istanbul Airport",
+    "resolution_source_url": "https://www.weather.gov/wrh/timeseries?site=LTFM",
+    "all_urls": [
+      "https://www.weather.gov/wrh/timeseries?site=LTFM"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded by NOAA at the Istanbul Airport in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from NOAA, specifically the highest reading under the \"Temp\" column on the specified date once information is finalized for all hours on that date, available here: https://www.weather.gov/wrh/timeseries?site=LTFM\n\nTo toggle between Fahrenheit and Celsius, click the \"Switch to Metric Units\" button until the relevant table displays °C.\n\nThis market can not resolve to \"Yes\" until data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Lowest temperature in Paris on May 6?",
+    "slug": "lowest-temperature-in-paris-on-may-6-2026",
+    "location": "Paris-Le Bourget",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/fr/bonneuil-en-france/LFPB",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/fr/bonneuil-en-france/LFPB"
+    ],
+    "description": "This market will resolve to the temperature range that contains the lowest temperature recorded at the Paris-Le Bourget Airport Station in degrees Celsius on 6 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the lowest temperature recorded for all times on this day by the Forecast for the Paris-Le Bourget Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/fr/bonneuil-en-france/LFPB.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in San Francisco on May 5?",
+    "slug": "highest-temperature-in-san-francisco-on-may-5-2026",
+    "location": "San Francisco International",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/us/ca/san-francisco/KSFO",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/us/ca/san-francisco/KSFO"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the San Francisco International Airport Station in degrees Fahrenheit on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the San Francisco International Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/us/ca/san-francisco/KSFO.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Fahrenheit (eg, 21°F). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Lowest temperature in London on May 5?",
+    "slug": "lowest-temperature-in-london-on-may-5-2026",
+    "location": "London City",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/gb/london/EGLC",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/gb/london/EGLC"
+    ],
+    "description": "This market will resolve to the temperature range that contains the lowest temperature recorded at the London City Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the lowest temperature recorded for all times on this day by the Forecast for the London City Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/gb/london/EGLC.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Warsaw on May 5?",
+    "slug": "highest-temperature-in-warsaw-on-may-5-2026",
+    "location": "Warsaw Chopin",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/pl/warsaw/EPWA",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/pl/warsaw/EPWA"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Warsaw Chopin Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Warsaw Chopin Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/pl/warsaw/EPWA.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Panama City on May 5?",
+    "slug": "highest-temperature-in-panama-city-on-may-5-2026",
+    "location": "Marcos A. Gelabert Intl",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/pa/panama-city/MPMG",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/pa/panama-city/MPMG"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded at the Marcos A. Gelabert Intl Airport Station in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the highest temperature recorded for all times on this day by the Forecast for the Marcos A. Gelabert Intl Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/pa/panama-city/MPMG.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Highest temperature in Hong Kong on May 4?",
+    "slug": "highest-temperature-in-hong-kong-on-may-4-2026",
+    "location": "Hong Kong on May 4",
+    "resolution_source_url": "https://www.weather.gov.hk/en/cis/climat.htm",
+    "all_urls": [
+      "https://www.weather.gov.hk/en/cis/climat.htm"
+    ],
+    "description": "This market will resolve to the temperature range that contains the highest temperature recorded by the Hong Kong Observatory in degrees Celsius on 4 May '26.\n\nThe resolution source for this market will be information from the Hong Kong Observatory, specifically the \"Absolute Daily Max (deg. C)\" the specified date once information is finalized in the relevant \"Daily Extract\", available here: https://www.weather.gov.hk/en/cis/climat.htm\n\nThis market can not resolve to \"Yes\" until data for this date has been finalized.\n\nThe resolution source for this market measures temperatures in Celsius to one decimal place (eg, 9.1°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Lowest temperature in Tokyo on May 6?",
+    "slug": "lowest-temperature-in-tokyo-on-may-6-2026",
+    "location": "Tokyo Haneda",
+    "resolution_source_url": "https://www.wunderground.com/history/daily/jp/tokyo/RJTT",
+    "all_urls": [
+      "https://www.wunderground.com/history/daily/jp/tokyo/RJTT"
+    ],
+    "description": "This market will resolve to the temperature range that contains the lowest temperature recorded at the Tokyo Haneda Airport Station in degrees Celsius on 6 May '26.\n\nThe resolution source for this market will be information from Wunderground, specifically the lowest temperature recorded for all times on this day by the Forecast for the Tokyo Haneda Airport Station once information is finalized, available here: https://www.wunderground.com/history/daily/jp/tokyo/RJTT.\n\nTo toggle between Fahrenheit and Celsius, click the gear icon next to the search bar and switch the Temperature setting between °F and °C.\n\nThis market can not resolve to \"Yes\" until all data for this date has been finalized.\n\nThe resolution source for this market measures temperatures to whole degrees Celsius (eg, 9°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  },
+  {
+    "title": "Lowest temperature in Hong Kong on May 5?",
+    "slug": "lowest-temperature-in-hong-kong-on-may-5-2026",
+    "location": "Hong Kong on May 5",
+    "resolution_source_url": "https://www.weather.gov.hk/en/cis/climat.htm",
+    "all_urls": [
+      "https://www.weather.gov.hk/en/cis/climat.htm"
+    ],
+    "description": "This market will resolve to the temperature range that contains the lowest temperature recorded by the Hong Kong Observatory in degrees Celsius on 5 May '26.\n\nThe resolution source for this market will be information from the Hong Kong Observatory, specifically the \"Absolute Daily Min (deg. C)\" the specified date once information is finalized in the relevant \"Daily Extract\", available here: https://www.weather.gov.hk/en/cis/climat.htm\n\nThis market can not resolve to \"Yes\" until data for this date has been finalized.\n\nThe resolution source for this market measures temperatures in Celsius to one decimal place (eg, 9.1°C). Thus, this is the level of precision that will be used when resolving the market.\n\nAny revisions to temperatures recorded after data is finalized for this market's timeframe will not be considered for this market's resolution."
+  }
+]

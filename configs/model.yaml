@@ -1,0 +1,105 @@
+project:
+  horizon_hours: 24
+  target_temperature_unit: celsius
+
+sources:
+  polymarket:
+    mode: read_only_paper
+    weather_url: https://polymarket.com/weather
+    geoblock_url: https://polymarket.com/api/geoblock
+    markets_path: data/polymarket_weather_markets.csv
+    raw_events_path: data/polymarket_weather_events.json
+    geoblock_path: data/polymarket_geoblock.json
+  station_catalog:
+    provider: aviationweather_cache
+    cache_url: https://aviationweather.gov/data/cache/stations.cache.json.gz
+    cache_path: data/stations.cache.json
+  forecast:
+    provider: open_meteo
+    endpoint: https://api.open-meteo.com/v1/forecast
+    timezone: auto
+    daily:
+      - temperature_2m_max
+      - temperature_2m_min
+      - temperature_2m_mean
+    hourly:
+      - temperature_2m
+      - dew_point_2m
+      - relative_humidity_2m
+      - pressure_msl
+      - surface_pressure
+      - wind_speed_10m
+  observations:
+    provider: aviationweather_metar
+    endpoint: https://aviationweather.gov/api/data/metar
+  actuals:
+    wunderground_provider: weather_com_historical
+    weather_gov_provider: synoptic_timeseries
+    hko_provider: hko_daily_extract
+    finalization_lag_days: 1
+
+features:
+  static:
+    - latitude
+    - longitude
+    - elevation_m
+    - station_id_hash
+    - source_domain_hash
+  calendar:
+    - target_day_of_year_sin
+    - target_day_of_year_cos
+    - target_month
+    - target_is_weekend
+  forecast:
+    - forecast_temp_max_c
+    - forecast_temp_min_c
+    - forecast_temp_mean_c
+    - forecast_temp_spread_c
+  observations:
+    - latest_observation_temp_c
+    - latest_observation_dewpoint_c
+    - latest_observation_pressure_hpa
+    - observation_age_hours
+  future_geospatial:
+    - dem_elevation_m
+    - land_cover_class
+    - built_up_density
+    - distance_to_water_km
+
+model:
+  baseline: nwp_daily_extreme
+  correction:
+    provider: sklearn_hist_gradient_boosting
+    target: observed_temp_c
+    prediction: corrected_prediction_c
+    split:
+      strategy: time_ordered_holdout
+      test_fraction: 0.33
+    evaluation:
+      metrics:
+        - mae_c
+        - rmse_c
+        - bias_c
+        - within_1c_pct
+        - within_2c_pct
+        - within_3c_pct
+
+signals:
+  output_path: artifacts/market_signals.csv
+  uncertainty_sigma_c: 1.0
+  min_edge: 0.03
+  weather_fee_rate: 0.05
+  execution_mode: paper_only
+
+paper_trading:
+  bankroll_usdc: 1000
+  portfolio_path: artifacts/paper_portfolio.csv
+  state_path: artifacts/paper_portfolio.json
+  settled_portfolio_path: artifacts/paper_portfolio_settled.csv
+  dashboard_path: artifacts/paper_dashboard.html
+  max_positions: 100
+  max_stake_usdc: 5
+  max_total_exposure_pct: 0.5
+  max_event_exposure_pct: 0.05
+  min_price: 0.005
+  max_price: 0.97

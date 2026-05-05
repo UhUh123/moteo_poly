@@ -1,0 +1,18 @@
+slug,title,target_date,unit,prediction,rounded_prediction,actual,error,abs_error,rounded_exact,top_bucket,top_bucket_probability,top_bucket_hit
+highest-temperature-in-seoul-on-may-4-2026,Highest temperature in Seoul on May 4?,2026-05-04,celsius,17.5473,18,18.0,-0.4527,0.4527,1,18°C,0.249906,1
+highest-temperature-in-warsaw-on-may-4-2026,Highest temperature in Warsaw on May 4?,2026-05-04,celsius,25.5047,26,27.0,-1.4953,1.4953,0,27°C,0.161765,1
+highest-temperature-in-taipei-on-may-4-2026,Highest temperature in Taipei on May 4?,2026-05-04,celsius,24.6467,25,24.0,0.6467,0.6467,0,25°C,0.25423,0
+highest-temperature-in-london-on-may-4-2026,Highest temperature in London on May 4?,2026-05-04,celsius,17.2772,17,15.0,2.2772,2.2772,0,17°C,0.256856,0
+highest-temperature-in-singapore-on-may-4-2026,Highest temperature in Singapore on May 4?,2026-05-04,celsius,30.9148,31,31.0,-0.0852,0.0852,1,31°C,0.260712,1
+highest-temperature-in-jakarta-on-may-4-2026,Highest temperature in Jakarta on May 4?,2026-05-04,celsius,30.2287,30,34.0,-3.7713,3.7713,0,34°C,0.012394,1
+highest-temperature-in-beijing-on-may-4-2026,Highest temperature in Beijing on May 4?,2026-05-04,celsius,23.595,24,26.0,-2.405,2.405,0,26°C,0.075652,1
+highest-temperature-in-chongqing-on-may-4-2026,Highest temperature in Chongqing on May 4?,2026-05-04,celsius,24.8035,25,28.0,-3.1965,3.1965,0,28°C,0.029251,1
+highest-temperature-in-madrid-on-may-4-2026,Highest temperature in Madrid on May 4?,2026-05-04,celsius,18.5647,19,21.0,-2.4353,2.4353,0,20°C,0.167976,0
+highest-temperature-in-miami-on-may-4-2026,Highest temperature in Miami on May 4?,2026-05-04,fahrenheit,80.782,81,81.0,-0.218,0.218,1,80-81°F,0.287995,1
+highest-temperature-in-ankara-on-may-4-2026,Highest temperature in Ankara on May 4?,2026-05-04,celsius,7.5815,8,8.0,-0.4185,0.4185,1,8°C,0.251508,1
+highest-temperature-in-shanghai-on-may-4-2026,Highest temperature in Shanghai on May 4?,2026-05-04,celsius,22.7543,23,24.0,-1.2457,1.2457,0,24°C,0.187296,1
+highest-temperature-in-kuala-lumpur-on-may-4-2026,Highest temperature in Kuala Lumpur on May 4?,2026-05-04,celsius,31.2902,31,32.0,-0.7098,0.7098,0,32°C,0.234415,1
+highest-temperature-in-paris-on-may-4-2026,Highest temperature in Paris on May 4?,2026-05-04,celsius,16.7243,17,18.0,-1.2757,1.2757,0,18°C,0.184285,1
+highest-temperature-in-wellington-on-may-4-2026,Highest temperature in Wellington on May 4?,2026-05-04,celsius,15.2961,15,16.0,-0.7039,0.7039,0,,,0
+highest-temperature-in-chengdu-on-may-4-2026,Highest temperature in Chengdu on May 4?,2026-05-04,celsius,25.8567,26,29.0,-3.1433,3.1433,0,29°C,0.031443,1
+highest-temperature-in-shenzhen-on-may-4-2026,Highest temperature in Shenzhen on May 4?,2026-05-04,celsius,27.7265,28,26.0,1.7265,1.7265,0,28°C or higher,0.560007,0

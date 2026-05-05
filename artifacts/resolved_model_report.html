@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Resolved Model Check</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #fff;
+      --text: #17202a;
+      --muted: #637083;
+      --line: #d8dee8;
+      --good: #0f7a45;
+      --bad: #b42318;
+      --accent: #0f766e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 14px/1.45 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+    header {
+      padding: 18px 24px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+    }
+    h1 { margin: 0; font-size: 20px; }
+    h2 { margin: 18px 0 10px; font-size: 16px; }
+    main { padding: 18px 24px 28px; }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .metric {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .metric span { display: block; color: var(--muted); font-size: 12px; }
+    .metric strong { display: block; margin-top: 4px; font-size: 21px; }
+    .note {
+      margin: 10px 0 16px;
+      color: var(--muted);
+      max-width: 960px;
+    }
+    .table-wrap {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: auto;
+    }
+    table { width: 100%; min-width: 960px; border-collapse: collapse; }
+    th, td {
+      padding: 9px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      white-space: nowrap;
+      vertical-align: top;
+    }
+    th { color: var(--muted); font-size: 12px; background: #fafbfc; position: sticky; top: 0; }
+    td.title { white-space: normal; min-width: 280px; }
+    .good { color: var(--good); font-weight: 650; }
+    .bad { color: var(--bad); font-weight: 650; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Проверка модели на resolved рынках</h1>
+    <div class="note">Это не PnL. Здесь проверяется, насколько прогноз модели совпал с фактической температурой и правильным outcome bucket.</div>
+  </header>
+  <main>
+    <div class="metrics">
+      <section class="metric"><span>Resolved events</span><strong>17</strong></section>
+      <section class="metric"><span>MAE</span><strong>1.54 resolution units</strong></section>
+      <section class="metric"><span>Exact rounded</span><strong>23.5%</strong></section>
+      <section class="metric"><span>Within 1 unit</span><strong>41.2%</strong></section>
+      <section class="metric"><span>Within 2 units</span><strong>64.7%</strong></section>
+      <section class="metric"><span>Visible bucket hit</span><strong>75.0%</strong></section>
+      <section class="metric"><span>Signal win rate</span><strong>-</strong></section>
+    </div>
+    <p class="note">`Exact rounded` значит: округленный точечный прогноз совпал с фактическим resolved значением. `Within 1/2 unit` значит: модель ошиблась не больше чем на 1/2 градуса в единицах рынка. `Visible bucket hit` проверяет только bucket'ы, которые были видны в текущем Polymarket snapshot; если часть диапазонов уже пропала из снимка, эту метрику нельзя считать полной точностью outcome'ов. `Signal win rate` считает, выиграла ли выбранная моделью сторона BUY_YES/BUY_NO.</p>
+    <h2>Event-level результат</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Дата</th><th>Рынок</th><th>Прогноз</th><th>Факт</th><th>Ошибка</th><th>Rounded</th><th>Top bucket</th></tr></thead>
+        <tbody><tr><td>2026-05-04</td><td class="title">Highest temperature in Seoul on May 4?</td><td>17.5473 celsius</td><td>18.0 celsius</td><td>-0.45</td><td class="good">yes</td><td class="good">18°C</td></tr>
+<tr><td>2026-05-04</td><td class="title">Highest temperature in Warsaw on May 4?</td><td>25.5047 celsius</td><td>27.0 celsius</td><td>-1.50</td><td class="bad">no</td><td class="good">27°C</td></tr>
+<tr><td>2026-05-04</td><td class="title">Highest temperature in Taipei on May 4?</td><td>24.6467 celsius</td><td>24.0 celsius</td><td>+0.65</td><td class="bad">no</td><td class="bad">25°C</td></tr>
+<tr><td>2026-05-04</td><td class="title">Highest temperature in London on May 4?</td><td>17.2772 celsius</td><td>15.0 celsius</td><td>+2.28</td><td class="bad">no</td><td class="bad">17°C</td></tr>
+<tr><td>2026-05-04</td><td class="title">Highest temperature in Singapore on May 4?</td><td>30.9148 celsius</td><td>31.0 celsius</td><td>-0.09</td><td class="good">yes</td><td class="good">31°C</td></tr>
+<tr><td>2026-05-04</td><td class="title">Highest temperature in Jakarta on May 4?</td><td>30.2287 celsius</td><td>34.0 celsius</td><td>-3.77</td><td class="bad">no</td><td class="good">34°C</td></tr>
+<tr><td>2026-05-04</td><td class="title">Highest temperature in Beijing on May 4?</td><td>23.595 celsius</td><td>26.0 celsius</td><td>-2.40</td><td class="bad">no</td><td class="good">26°C</td></tr>
+<tr><td>2026-05-04</td><td class="title">Highest temperature in Chongqing on May 4?</td><td>24.8035 celsius</td><td>28.0 celsius</td><td>-3.20</td><td class="bad">no</td><td class="good">28°C</td></tr>
+<tr><td>2026-05-04</td><td class="title">Highest temperature in Madrid on May 4?</td><td>18.5647 celsius</td><td>21.0 celsius</td><td>-2.44</td><td class="bad">no</td><td class="bad">20°C</td></tr>
+<tr><td>2026-05-04</td><td class="title">Highest temperature in Miami on May 4?</td><td>80.782 fahrenheit</td><td>81.0 fahrenheit</td><td>-0.22</td><td class="good">yes</td><td class="good">80-81°F</td></tr>
+<tr><td>2026-05-04</td><td class="title">Highest temperature in Ankara on May 4?</td><td>7.5815 celsius</td><td>8.0 celsius</td><td>-0.42</td><td class="good">yes</td><td class="good">8°C</td></tr>
+<tr><td>2026-05-04</td><td class="title">Highest temperature in Shanghai on May 4?</td><td>22.7543 celsius</td><td>24.0 celsius</td><td>-1.25</td><td class="bad">no</td><td class="good">24°C</td></tr>
+<tr><td>2026-05-04</td><td class="title">Highest temperature in Kuala Lumpur on May 4?</td><td>31.2902 celsius</td><td>32.0 celsius</td><td>-0.71</td><td class="bad">no</td><td class="good">32°C</td></tr>
+<tr><td>2026-05-04</td><td class="title">Highest temperature in Paris on May 4?</td><td>16.7243 celsius</td><td>18.0 celsius</td><td>-1.28</td><td class="bad">no</td><td class="good">18°C</td></tr>
+<tr><td>2026-05-04</td><td class="title">Highest temperature in Wellington on May 4?</td><td>15.2961 celsius</td><td>16.0 celsius</td><td>-0.70</td><td class="bad">no</td><td class="bad">-</td></tr>
+<tr><td>2026-05-04</td><td class="title">Highest temperature in Chengdu on May 4?</td><td>25.8567 celsius</td><td>29.0 celsius</td><td>-3.14</td><td class="bad">no</td><td class="good">29°C</td></tr>
+<tr><td>2026-05-04</td><td class="title">Highest temperature in Shenzhen on May 4?</td><td>27.7265 celsius</td><td>26.0 celsius</td><td>+1.73</td><td class="bad">no</td><td class="bad">28°C or higher</td></tr></tbody>
+      </table>
+    </div>
+    <h2>Outcome/signal результат</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Результат</th><th>Сторона</th><th>Fair</th><th>Outcome</th><th>Факт</th><th>Рынок</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,3 @@
+station_id,name,latitude,longitude,elevation_m,country,source
+HKO,Hong Kong Observatory,22.301944,114.174167,32,HK,weather.gov.hk_station_table
+

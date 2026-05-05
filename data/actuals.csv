@@ -1,0 +1,87 @@
+slug,station_id,target_date,target_extreme,resolution_unit,observed_temp_c,observed_temp_f,observed_resolution_value,provider,status,sample_count,source_url,notes
+highest-temperature-in-houston-on-may-5-2026,KHOU,2026-05-05,max,fahrenheit,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+lowest-temperature-in-shanghai-on-may-6-2026,ZSPD,2026-05-06,min,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+lowest-temperature-in-tokyo-on-may-5-2026,RJTT,2026-05-05,min,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-nyc-on-may-4-2026,KLGA,2026-05-04,max,fahrenheit,,,,none,error,0,,"HTTPSConnectionPool(host='api.weather.com', port=443): Read timed out. (read timeout=30)"
+highest-temperature-in-seoul-on-may-4-2026,RKSI,2026-05-04,max,celsius,18.0,64.4,18.0,weather_com_historical,ok,48,https://api.weather.com/v1/location/RKSI:9:KR/observations/historical.json?apiKey=REDACTED&units=m&startDate=20260504&endDate=20260504,
+highest-temperature-in-chongqing-on-may-5-2026,ZUCK,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-munich-on-may-5-2026,EDDM,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-singapore-on-may-5-2026,WSSS,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-dallas-on-may-5-2026,KDAL,2026-05-05,max,fahrenheit,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-qingdao-on-may-5-2026,ZSQD,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-lagos-on-may-5-2026,DNMM,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-warsaw-on-may-4-2026,EPWA,2026-05-04,max,celsius,27.0,80.6,27.0,weather_com_historical,ok,47,https://api.weather.com/v1/location/EPWA:9:PL/observations/historical.json?apiKey=REDACTED&units=m&startDate=20260504&endDate=20260504,
+highest-temperature-in-tokyo-on-may-5-2026,RJTT,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-taipei-on-may-5-2026,RCSS,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-milan-on-may-5-2026,LIMC,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-sao-paulo-on-may-5-2026,SBGR,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-amsterdam-on-may-5-2026,EHAM,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-kuala-lumpur-on-may-5-2026,WMKK,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+lowest-temperature-in-nyc-on-may-6-2026,KLGA,2026-05-06,min,fahrenheit,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-taipei-on-may-4-2026,RCSS,2026-05-04,max,celsius,24.0,75.2,24.0,weather_com_historical,ok,52,https://api.weather.com/v1/location/RCSS:9:TW/observations/historical.json?apiKey=REDACTED&units=m&startDate=20260504&endDate=20260504,
+highest-temperature-in-guangzhou-on-may-5-2026,ZGGG,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-hong-kong-on-may-5-2026,HKO,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-shenzhen-on-may-5-2026,ZGSZ,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-london-on-may-4-2026,EGLC,2026-05-04,max,celsius,15.0,59.0,15.0,weather_com_historical,ok,44,https://api.weather.com/v1/location/EGLC:9:GB/observations/historical.json?apiKey=REDACTED&units=m&startDate=20260504&endDate=20260504,
+highest-temperature-in-manila-on-may-5-2026,RPLL,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-madrid-on-may-5-2026,LEMD,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-singapore-on-may-4-2026,WSSS,2026-05-04,max,celsius,31.0,87.8,31.0,weather_com_historical,ok,53,https://api.weather.com/v1/location/WSSS:9:SG/observations/historical.json?apiKey=REDACTED&units=m&startDate=20260504&endDate=20260504,
+highest-temperature-in-jeddah-on-may-5-2026,OEJN,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-jakarta-on-may-5-2026,WIHH,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-jakarta-on-may-4-2026,WIHH,2026-05-04,max,celsius,34.0,93.2,34.0,weather_com_historical,ok,51,https://api.weather.com/v1/location/WIHH:9:ID/observations/historical.json?apiKey=REDACTED&units=m&startDate=20260504&endDate=20260504,
+highest-temperature-in-beijing-on-may-4-2026,ZBAA,2026-05-04,max,celsius,26.0,78.8,26.0,weather_com_historical,ok,48,https://api.weather.com/v1/location/ZBAA:9:CN/observations/historical.json?apiKey=REDACTED&units=m&startDate=20260504&endDate=20260504,
+highest-temperature-in-helsinki-on-may-5-2026,EFHK,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-chongqing-on-may-4-2026,ZUCK,2026-05-04,max,celsius,28.0,82.4,28.0,weather_com_historical,ok,24,https://api.weather.com/v1/location/ZUCK:9:CN/observations/historical.json?apiKey=REDACTED&units=m&startDate=20260504&endDate=20260504,
+lowest-temperature-in-miami-on-may-6-2026,KMIA,2026-05-06,min,fahrenheit,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-tel-aviv-on-may-5-2026,LLBG,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-ankara-on-may-5-2026,LTAC,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-madrid-on-may-4-2026,LEMD,2026-05-04,max,celsius,21.0,69.8,21.0,weather_com_historical,ok,47,https://api.weather.com/v1/location/LEMD:9:ES/observations/historical.json?apiKey=REDACTED&units=m&startDate=20260504&endDate=20260504,
+lowest-temperature-in-seoul-on-may-6-2026,RKSI,2026-05-06,min,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-mexico-city-on-may-5-2026,MMMX,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+lowest-temperature-in-hong-kong-on-may-6-2026,HKO,2026-05-06,min,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-cape-town-on-may-5-2026,FACT,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-buenos-aires-on-may-5-2026,SAEZ,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-miami-on-may-4-2026,KMIA,2026-05-04,max,fahrenheit,27.22222222222222,81.0,81.0,weather_com_historical,ok,30,https://api.weather.com/v1/location/KMIA:9:US/observations/historical.json?apiKey=REDACTED&units=e&startDate=20260504&endDate=20260504,
+highest-temperature-in-wuhan-on-may-5-2026,ZHHH,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-paris-on-may-5-2026,LFPB,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-lucknow-on-may-5-2026,VILK,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+lowest-temperature-in-seoul-on-may-5-2026,RKSI,2026-05-05,min,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+lowest-temperature-in-shanghai-on-may-5-2026,ZSPD,2026-05-05,min,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-seattle-on-may-5-2026,KSEA,2026-05-05,max,fahrenheit,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-karachi-on-may-5-2026,OPKC,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-austin-on-may-5-2026,KAUS,2026-05-05,max,fahrenheit,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-miami-on-may-5-2026,KMIA,2026-05-05,max,fahrenheit,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-toronto-on-may-5-2026,CYYZ,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-nyc-on-may-5-2026,KLGA,2026-05-05,max,fahrenheit,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-los-angeles-on-may-5-2026,KLAX,2026-05-05,max,fahrenheit,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+lowest-temperature-in-nyc-on-may-5-2026,KLGA,2026-05-05,min,fahrenheit,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-atlanta-on-may-5-2026,KATL,2026-05-05,max,fahrenheit,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+lowest-temperature-in-paris-on-may-5-2026,LFPB,2026-05-05,min,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-chengdu-on-may-5-2026,ZUUU,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-ankara-on-may-4-2026,LTAC,2026-05-04,max,celsius,8.0,46.4,8.0,weather_com_historical,ok,48,https://api.weather.com/v1/location/LTAC:9:TR/observations/historical.json?apiKey=REDACTED&units=m&startDate=20260504&endDate=20260504,
+highest-temperature-in-shanghai-on-may-4-2026,ZSPD,2026-05-04,max,celsius,24.0,75.2,24.0,weather_com_historical,ok,49,https://api.weather.com/v1/location/ZSPD:9:CN/observations/historical.json?apiKey=REDACTED&units=m&startDate=20260504&endDate=20260504,
+lowest-temperature-in-miami-on-may-5-2026,KMIA,2026-05-05,min,fahrenheit,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-kuala-lumpur-on-may-4-2026,WMKK,2026-05-04,max,celsius,32.0,89.6,32.0,weather_com_historical,ok,51,https://api.weather.com/v1/location/WMKK:9:MY/observations/historical.json?apiKey=REDACTED&units=m&startDate=20260504&endDate=20260504,
+highest-temperature-in-london-on-may-5-2026,EGLC,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-paris-on-may-4-2026,LFPB,2026-05-04,max,celsius,18.0,64.4,18.0,weather_com_historical,ok,47,https://api.weather.com/v1/location/LFPB:9:FR/observations/historical.json?apiKey=REDACTED&units=m&startDate=20260504&endDate=20260504,
+highest-temperature-in-wellington-on-may-4-2026,NZWN,2026-05-04,max,celsius,16.0,60.8,16.0,weather_com_historical,ok,48,https://api.weather.com/v1/location/NZWN:9:NZ/observations/historical.json?apiKey=REDACTED&units=m&startDate=20260504&endDate=20260504,
+highest-temperature-in-wellington-on-may-5-2026,NZWN,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-chicago-on-may-5-2026,KORD,2026-05-05,max,fahrenheit,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-seoul-on-may-5-2026,RKSI,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-chengdu-on-may-4-2026,ZUUU,2026-05-04,max,celsius,29.0,84.2,29.0,weather_com_historical,ok,24,https://api.weather.com/v1/location/ZUUU:9:CN/observations/historical.json?apiKey=REDACTED&units=m&startDate=20260504&endDate=20260504,
+highest-temperature-in-shanghai-on-may-5-2026,ZSPD,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-shenzhen-on-may-4-2026,ZGSZ,2026-05-04,max,celsius,26.0,78.8,26.0,weather_com_historical,ok,24,https://api.weather.com/v1/location/ZGSZ:9:CN/observations/historical.json?apiKey=REDACTED&units=m&startDate=20260504&endDate=20260504,
+lowest-temperature-in-london-on-may-6-2026,EGLC,2026-05-06,min,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-beijing-on-may-5-2026,ZBAA,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-busan-on-may-5-2026,RKPK,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-moscow-on-may-5-2026,UUWW,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-denver-on-may-5-2026,KBKF,2026-05-05,max,fahrenheit,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-istanbul-on-may-5-2026,LTFM,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+lowest-temperature-in-paris-on-may-6-2026,LFPB,2026-05-06,min,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-san-francisco-on-may-5-2026,KSFO,2026-05-05,max,fahrenheit,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+lowest-temperature-in-london-on-may-5-2026,EGLC,2026-05-05,min,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-warsaw-on-may-5-2026,EPWA,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-panama-city-on-may-5-2026,MPMG,2026-05-05,max,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+highest-temperature-in-hong-kong-on-may-4-2026,HKO,2026-05-04,max,celsius,,,,hko_daily_extract,pending,0,https://www.hko.gov.hk/cis/dailyExtract/dailyExtract_202605.xml,target day is not present in HKO extract
+lowest-temperature-in-tokyo-on-may-6-2026,RJTT,2026-05-06,min,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
+lowest-temperature-in-hong-kong-on-may-5-2026,HKO,2026-05-05,min,celsius,,,,none,pending,0,,waiting for finalization lag of 1 day(s)
