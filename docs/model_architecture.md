@@ -73,6 +73,8 @@ Polymarket markets
 
 `scan-polymarket-weather` не выставляет ордера. Он читает публичную weather страницу Polymarket, сохраняет все temperature binary markets в `data/polymarket_weather_markets.csv` и отдельно пишет `data/polymarket_geoblock.json`.
 
+`build-polymarket-targets` превращает свежий `data/polymarket_weather_events.json` в event-level targets. Так как Polymarket weather page не всегда содержит station/source rules, команда переиспользует уже известные станции из `data/targets.csv` по городу и типу high/low. Новые неизвестные города остаются видимыми, но без station forecast до ручного маппинга.
+
 `build-market-signals` соединяет market snapshot с `artifacts/predictions_gbm.csv`, парсит диапазоны вроде `24°C`, `60°F or higher`, `58-59°F`, считает normal probability around `corrected_prediction_c` и пишет paper edge в `artifacts/market_signals.csv`.
 
 `open-paper-trades` превращает лучшие paper signals в виртуальный портфель с bankroll, stake, shares, expected PnL и HTML-интерфейсом `artifacts/paper_dashboard.html`.

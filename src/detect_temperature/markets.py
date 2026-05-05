@@ -57,6 +57,42 @@ def normalize_markets(raw_markets: Iterable[dict], include_unknown: bool = False
     ]
 
 
+def normalize_polymarket_events(
+    events: Iterable[dict],
+    reference_targets: Iterable[MarketTarget] | None = None,
+    include_unknown: bool = False,
+) -> list[MarketTarget]:
+    references = _reference_targets(reference_targets or [])
+    targets = []
+    seen = set()
+    for event in events:
+        title = str(event.get("title") or "")
+        slug = str(event.get("slug") or "")
+        if not slug or slug in seen or "temperature" not in title.lower():
+            continue
+        seen.add(slug)
+        target_date = _parse_target_date(title, slug, "")
+        target_extreme = _parse_extreme(title)
+        city = _parse_city(title)
+        reference = _find_reference_target(references, slug=slug, city=city, target_extreme=target_extreme)
+        target = MarketTarget(
+            title=title,
+            slug=slug,
+            city=city,
+            location_name=reference.location_name if reference else city,
+            target_date=target_date,
+            target_extreme=target_extreme,
+            target_unit=_parse_unit_from_polymarket_event(event, fallback=reference.target_unit if reference else "unknown"),
+            station_id=reference.station_id if reference else "",
+            resolution_source_url=reference.resolution_source_url if reference else "",
+            source_domain=reference.source_domain if reference else "",
+            description=reference.description if reference else "Inferred from Polymarket weather event snapshot.",
+        )
+        if include_unknown or (target.target_extreme in {"max", "min"} and target.target_date is not None):
+            targets.append(target)
+    return targets
+
+
 def normalize_market(raw: dict) -> MarketTarget:
     title = str(raw.get("title") or "")
     slug = str(raw.get("slug") or "")
@@ -76,6 +112,41 @@ def normalize_market(raw: dict) -> MarketTarget:
         source_domain=_parse_domain(source_url),
         description=description,
     )
+
+
+def _reference_targets(targets: Iterable[MarketTarget]) -> dict[str, dict[str, MarketTarget]]:
+    by_slug = {}
+    by_city_extreme = {}
+    by_city = {}
+    for target in targets:
+        if target.slug:
+            by_slug[target.slug] = target
+        city_key = _city_key(target.city)
+        if city_key:
+            if target.target_extreme in {"max", "min"}:
+                by_city_extreme.setdefault(f"{city_key}|{target.target_extreme}", target)
+            by_city.setdefault(city_key, target)
+    return {"slug": by_slug, "city_extreme": by_city_extreme, "city": by_city}
+
+
+def _find_reference_target(
+    references: dict[str, dict[str, MarketTarget]],
+    slug: str,
+    city: str,
+    target_extreme: str,
+) -> MarketTarget | None:
+    if slug in references["slug"]:
+        return references["slug"][slug]
+    city_key = _city_key(city)
+    if target_extreme in {"max", "min"}:
+        reference = references["city_extreme"].get(f"{city_key}|{target_extreme}")
+        if reference:
+            return reference
+    return references["city"].get(city_key)
+
+
+def _city_key(city: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "", city.lower())
 
 
 def write_targets_csv(targets: Iterable[MarketTarget], path: str | Path) -> None:
@@ -141,6 +212,25 @@ def _parse_unit(description: str) -> str:
     if re.search(r"degrees\s+Fahrenheit|°F|ºF", description, re.I):
         return "fahrenheit"
     return "unknown"
+
+
+def _parse_unit_from_polymarket_event(event: dict, fallback: str = "unknown") -> str:
+    chunks = [str(event.get("title") or "")]
+    for market in event.get("markets") or []:
+        if not isinstance(market, dict):
+            continue
+        chunks.extend(
+            [
+                str(market.get("question") or ""),
+                str(market.get("groupItemTitle") or ""),
+            ]
+        )
+    text = " ".join(chunks)
+    if re.search(r"°F|ºF|\bF\b|fahrenheit", text, re.I):
+        return "fahrenheit"
+    if re.search(r"°C|ºC|\bC\b|celsius", text, re.I):
+        return "celsius"
+    return fallback or "unknown"
 
 
 def _parse_target_date(title: str, slug: str, description: str) -> date | None:

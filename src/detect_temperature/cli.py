@@ -6,6 +6,7 @@ from pathlib import Path
 from .pipeline import (
     build_features,
     build_market_signals,
+    build_polymarket_targets,
     build_targets,
     collect_actuals,
     evaluate_resolved_model,
@@ -34,6 +35,13 @@ def main(argv: list[str] | None = None) -> int:
     build_targets_parser.add_argument("--csv", default="data/targets.csv")
     build_targets_parser.add_argument("--jsonl", default="data/targets.jsonl")
     build_targets_parser.add_argument("--include-unknown", action="store_true")
+
+    build_poly_targets_parser = subparsers.add_parser("build-polymarket-targets")
+    build_poly_targets_parser.add_argument("--events", default="data/polymarket_weather_events.json")
+    build_poly_targets_parser.add_argument("--csv", default="data/targets.csv")
+    build_poly_targets_parser.add_argument("--jsonl", default="data/targets.jsonl")
+    build_poly_targets_parser.add_argument("--reference-targets", default="data/targets.csv")
+    build_poly_targets_parser.add_argument("--include-unknown", action="store_true")
 
     refresh_parser = subparsers.add_parser("refresh-stations")
     refresh_parser.add_argument("--output", default="data/stations.cache.json")
@@ -184,6 +192,18 @@ def main(argv: list[str] | None = None) -> int:
             include_unknown=args.include_unknown,
         )
         print(f"built {len(targets)} targets -> {args.csv}")
+        return 0
+
+    if args.command == "build-polymarket-targets":
+        targets = build_polymarket_targets(
+            events_path=args.events,
+            csv_path=args.csv,
+            jsonl_path=args.jsonl,
+            reference_targets_path=args.reference_targets,
+            include_unknown=args.include_unknown,
+        )
+        with_station = sum(1 for target in targets if target.station_id)
+        print(f"built {len(targets)} polymarket targets, with_station={with_station} -> {args.csv}")
         return 0
 
     if args.command == "refresh-stations":
@@ -367,8 +387,11 @@ def main(argv: list[str] | None = None) -> int:
             report_path=args.report,
         )
         summary = payload["summary"]
+        rounded_exact = _format_pct(summary["rounded_exact_pct"])
+        within_1_unit = _format_pct(summary["within_1_unit_pct"])
+        within_2_units = _format_pct(summary["within_2_units_pct"])
         signal_win_rate = (
-            f"{summary['signal_win_rate_pct']}%"
+            _format_pct(summary["signal_win_rate_pct"])
             if summary["signal_win_rate_pct"] is not None
             else "-"
         )
@@ -376,9 +399,9 @@ def main(argv: list[str] | None = None) -> int:
             "evaluated resolved model -> "
             f"events={summary['resolved_events']}, "
             f"MAE={summary['mae_resolution']} {summary['primary_unit']}, "
-            f"rounded_exact={summary['rounded_exact_pct']}%, "
-            f"within_1_unit={summary['within_1_unit_pct']}%, "
-            f"within_2_units={summary['within_2_units_pct']}%, "
+            f"rounded_exact={rounded_exact}, "
+            f"within_1_unit={within_1_unit}, "
+            f"within_2_units={within_2_units}, "
             f"signal_win_rate={signal_win_rate} -> {args.report}"
         )
         return 0
@@ -442,6 +465,10 @@ def _parse_float_tuple(value: str) -> tuple[float, ...]:
     if not items:
         raise argparse.ArgumentTypeError("expected at least one comma-separated float")
     return tuple(float(item) for item in items)
+
+
+def _format_pct(value: float | None) -> str:
+    return "-" if value is None else f"{value}%"
 
 
 if __name__ == "__main__":

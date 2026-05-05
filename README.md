@@ -15,12 +15,12 @@
 
 ## Текущий статус данных
 
-- `data/targets.csv`: 86 точечных high/low рынков.
+- `data/targets.csv`: 175 точечных high/low рынков из свежего Polymarket weather snapshot.
 - `data/stations.cache.json`: каталог AviationWeather для координат аэропортов.
 - `data/manual_stations.csv`: ручные станции для не-ICAO источников, сейчас `HKO`.
-- `data/features.csv`: 86 строк, все с координатами и Open-Meteo baseline-прогнозом.
-- `artifacts/predictions.csv`: 86 baseline-предсказаний в Celsius и в единицах resolution source.
-- `data/actuals.csv`: фактические resolved значения; сейчас строки `pending`, потому что целевые даты ещё не прошли с лагом финализации.
+- `data/features.csv`: 175 строк, все с координатами; 174 строки с Open-Meteo baseline-прогнозом.
+- `artifacts/predictions_gbm.csv`: 175 GBM-предсказаний; 174 с corrected prediction.
+- `data/actuals.csv`: фактические resolved значения; текущий snapshot содержит `17 ok`, `68 pending`, `1 error`.
 - `data/historical_observed.csv` и `data/training.csv`: исторический тестовый слой для обучения поправки к baseline.
 - `artifacts/models/gbm.joblib`: обучаемая модель поправки, создается командой `train-gbm`.
 - `data/polymarket_weather_markets.csv`: read-only snapshot live temperature markets с Polymarket.
@@ -104,6 +104,24 @@ PYTHONPATH=src python3 -m detect_temperature.cli scan-polymarket-weather \
   --output data/polymarket_weather_markets.csv \
   --raw-output data/polymarket_weather_events.json \
   --geoblock-output data/polymarket_geoblock.json
+
+PYTHONPATH=src python3 -m detect_temperature.cli build-polymarket-targets \
+  --events data/polymarket_weather_events.json \
+  --reference-targets data/targets.csv \
+  --csv data/targets.csv \
+  --jsonl data/targets.jsonl
+
+PYTHONPATH=src python3 -m detect_temperature.cli build-features \
+  --targets data/targets.csv \
+  --manual-stations data/manual_stations.csv \
+  --stations data/stations.cache.json \
+  --with-open-meteo \
+  --output data/features.csv
+
+PYTHONPATH=src python3 -m detect_temperature.cli predict-gbm \
+  --features data/features.csv \
+  --model artifacts/models/gbm.joblib \
+  --output artifacts/predictions_gbm.csv
 
 PYTHONPATH=src python3 -m detect_temperature.cli build-market-signals \
   --markets data/polymarket_weather_markets.csv \

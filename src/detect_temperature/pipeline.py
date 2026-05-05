@@ -12,6 +12,7 @@ from .features import build_feature_row
 from .markets import (
     load_raw_markets,
     normalize_markets,
+    normalize_polymarket_events,
     read_targets_csv,
     write_targets_csv,
     write_targets_jsonl,
@@ -41,6 +42,28 @@ def build_targets(
     include_unknown: bool = False,
 ) -> list[MarketTarget]:
     targets = normalize_markets(load_raw_markets(input_path), include_unknown=include_unknown)
+    if csv_path:
+        write_targets_csv(targets, csv_path)
+    if jsonl_path:
+        write_targets_jsonl(targets, jsonl_path)
+    return targets
+
+
+def build_polymarket_targets(
+    events_path: str | Path,
+    csv_path: str | Path | None = None,
+    jsonl_path: str | Path | None = None,
+    reference_targets_path: str | Path | None = None,
+    include_unknown: bool = False,
+) -> list[MarketTarget]:
+    reference_targets = []
+    if reference_targets_path and Path(reference_targets_path).exists():
+        reference_targets = read_targets_csv(reference_targets_path)
+    targets = normalize_polymarket_events(
+        load_raw_markets(events_path),
+        reference_targets=reference_targets,
+        include_unknown=include_unknown,
+    )
     if csv_path:
         write_targets_csv(targets, csv_path)
     if jsonl_path:

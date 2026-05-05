@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import date
 
-from detect_temperature.markets import normalize_market
+from detect_temperature.markets import normalize_market, normalize_polymarket_events
 
 
 def test_normalizes_wunderground_temperature_market() -> None:
@@ -88,3 +88,59 @@ def test_celsius_market_unit_ignores_toggle_hint() -> None:
     )
 
     assert target.target_unit == "celsius"
+
+
+def test_polymarket_event_targets_reuse_known_station_by_city() -> None:
+    reference = normalize_market(
+        {
+            "title": "Highest temperature in Seoul on May 5?",
+            "slug": "highest-temperature-in-seoul-on-may-5-2026",
+            "location": "Seoul Gimpo International Airport",
+            "resolution_source_url": "https://www.wunderground.com/history/daily/kr/seoul/RKSS",
+            "description": "highest temperature recorded in degrees Celsius on 5 May '26.",
+        }
+    )
+    targets = normalize_polymarket_events(
+        [
+            {
+                "title": "Lowest temperature in Seoul on May 6?",
+                "slug": "lowest-temperature-in-seoul-on-may-6-2026",
+                "markets": [
+                    {
+                        "question": "Will the lowest temperature in Seoul be 12°C on May 6?",
+                        "groupItemTitle": "12°C",
+                    }
+                ],
+            }
+        ],
+        reference_targets=[reference],
+    )
+
+    assert len(targets) == 1
+    assert targets[0].city == "Seoul"
+    assert targets[0].target_date == date(2026, 5, 6)
+    assert targets[0].target_extreme == "min"
+    assert targets[0].target_unit == "celsius"
+    assert targets[0].station_id == "RKSS"
+    assert targets[0].resolution_source_url == reference.resolution_source_url
+
+
+def test_polymarket_event_target_keeps_unknown_station_visible() -> None:
+    targets = normalize_polymarket_events(
+        [
+            {
+                "title": "Highest temperature in New City on May 7?",
+                "slug": "highest-temperature-in-new-city-on-may-7-2026",
+                "markets": [
+                    {
+                        "question": "Will the highest temperature in New City be 82-83°F on May 7?",
+                        "groupItemTitle": "82-83°F",
+                    }
+                ],
+            }
+        ]
+    )
+
+    assert len(targets) == 1
+    assert targets[0].target_unit == "fahrenheit"
+    assert targets[0].station_id == ""

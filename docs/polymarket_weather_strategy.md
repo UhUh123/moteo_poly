@@ -137,9 +137,9 @@ PYTHONPATH=src python3 -m detect_temperature.cli build-market-signals \
 
 Текущий snapshot после v2:
 
-- `610` temperature binary markets scanned;
-- `415` rows matched to existing GBM event predictions;
-- `157` paper trade candidates at `min_edge=0.03`;
+- `859` temperature binary markets scanned;
+- `849` rows matched to existing GBM event predictions after `build-polymarket-targets`;
+- `365` paper trade candidates at `min_edge=0.03`;
 - `0` candidates on already-ended markets;
 - `0` `BUY_NO` candidates against the model top/near-top bucket;
 - current geoblock check returned `blocked=true`, so this remains paper-only.
@@ -165,8 +165,8 @@ PYTHONPATH=src python3 -m detect_temperature.cli open-paper-trades \
 
 - bankroll: `1000 USDC`;
 - opened positions: `100`;
-- total virtual stake: `500 USDC`;
-- cash left: `500 USDC`;
+- total virtual stake: `250 USDC`;
+- cash left: `750 USDC`;
 - все позиции пока `open`;
 - dashboard: `artifacts/paper_dashboard.html`.
 
@@ -211,25 +211,26 @@ PYTHONPATH=src python3 -m detect_temperature.cli run-strategy-lab \
 
 Текущий запуск:
 
-- `157` v2 trade candidates;
-- `78` проходят stress scenarios и execution checks;
-- `59` попали в optimized robust portfolio после лимитов риска, концентрации и execution penalty;
-- selected stake: `292.56 USDC` из `1000 USDC`;
-- минимальный worst-case edge среди selected: `1.71%`;
-- средний worst-case edge среди selected: `10.72%`;
-- execution-adjusted expected PnL: `469.55 USDC`;
-- maker if-filled expected PnL: `797.45 USDC`;
-- maker fill-adjusted expected PnL: `438.88 USDC`;
-- maker-eligible positions: `58` из `59`;
-- maker-preferred positions: `6` из `59`;
-- selected positions покрывают `38` событий;
-- max city concentration: `4` позиции / `20 USDC`;
-- max date concentration: `277.56 USDC` на May 5;
-- selected execution quality: `22 good`, `36 fair`, `1 poor`.
+- `365` v2 trade candidates;
+- `163` проходят stress scenarios и execution checks;
+- `100` попали в optimized robust portfolio после лимитов риска, концентрации и execution penalty;
+- selected stake: `250.00 USDC` из `1000 USDC`;
+- минимальный worst-case edge среди selected: `1.13%`;
+- средний worst-case edge среди selected: `15.93%`;
+- execution-adjusted expected PnL: `1037.58 USDC`;
+- maker if-filled expected PnL: `2475.73 USDC`;
+- maker fill-adjusted expected PnL: `1577.60 USDC`;
+- maker-eligible positions: `95` из `100`;
+- maker-preferred positions: `18` из `100`;
+- selected positions покрывают `70` событий;
+- max city concentration: `4` позиции / `10 USDC`;
+- max date concentration: `92.50 USDC`;
+- selected dates: `37` positions on May 5, `37` on May 6, `26` on May 7.
+- selected execution quality: `25 good`, `72 fair`, `3 poor`.
 
 Execution realism layer оценивает дополнительный slippage по `spread`, `liquidity`, `market_volume` и экстремальности цены. Это не заменяет настоящий orderbook depth, но уже делает paper-selection менее наивной.
 
-Maker paper mode оценивает лимитную цену через `best_bid/best_ask`, ожидаемый шанс исполнения через spread/liquidity/volume и штрафует adverse selection. Текущий вывод простой: passive quoting полезен, но не как blanket-правило. По текущему snapshot только `6` selected позиций выглядят лучше через maker-вход; для остальных taker execution-adjusted expectation выше.
+Maker paper mode оценивает лимитную цену через `best_bid/best_ask`, ожидаемый шанс исполнения через spread/liquidity/volume и штрафует adverse selection. Текущий вывод простой: passive quoting полезен, но не как blanket-правило. По текущему snapshot `18` selected позиций выглядят лучше через maker-вход; для остальных taker execution-adjusted expectation выше.
 
 Чтобы forward-test шел через одну панель, Strategy Lab portfolio теперь можно открыть как основной paper portfolio:
 

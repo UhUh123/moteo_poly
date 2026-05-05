@@ -131,10 +131,10 @@ def render_resolved_report(payload: dict[str, Any], path: str | Path) -> None:
     <div class="metrics">
       {_metric("Resolved events", summary["resolved_events"])}
       {_metric("MAE", f'{summary["mae_resolution"]:.2f} {summary["primary_unit"]}' if summary["mae_resolution"] is not None else "-")}
-      {_metric("Exact rounded", f'{summary["rounded_exact_pct"]:.1f}%')}
-      {_metric("Within 1 unit", f'{summary["within_1_unit_pct"]:.1f}%')}
-      {_metric("Within 2 units", f'{summary["within_2_units_pct"]:.1f}%')}
-      {_metric("Visible bucket hit", f'{summary["visible_top_bucket_hit_pct"]:.1f}%')}
+      {_metric("Exact rounded", _pct_or_dash(summary["rounded_exact_pct"]))}
+      {_metric("Within 1 unit", _pct_or_dash(summary["within_1_unit_pct"]))}
+      {_metric("Within 2 units", _pct_or_dash(summary["within_2_units_pct"]))}
+      {_metric("Visible bucket hit", _pct_or_dash(summary["visible_top_bucket_hit_pct"]))}
       {_metric("Signal win rate", _pct_or_dash(summary["signal_win_rate_pct"]))}
     </div>
     <p class="note">`Exact rounded` значит: округленный точечный прогноз совпал с фактическим resolved значением. `Within 1/2 unit` значит: модель ошиблась не больше чем на 1/2 градуса в единицах рынка. `Visible bucket hit` проверяет только bucket'ы, которые были видны в текущем Polymarket snapshot; если часть диапазонов уже пропала из снимка, эту метрику нельзя считать полной точностью outcome'ов. `Signal win rate` считает, выиграла ли выбранная моделью сторона BUY_YES/BUY_NO.</p>
@@ -269,9 +269,9 @@ def _signal_results(signals: list[dict[str, str]], actuals_by_slug: dict[str, di
 
 def _summary(event_rows: list[dict[str, Any]], signal_rows: list[dict[str, Any]]) -> dict[str, Any]:
     mae = None
-    rounded_exact_pct = 0.0
-    within_1_unit_pct = 0.0
-    within_2_units_pct = 0.0
+    rounded_exact_pct = None
+    within_1_unit_pct = None
+    within_2_units_pct = None
     if event_rows:
         mae = sum(row["abs_error"] for row in event_rows) / len(event_rows)
         rounded_exact_pct = sum(row["rounded_exact"] for row in event_rows) / len(event_rows) * 100.0
@@ -281,7 +281,7 @@ def _summary(event_rows: list[dict[str, Any]], signal_rows: list[dict[str, Any]]
     visible_top_bucket_hit_pct = (
         sum(row["top_bucket_hit"] for row in top_bucket_events) / len(top_bucket_events) * 100.0
         if top_bucket_events
-        else 0.0
+        else None
     )
     signal_win_rate = (
         sum(row["won"] for row in signal_rows) / len(signal_rows) * 100.0
@@ -295,11 +295,11 @@ def _summary(event_rows: list[dict[str, Any]], signal_rows: list[dict[str, Any]]
         "resolved_signals": len(signal_rows),
         "mae_resolution": round(mae, 4) if mae is not None else None,
         "primary_unit": primary_unit,
-        "rounded_exact_pct": round(rounded_exact_pct, 2),
-        "within_1_unit_pct": round(within_1_unit_pct, 2),
-        "within_2_units_pct": round(within_2_units_pct, 2),
-        "visible_top_bucket_hit_pct": round(visible_top_bucket_hit_pct, 2),
-        "top_bucket_hit_pct": round(visible_top_bucket_hit_pct, 2),
+        "rounded_exact_pct": round(rounded_exact_pct, 2) if rounded_exact_pct is not None else None,
+        "within_1_unit_pct": round(within_1_unit_pct, 2) if within_1_unit_pct is not None else None,
+        "within_2_units_pct": round(within_2_units_pct, 2) if within_2_units_pct is not None else None,
+        "visible_top_bucket_hit_pct": round(visible_top_bucket_hit_pct, 2) if visible_top_bucket_hit_pct is not None else None,
+        "top_bucket_hit_pct": round(visible_top_bucket_hit_pct, 2) if visible_top_bucket_hit_pct is not None else None,
         "signal_win_rate_pct": round(signal_win_rate, 2) if signal_win_rate is not None else None,
     }
 
