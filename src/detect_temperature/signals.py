@@ -11,6 +11,42 @@ from typing import Any
 from .units import celsius_to_fahrenheit
 
 STRATEGY_VERSION = "betting_v2_conservative"
+SIGMA_FLOOR_C = 1.5
+SIGMA_MAE_MULTIPLIER = 1.5
+
+
+def load_station_calibrations(path: str | Path | None) -> dict[str, float]:
+    """Load per-station rolling MAE from data/station_calibration.csv.
+
+    Returns {station_id -> rolling_mae_c}. Missing file yields {} and callers
+    fall back to the global sigma_c.
+    """
+    if not path:
+        return {}
+    file_path = Path(path)
+    if not file_path.exists():
+        return {}
+    calibrations: dict[str, float] = {}
+    with file_path.open("r", newline="", encoding="utf-8") as fh:
+        for row in csv.DictReader(fh):
+            station_id = (row.get("station_id") or "").strip().upper()
+            mae = _as_float(row.get("rolling_mae_c"))
+            if station_id and mae is not None:
+                calibrations[station_id] = mae
+    return calibrations
+
+
+def sigma_for_station(
+    station_id: str | None,
+    calibrations: dict[str, float] | None,
+    default_sigma_c: float,
+) -> float:
+    if not station_id or not calibrations:
+        return default_sigma_c
+    mae = calibrations.get(station_id.strip().upper())
+    if mae is None:
+        return default_sigma_c
+    return max(SIGMA_FLOOR_C, mae * SIGMA_MAE_MULTIPLIER)
 
 
 @dataclass(frozen=True)
@@ -36,9 +72,14 @@ def build_market_signals(
     guard_no_on_top_bucket: bool = True,
     near_top_no_guard_ratio: float = 0.75,
     allow_buy_yes: bool = True,
+    station_calibration_path: str | Path | None = None,
+    station_calibrations: dict[str, float] | None = None,
 ) -> list[dict[str, Any]]:
     markets = _read_csv(markets_path)
     predictions = {row.get("slug", ""): row for row in _read_csv(predictions_path)}
+    calibrations: dict[str, float] = dict(station_calibrations or {})
+    if station_calibration_path:
+        calibrations.update(load_station_calibrations(station_calibration_path))
     rows = []
     for market in markets:
         event_slug = market.get("event_slug", "")
@@ -57,6 +98,7 @@ def build_market_signals(
             guard_no_on_top_bucket=guard_no_on_top_bucket,
             near_top_no_guard_ratio=near_top_no_guard_ratio,
             allow_buy_yes=allow_buy_yes,
+            station_calibrations=calibrations,
         )
         rows.append(row)
     _apply_event_context(
@@ -89,6 +131,7 @@ def build_market_signal(
     guard_no_on_top_bucket: bool = True,
     near_top_no_guard_ratio: float = 0.75,
     allow_buy_yes: bool = True,
+    station_calibrations: dict[str, float] | None = None,
 ) -> dict[str, Any]:
     interval = parse_temperature_interval(market.get("question", ""))
     market_has_ended = _market_has_ended(market.get("end_date"))
@@ -152,8 +195,19 @@ def build_market_signal(
         base["reason"] = "missing corrected_prediction_c"
         return base
 
+    station_id = str(prediction.get("station_id") or "").strip()
+    effective_sigma_c = sigma_for_station(station_id, station_calibrations, sigma_c)
+    base["model_sigma_c"] = effective_sigma_c
+    base["model_sigma_source"] = (
+        "station_calibration"
+        if station_calibrations and station_id.upper() in (station_calibrations or {})
+        else "default"
+    )
+
     mean = celsius_to_fahrenheit(mean_c) if interval.unit == "fahrenheit" else mean_c
-    sigma = sigma_c * 9.0 / 5.0 if interval.unit == "fahrenheit" else sigma_c
+    sigma = (
+        effective_sigma_c * 9.0 / 5.0 if interval.unit == "fahrenheit" else effective_sigma_c
+    )
     fair_yes = normal_interval_probability(mean, sigma, interval.lower, interval.upper)
     fair_no = 1.0 - fair_yes
 

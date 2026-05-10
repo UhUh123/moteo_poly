@@ -141,6 +141,23 @@ settle-paper-trades     ──►  artifacts/paper_portfolio.csv (updated with w
 - Production model: `artifacts/models/gbm.joblib` (копия `gbm_real.joblib`). Старая сохранена как `gbm_synthetic_backup.joblib`.
 - После переключения: сигналы `bankroll_100` дают 35 BUY_NO кандидатов (было 0 на устаревших снимках).
 
+### Фаза 2b — per-station sigma ✅
+
+- [scripts/build_station_calibration.py](scripts/build_station_calibration.py) считает per-station rolling MAE + bias на holdout (2025-10-30..2026-04-30).
+- [data/station_calibration.csv](data/station_calibration.csv): 51 станция. Диапазон MAE: 0.01°C (тропики, где модель почти детерминирована) … 1.34°C (RKSI Сеул, атмосферные фронты). Bias: -0.40 .. +0.41.
+- [signals.py](src/detect_temperature/signals.py): `sigma_for_station()` и `load_station_calibrations()`. Эффективная sigma = `max(1.5, 1.5 × rolling_mae)`. Каждая signal-строка получает `model_sigma_c` и `model_sigma_source` (`station_calibration` или `default`).
+- [pipeline.py](src/detect_temperature/pipeline.py): по умолчанию читает `data/station_calibration.csv` (параметр `station_calibration_path`).
+- После переключения на новые sigma: сигналов `bankroll_100` стало 57 BUY_NO кандидатов (с 35 при sigma=2.5 для всех). Ужесточение для noisy станций + смягчение для tropical.
+- Тесты: **46 passed** (добавлено 3 новых теста на sigma_for_station, load_station_calibrations, build_market_signal use of station sigma).
+
+### Что осталось в фазе 2
+
+- [ ] **2c. Rolling bias correction в модели.** `bias` из calibration пока **не применяется**. Следующий шаг — в `predict_gbm` добавить `corrected -= rolling_bias`. Сейчас bias небольшой (≤0.4°C), но исправить стоит.
+- [ ] **2d. Обновление calibration еженедельно.** Нужен cron/Task Scheduler, который пересчитывает `data/station_calibration.csv` по последним N дням training_real + actuals.
+- [ ] **2e. Включение реальных Polymarket actuals в training.** Когда `data/actuals.csv` соберёт ≥500 строк — объединить с training_real и переобучить.
+
+Критерии успеха фазы 2: MAE на Polymarket resolved ≤ 1.3 °C, BUY_NO win rate ≥ 75 %.
+
 ### Windows collector — работает
 
 - `C:\poly\detect-temperature` — репо на Windows, установлен через venv, Python 3.14.
@@ -174,9 +191,9 @@ Windows collector работает сам — проверять логи раз
 ### Фаза 2 (неделя 3–6) — частично готово
 
 - [x] **2a. Реальная модель.** Обучено на 124K Open-Meteo пар 2023–2026. Production model теперь даёт MAE 0.45°C на реальных данных вместо 0.73°C у синтетической.
-- [ ] **2b. Per-station rolling MAE + bias.** Используем `data/training_real.csv` чтобы посчитать для каждой станции реальную sigma и bias, сохранить в `data/station_calibration.csv`. Сейчас sigma 2.5 захардкожена глобально.
-- [ ] **2c. Signals.py читает sigma per station.** Заменить захардкоженную sigma на чтение из calibration файла + fallback 2.5.
-- [ ] **2d. Backtesting на 2025-10-30 … 2026-04-30 holdout.** Реконструировать bucket-вероятности для архивных Polymarket рынков если доступны, оценить win rate BUY_NO.
+- [x] **2b. Per-station rolling MAE + bias.** `data/station_calibration.csv` + sigma-per-station в signals.py. 46 тестов зелёные.
+- [ ] **2c. Применить rolling_bias в predict-gbm.** Сейчас bias сохраняется, но не вычитается из прогноза.
+- [ ] **2d. Авто-обновление calibration раз в неделю.**
 - [ ] **2e. Когда `data/actuals.csv` соберёт ≥ 500 реальных resolved — переобучить с включением этих пар.**
 
 Критерии успеха фазы 2: MAE на Polymarket resolved ≤ 1.3 °C, BUY_NO win rate ≥ 75 %.

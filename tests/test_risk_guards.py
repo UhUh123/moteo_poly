@@ -9,7 +9,13 @@ import pytest
 from detect_temperature.polymarket import flatten_temperature_markets
 from detect_temperature.risk_guards import DrawdownAbort, check_drawdown
 from detect_temperature.schema import MarketTarget
-from detect_temperature.signals import build_market_signal
+from detect_temperature.signals import (
+    build_market_signal,
+    load_station_calibrations,
+    sigma_for_station,
+    SIGMA_FLOOR_C,
+    SIGMA_MAE_MULTIPLIER,
+)
 from detect_temperature.sources.base import StationMetadata
 from detect_temperature.station_verifier import verify_target
 
@@ -179,3 +185,54 @@ def test_station_verifier_rejects_unsupported_domain() -> None:
     )
     ok, reason = verify_target(target)
     assert ok is False and "unsupported source domain" in reason
+
+
+def test_sigma_for_station_applies_floor_and_multiplier() -> None:
+    calibrations = {"KSEA": 1.5, "WMKK": 0.01}  # noisy Seattle, tropical Kuala Lumpur
+    # Seattle: 1.5 * 1.5 = 2.25 > floor 1.5
+    assert sigma_for_station("KSEA", calibrations, default_sigma_c=2.5) == pytest.approx(2.25)
+    # WMKK: 0.01 * 1.5 = 0.015 -> floored to 1.5
+    assert sigma_for_station("WMKK", calibrations, default_sigma_c=2.5) == pytest.approx(SIGMA_FLOOR_C)
+    # Unknown station falls back to default
+    assert sigma_for_station("UNKNOWN", calibrations, default_sigma_c=2.5) == 2.5
+    # No calibrations -> default
+    assert sigma_for_station("KSEA", {}, default_sigma_c=2.5) == 2.5
+    assert sigma_for_station(None, calibrations, default_sigma_c=2.5) == 2.5
+
+
+def test_load_station_calibrations_roundtrip(tmp_path: Path) -> None:
+    path = tmp_path / "cal.csv"
+    path.write_text(
+        "station_id,rolling_mae_c,rolling_bias_c\nKSFO,0.8,-0.2\nEGLC,1.1,0.05\n",
+        encoding="utf-8",
+    )
+    loaded = load_station_calibrations(path)
+    assert loaded == {"KSFO": 0.8, "EGLC": 1.1}
+    # missing file returns empty dict
+    assert load_station_calibrations(tmp_path / "nope.csv") == {}
+
+
+def test_build_market_signal_uses_station_sigma() -> None:
+    market_row = _signal_fixture()
+    market_row["best_ask"] = "0.30"
+    market_row["best_bid"] = "0.28"
+    prediction = {
+        "slug": "highest-temperature-in-test-on-may-5-2026",
+        "corrected_prediction_c": "17.0",
+        "station_id": "NOISY",
+        "model_name": "test-model",
+    }
+
+    tight = build_market_signal(market=market_row, prediction=prediction, sigma_c=1.0, min_edge=0.01)
+    wide = build_market_signal(
+        market=market_row,
+        prediction=prediction,
+        sigma_c=1.0,
+        min_edge=0.01,
+        station_calibrations={"NOISY": 2.5},  # 2.5 * 1.5 = 3.75 effective
+    )
+    # Wider sigma smears probability mass away from the bucket -> lower fair_yes.
+    assert wide["fair_yes_probability"] < tight["fair_yes_probability"]
+    assert wide["model_sigma_c"] == pytest.approx(2.5 * SIGMA_MAE_MULTIPLIER)
+    assert wide["model_sigma_source"] == "station_calibration"
+    assert tight["model_sigma_source"] == "default"

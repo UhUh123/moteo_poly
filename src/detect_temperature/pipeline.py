@@ -315,6 +315,7 @@ def build_market_signals(
     guard_no_on_top_bucket: bool = True,
     near_top_no_guard_ratio: float = 0.75,
     allow_buy_yes: bool = True,
+    station_calibration_path: str | Path | None = "data/station_calibration.csv",
 ) -> list[dict]:
     return build_market_signals_file(
         markets_path=markets_path,
@@ -331,6 +332,7 @@ def build_market_signals(
         guard_no_on_top_bucket=guard_no_on_top_bucket,
         near_top_no_guard_ratio=near_top_no_guard_ratio,
         allow_buy_yes=allow_buy_yes,
+        station_calibration_path=station_calibration_path,
     )
 
 
