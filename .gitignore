@@ -19,3 +19,4 @@ logs/
 output/
 # macOS resource forks when tarring cross-platform
 ._*
+data/training_refresh_window.csv

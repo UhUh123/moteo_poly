@@ -205,7 +205,7 @@ Windows collector работает сам — проверять логи раз
 - [x] **2a. Реальная модель.** 124K Open-Meteo пар, MAE 0.45°C vs 0.73°C у синтетической.
 - [x] **2b. Per-station rolling MAE.** `data/station_calibration.csv` + sigma-per-station в signals.
 - [x] **2c. Применить rolling_bias в predict-gbm.** Wired; MAE 0.414 → 0.404 на holdout; старая модель вредила, новая — нет.
-- [ ] **2d. Авто-обновление calibration раз в неделю** (Task Scheduler на Windows).
+- [x] **2d. Авто-обновление calibration раз в неделю.** `scripts/refresh_calibration.py` + `scripts/register_calibration_refresh.ps1`. Windows Task `PolymarketCalibrationRefresh`: Mondays 04:17 local, `--window-days 180`. Каждую неделю тянет свежие Open-Meteo пары, мерджит в training_real, переобучает GBM, пересобирает calibration, обновляет predictions и signals.
 - [ ] **2e. Когда `data/actuals.csv` соберёт ≥ 500 реальных resolved — переобучить с включением этих пар.**
 
 Критерии успеха фазы 2: MAE на Polymarket resolved ≤ 1.3 °C, BUY_NO win rate ≥ 75 %.

@@ -1,17 +1,17 @@
 # Temperature Model Report
 
 - model: `sklearn_hist_gradient_boosting_bias_corrector`
-- training rows: `3100`
-- holdout rows: `1100`
-- train period: `2026-03-01` to `2026-03-20`
-- holdout period: `2026-03-21` to `2026-03-31`
+- training rows: `124440`
+- holdout rows: `41106`
+- train period: `2023-01-01` to `2025-03-27`
+- holdout period: `2025-03-28` to `2026-05-04`
 - features: `target_day_of_year_sin, target_day_of_year_cos, target_month, target_is_weekend, target_is_max, station_latitude, station_longitude, station_elevation_m, station_id_hash, source_domain_hash, forecast_temp_max_c, forecast_temp_min_c, forecast_temp_mean_c, forecast_temp_spread_c`
 
 | split | group | model | samples | MAE C | RMSE C | bias C | within 1C | within 2C | within 3C |
 | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| holdout | combined | nwp_daily_extreme_baseline | 1100 | 0.5786 | 1.2666 | 0.0541 | 80.36% | 94.36% | 97.36% |
-| holdout | max | nwp_daily_extreme_baseline | 550 | 0.6904 | 1.5793 | -0.0762 | 78.0% | 92.0% | 96.0% |
-| holdout | min | nwp_daily_extreme_baseline | 550 | 0.4669 | 0.8451 | 0.1844 | 82.73% | 96.73% | 98.73% |
-| holdout | combined | sklearn_hist_gradient_boosting_bias_corrector | 1100 | 0.5063 | 0.9165 | -0.0732 | 84.09% | 96.55% | 98.18% |
-| holdout | max | sklearn_hist_gradient_boosting_bias_corrector | 550 | 0.5371 | 1.0222 | -0.1105 | 84.73% | 96.0% | 97.45% |
-| holdout | min | sklearn_hist_gradient_boosting_bias_corrector | 550 | 0.4754 | 0.7969 | -0.036 | 83.45% | 97.09% | 98.91% |
+| holdout | combined | nwp_daily_extreme_baseline | 41106 | 0.5611 | 1.0885 | 0.1284 | 80.21% | 93.25% | 97.47% |
+| holdout | max | nwp_daily_extreme_baseline | 20553 | 0.5981 | 1.1908 | 0.0829 | 79.4% | 92.19% | 96.87% |
+| holdout | min | nwp_daily_extreme_baseline | 20553 | 0.5241 | 0.9756 | 0.1739 | 81.01% | 94.31% | 98.07% |
+| holdout | combined | sklearn_hist_gradient_boosting_bias_corrector | 41106 | 0.4812 | 0.8579 | -0.0875 | 81.93% | 95.59% | 98.89% |
+| holdout | max | sklearn_hist_gradient_boosting_bias_corrector | 20553 | 0.4925 | 0.8961 | -0.0301 | 81.82% | 94.95% | 98.57% |
+| holdout | min | sklearn_hist_gradient_boosting_bias_corrector | 20553 | 0.47 | 0.8178 | -0.1449 | 82.04% | 96.22% | 99.2% |

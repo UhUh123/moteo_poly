@@ -1,18 +1,51 @@
 slug,title,target_date,unit,prediction,rounded_prediction,actual,error,abs_error,rounded_exact,top_bucket,top_bucket_probability,top_bucket_hit
-highest-temperature-in-seoul-on-may-4-2026,Highest temperature in Seoul on May 4?,2026-05-04,celsius,17.5473,18,18.0,-0.4527,0.4527,1,18°C,0.249906,1
-highest-temperature-in-warsaw-on-may-4-2026,Highest temperature in Warsaw on May 4?,2026-05-04,celsius,25.5047,26,27.0,-1.4953,1.4953,0,27°C,0.161765,1
-highest-temperature-in-taipei-on-may-4-2026,Highest temperature in Taipei on May 4?,2026-05-04,celsius,24.6467,25,24.0,0.6467,0.6467,0,25°C,0.25423,0
-highest-temperature-in-london-on-may-4-2026,Highest temperature in London on May 4?,2026-05-04,celsius,17.2772,17,15.0,2.2772,2.2772,0,17°C,0.256856,0
-highest-temperature-in-singapore-on-may-4-2026,Highest temperature in Singapore on May 4?,2026-05-04,celsius,30.9148,31,31.0,-0.0852,0.0852,1,31°C,0.260712,1
-highest-temperature-in-jakarta-on-may-4-2026,Highest temperature in Jakarta on May 4?,2026-05-04,celsius,30.2287,30,34.0,-3.7713,3.7713,0,34°C,0.012394,1
-highest-temperature-in-beijing-on-may-4-2026,Highest temperature in Beijing on May 4?,2026-05-04,celsius,23.595,24,26.0,-2.405,2.405,0,26°C,0.075652,1
-highest-temperature-in-chongqing-on-may-4-2026,Highest temperature in Chongqing on May 4?,2026-05-04,celsius,24.8035,25,28.0,-3.1965,3.1965,0,28°C,0.029251,1
-highest-temperature-in-madrid-on-may-4-2026,Highest temperature in Madrid on May 4?,2026-05-04,celsius,18.5647,19,21.0,-2.4353,2.4353,0,20°C,0.167976,0
-highest-temperature-in-miami-on-may-4-2026,Highest temperature in Miami on May 4?,2026-05-04,fahrenheit,80.782,81,81.0,-0.218,0.218,1,80-81°F,0.287995,1
-highest-temperature-in-ankara-on-may-4-2026,Highest temperature in Ankara on May 4?,2026-05-04,celsius,7.5815,8,8.0,-0.4185,0.4185,1,8°C,0.251508,1
-highest-temperature-in-shanghai-on-may-4-2026,Highest temperature in Shanghai on May 4?,2026-05-04,celsius,22.7543,23,24.0,-1.2457,1.2457,0,24°C,0.187296,1
-highest-temperature-in-kuala-lumpur-on-may-4-2026,Highest temperature in Kuala Lumpur on May 4?,2026-05-04,celsius,31.2902,31,32.0,-0.7098,0.7098,0,32°C,0.234415,1
-highest-temperature-in-paris-on-may-4-2026,Highest temperature in Paris on May 4?,2026-05-04,celsius,16.7243,17,18.0,-1.2757,1.2757,0,18°C,0.184285,1
-highest-temperature-in-wellington-on-may-4-2026,Highest temperature in Wellington on May 4?,2026-05-04,celsius,15.2961,15,16.0,-0.7039,0.7039,0,,,0
-highest-temperature-in-chengdu-on-may-4-2026,Highest temperature in Chengdu on May 4?,2026-05-04,celsius,25.8567,26,29.0,-3.1433,3.1433,0,29°C,0.031443,1
-highest-temperature-in-shenzhen-on-may-4-2026,Highest temperature in Shenzhen on May 4?,2026-05-04,celsius,27.7265,28,26.0,1.7265,1.7265,0,28°C or higher,0.560007,0
+highest-temperature-in-london-on-may-10-2026,Highest temperature in London on May 10?,2026-05-10,celsius,13.158,13,13.0,0.158,0.158,1,13°C,0.259725,1
+highest-temperature-in-shanghai-on-may-10-2026,Highest temperature in Shanghai on May 10?,2026-05-10,celsius,23.3988,23,24.0,-0.6012,0.6012,0,24°C,0.241673,1
+highest-temperature-in-beijing-on-may-10-2026,Highest temperature in Beijing on May 10?,2026-05-10,celsius,32.4329,32,33.0,-0.5671,0.5671,0,33°C,0.243741,1
+highest-temperature-in-madrid-on-may-10-2026,Highest temperature in Madrid on May 10?,2026-05-10,celsius,15.1276,15,16.0,-0.8724,0.8724,0,16°C,0.221847,1
+highest-temperature-in-nyc-on-may-10-2026,Highest temperature in NYC on May 10?,2026-05-10,fahrenheit,73.4364,73,73.0,0.4364,0.4364,1,72-73°F,0.285312,1
+highest-temperature-in-paris-on-may-10-2026,Highest temperature in Paris on May 10?,2026-05-10,celsius,17.6096,18,18.0,-0.3904,0.3904,1,18°C,0.252734,1
+highest-temperature-in-qingdao-on-may-10-2026,Highest temperature in Qingdao on May 10?,2026-05-10,celsius,26.7513,27,23.0,3.7513,3.7513,0,27°C,0.257681,0
+highest-temperature-in-shenzhen-on-may-10-2026,Highest temperature in Shenzhen on May 10?,2026-05-10,celsius,27.4173,27,27.0,0.4173,0.4173,1,27°C,0.25156,1
+highest-temperature-in-chongqing-on-may-10-2026,Highest temperature in Chongqing on May 10?,2026-05-10,celsius,24.7801,25,28.0,-3.2199,3.2199,0,28°C,0.028327,1
+highest-temperature-in-chengdu-on-may-10-2026,Highest temperature in Chengdu on May 10?,2026-05-10,celsius,30.7009,31,31.0,-0.2991,0.2991,1,31°C,0.256163,1
+highest-temperature-in-sao-paulo-on-may-10-2026,Highest temperature in Sao Paulo on May 10?,2026-05-10,celsius,18.5963,19,20.0,-1.4037,1.4037,0,20°C,0.171231,1
+highest-temperature-in-taipei-on-may-10-2026,Highest temperature in Taipei on May 10?,2026-05-10,celsius,28.5038,29,29.0,-0.4962,0.4962,1,29°C,0.247709,1
+highest-temperature-in-ankara-on-may-10-2026,Highest temperature in Ankara on May 10?,2026-05-10,celsius,22.1397,22,23.0,-0.8603,0.8603,0,23°C,0.222849,1
+highest-temperature-in-singapore-on-may-10-2026,Highest temperature in Singapore on May 10?,2026-05-10,celsius,31.3174,31,33.0,-1.6826,1.6826,0,33°C,0.142406,1
+highest-temperature-in-amsterdam-on-may-10-2026,Highest temperature in Amsterdam on May 10?,2026-05-10,celsius,17.2475,17,16.0,1.2475,1.2475,0,17°C,0.257714,0
+highest-temperature-in-jakarta-on-may-10-2026,Highest temperature in Jakarta on May 10?,2026-05-10,celsius,33.7141,34,34.0,-0.2859,0.2859,1,34°C,0.256586,1
+highest-temperature-in-munich-on-may-10-2026,Highest temperature in Munich on May 10?,2026-05-10,celsius,22.513,23,23.0,-0.487,0.487,1,23°C,0.248186,1
+highest-temperature-in-cape-town-on-may-10-2026,Highest temperature in Cape Town on May 10?,2026-05-10,celsius,13.8351,14,15.0,-1.1649,1.1649,0,15°C,0.19527,1
+highest-temperature-in-tel-aviv-on-may-10-2026,Highest temperature in Tel Aviv on May 10?,2026-05-10,celsius,26.5226,27,27.0,-0.4774,0.4774,1,27°C,0.24868,1
+highest-temperature-in-atlanta-on-may-10-2026,Highest temperature in Atlanta on May 10?,2026-05-10,fahrenheit,80.399,80,82.0,-1.601,1.601,0,80-81°F,0.282139,0
+highest-temperature-in-milan-on-may-10-2026,Highest temperature in Milan on May 10?,2026-05-10,celsius,16.8081,17,16.0,0.8081,0.8081,0,17°C,0.259066,0
+highest-temperature-in-helsinki-on-may-10-2026,Highest temperature in Helsinki on May 10?,2026-05-10,celsius,15.3287,15,15.0,0.3287,0.3287,1,15°C,0.255146,1
+highest-temperature-in-seattle-on-may-10-2026,Highest temperature in Seattle on May 10?,2026-05-10,fahrenheit,64.5411,65,58.0,6.5411,6.5411,0,64-65°F,0.284935,0
+highest-temperature-in-miami-on-may-10-2026,Highest temperature in Miami on May 10?,2026-05-10,fahrenheit,88.9603,89,91.0,-2.0397,2.0397,0,90-91°F,0.21997,1
+highest-temperature-in-moscow-on-may-10-2026,Highest temperature in Moscow on May 10?,2026-05-10,celsius,14.0076,14,13.0,1.0076,1.0076,0,14°C,0.261114,0
+highest-temperature-in-istanbul-on-may-10-2026,Highest temperature in Istanbul on May 10?,2026-05-10,celsius,21.301,21,20.0,1.301,1.301,0,21°C,0.256099,0
+highest-temperature-in-wuhan-on-may-10-2026,Highest temperature in Wuhan on May 10?,2026-05-10,celsius,26.3934,26,28.0,-1.6066,1.6066,0,28°C,0.150241,1
+highest-temperature-in-guangzhou-on-may-10-2026,Highest temperature in Guangzhou on May 10?,2026-05-10,celsius,27.417,27,27.0,0.417,0.417,1,27°C,0.251576,1
+highest-temperature-in-lagos-on-may-10-2026,Highest temperature in Lagos on May 10?,2026-05-10,celsius,31.3183,31,33.0,-1.6817,1.6817,0,33°C,0.142502,1
+highest-temperature-in-warsaw-on-may-10-2026,Highest temperature in Warsaw on May 10?,2026-05-10,celsius,20.7038,21,20.0,0.7038,0.7038,0,22°C or higher,0.297784,0
+highest-temperature-in-buenos-aires-on-may-10-2026,Highest temperature in Buenos Aires on May 10?,2026-05-10,celsius,14.2257,14,16.0,-1.7743,1.7743,0,13°C,0.189287,0
+highest-temperature-in-chicago-on-may-10-2026,Highest temperature in Chicago on May 10?,2026-05-10,fahrenheit,63.1857,63,64.0,-0.8143,0.8143,0,64°F or higher,0.453658,1
+highest-temperature-in-kuala-lumpur-on-may-10-2026,Highest temperature in Kuala Lumpur on May 10?,2026-05-10,celsius,32.8079,33,34.0,-1.1921,1.1921,0,34°C,0.192612,1
+highest-temperature-in-toronto-on-may-10-2026,Highest temperature in Toronto on May 10?,2026-05-10,celsius,12.5556,13,13.0,-0.4444,0.4444,1,13°C,0.24549,1
+highest-temperature-in-jeddah-on-may-10-2026,Highest temperature in Jeddah on May 10?,2026-05-10,celsius,36.2155,36,34.0,2.2155,2.2155,0,37°C or higher,0.424784,0
+highest-temperature-in-los-angeles-on-may-10-2026,Highest temperature in Los Angeles on May 10?,2026-05-10,fahrenheit,67.9317,68,69.0,-1.0683,1.0683,0,68-69°F,0.268081,1
+highest-temperature-in-manila-on-may-10-2026,Highest temperature in Manila on May 10?,2026-05-10,celsius,36.7077,37,36.0,0.7077,0.7077,0,37°C,0.256385,0
+highest-temperature-in-san-francisco-on-may-10-2026,Highest temperature in San Francisco on May 10?,2026-05-10,fahrenheit,62.752,63,61.0,1.752,1.752,0,62-63°F,0.287732,0
+highest-temperature-in-houston-on-may-10-2026,Highest temperature in Houston on May 10?,2026-05-10,fahrenheit,85.8794,86,89.0,-3.1206,3.1206,0,86°F or higher,0.555877,1
+lowest-temperature-in-nyc-on-may-10-2026,Lowest temperature in NYC on May 10?,2026-05-10,fahrenheit,50.5109,51,51.0,-0.4891,0.4891,1,50-51°F,0.284402,1
+highest-temperature-in-karachi-on-may-10-2026,Highest temperature in Karachi on May 10?,2026-05-10,celsius,35.5094,36,35.0,0.5094,0.5094,0,36°C or higher,0.502507,0
+highest-temperature-in-austin-on-may-10-2026,Highest temperature in Austin on May 10?,2026-05-10,fahrenheit,88.3345,88,89.0,-0.6655,0.6655,0,74°F or higher,1.0,1
+highest-temperature-in-lucknow-on-may-10-2026,Highest temperature in Lucknow on May 10?,2026-05-10,celsius,34.7835,35,34.0,0.7835,0.7835,0,35°C or below,0.683558,1
+highest-temperature-in-denver-on-may-10-2026,Highest temperature in Denver on May 10?,2026-05-10,fahrenheit,68.462,68,63.0,5.462,5.462,0,68°F or higher,0.633586,0
+lowest-temperature-in-miami-on-may-10-2026,Lowest temperature in Miami on May 10?,2026-05-10,fahrenheit,76.1224,76,80.0,-3.8776,3.8776,0,76-77°F,0.274679,0
+lowest-temperature-in-paris-on-may-10-2026,Lowest temperature in Paris on May 10?,2026-05-10,celsius,11.6943,12,12.0,-0.3057,0.3057,1,12°C,0.255946,1
+lowest-temperature-in-london-on-may-10-2026,Lowest temperature in London on May 10?,2026-05-10,celsius,7.7997,8,9.0,-1.2003,1.2003,0,8°C,0.258884,0
+lowest-temperature-in-shanghai-on-may-10-2026,Lowest temperature in Shanghai on May 10?,2026-05-10,celsius,14.0656,14,14.0,0.0656,0.0656,1,14°C,0.260877,1
+highest-temperature-in-mexico-city-on-may-10-2026,Highest temperature in Mexico City on May 10?,2026-05-10,celsius,26.852,27,25.0,1.852,1.852,0,25°C or higher,0.941558,1
+highest-temperature-in-panama-city-on-may-10-2026,Highest temperature in Panama City on May 10?,2026-05-10,celsius,32.8118,33,34.0,-1.1882,1.1882,0,33°C or higher,0.582328,1

@@ -77,12 +77,12 @@
   </header>
   <main>
     <div class="metrics">
-      <section class="metric"><span>Resolved events</span><strong>17</strong></section>
-      <section class="metric"><span>MAE</span><strong>1.54 resolution units</strong></section>
-      <section class="metric"><span>Exact rounded</span><strong>23.5%</strong></section>
-      <section class="metric"><span>Within 1 unit</span><strong>41.2%</strong></section>
-      <section class="metric"><span>Within 2 units</span><strong>64.7%</strong></section>
-      <section class="metric"><span>Visible bucket hit</span><strong>75.0%</strong></section>
+      <section class="metric"><span>Resolved events</span><strong>50</strong></section>
+      <section class="metric"><span>MAE</span><strong>1.33 resolution units</strong></section>
+      <section class="metric"><span>Exact rounded</span><strong>30.0%</strong></section>
+      <section class="metric"><span>Within 1 unit</span><strong>52.0%</strong></section>
+      <section class="metric"><span>Within 2 units</span><strong>84.0%</strong></section>
+      <section class="metric"><span>Visible bucket hit</span><strong>68.0%</strong></section>
       <section class="metric"><span>Signal win rate</span><strong>-</strong></section>
     </div>
     <p class="note">`Exact rounded` значит: округленный точечный прогноз совпал с фактическим resolved значением. `Within 1/2 unit` значит: модель ошиблась не больше чем на 1/2 градуса в единицах рынка. `Visible bucket hit` проверяет только bucket'ы, которые были видны в текущем Polymarket snapshot; если часть диапазонов уже пропала из снимка, эту метрику нельзя считать полной точностью outcome'ов. `Signal win rate` считает, выиграла ли выбранная моделью сторона BUY_YES/BUY_NO.</p>
@@ -90,23 +90,56 @@
     <div class="table-wrap">
       <table>
         <thead><tr><th>Дата</th><th>Рынок</th><th>Прогноз</th><th>Факт</th><th>Ошибка</th><th>Rounded</th><th>Top bucket</th></tr></thead>
-        <tbody><tr><td>2026-05-04</td><td class="title">Highest temperature in Seoul on May 4?</td><td>17.5473 celsius</td><td>18.0 celsius</td><td>-0.45</td><td class="good">yes</td><td class="good">18°C</td></tr>
-<tr><td>2026-05-04</td><td class="title">Highest temperature in Warsaw on May 4?</td><td>25.5047 celsius</td><td>27.0 celsius</td><td>-1.50</td><td class="bad">no</td><td class="good">27°C</td></tr>
-<tr><td>2026-05-04</td><td class="title">Highest temperature in Taipei on May 4?</td><td>24.6467 celsius</td><td>24.0 celsius</td><td>+0.65</td><td class="bad">no</td><td class="bad">25°C</td></tr>
-<tr><td>2026-05-04</td><td class="title">Highest temperature in London on May 4?</td><td>17.2772 celsius</td><td>15.0 celsius</td><td>+2.28</td><td class="bad">no</td><td class="bad">17°C</td></tr>
-<tr><td>2026-05-04</td><td class="title">Highest temperature in Singapore on May 4?</td><td>30.9148 celsius</td><td>31.0 celsius</td><td>-0.09</td><td class="good">yes</td><td class="good">31°C</td></tr>
-<tr><td>2026-05-04</td><td class="title">Highest temperature in Jakarta on May 4?</td><td>30.2287 celsius</td><td>34.0 celsius</td><td>-3.77</td><td class="bad">no</td><td class="good">34°C</td></tr>
-<tr><td>2026-05-04</td><td class="title">Highest temperature in Beijing on May 4?</td><td>23.595 celsius</td><td>26.0 celsius</td><td>-2.40</td><td class="bad">no</td><td class="good">26°C</td></tr>
-<tr><td>2026-05-04</td><td class="title">Highest temperature in Chongqing on May 4?</td><td>24.8035 celsius</td><td>28.0 celsius</td><td>-3.20</td><td class="bad">no</td><td class="good">28°C</td></tr>
-<tr><td>2026-05-04</td><td class="title">Highest temperature in Madrid on May 4?</td><td>18.5647 celsius</td><td>21.0 celsius</td><td>-2.44</td><td class="bad">no</td><td class="bad">20°C</td></tr>
-<tr><td>2026-05-04</td><td class="title">Highest temperature in Miami on May 4?</td><td>80.782 fahrenheit</td><td>81.0 fahrenheit</td><td>-0.22</td><td class="good">yes</td><td class="good">80-81°F</td></tr>
-<tr><td>2026-05-04</td><td class="title">Highest temperature in Ankara on May 4?</td><td>7.5815 celsius</td><td>8.0 celsius</td><td>-0.42</td><td class="good">yes</td><td class="good">8°C</td></tr>
-<tr><td>2026-05-04</td><td class="title">Highest temperature in Shanghai on May 4?</td><td>22.7543 celsius</td><td>24.0 celsius</td><td>-1.25</td><td class="bad">no</td><td class="good">24°C</td></tr>
-<tr><td>2026-05-04</td><td class="title">Highest temperature in Kuala Lumpur on May 4?</td><td>31.2902 celsius</td><td>32.0 celsius</td><td>-0.71</td><td class="bad">no</td><td class="good">32°C</td></tr>
-<tr><td>2026-05-04</td><td class="title">Highest temperature in Paris on May 4?</td><td>16.7243 celsius</td><td>18.0 celsius</td><td>-1.28</td><td class="bad">no</td><td class="good">18°C</td></tr>
-<tr><td>2026-05-04</td><td class="title">Highest temperature in Wellington on May 4?</td><td>15.2961 celsius</td><td>16.0 celsius</td><td>-0.70</td><td class="bad">no</td><td class="bad">-</td></tr>
-<tr><td>2026-05-04</td><td class="title">Highest temperature in Chengdu on May 4?</td><td>25.8567 celsius</td><td>29.0 celsius</td><td>-3.14</td><td class="bad">no</td><td class="good">29°C</td></tr>
-<tr><td>2026-05-04</td><td class="title">Highest temperature in Shenzhen on May 4?</td><td>27.7265 celsius</td><td>26.0 celsius</td><td>+1.73</td><td class="bad">no</td><td class="bad">28°C or higher</td></tr></tbody>
+        <tbody><tr><td>2026-05-10</td><td class="title">Highest temperature in London on May 10?</td><td>13.158 celsius</td><td>13.0 celsius</td><td>+0.16</td><td class="good">yes</td><td class="good">13°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Shanghai on May 10?</td><td>23.3988 celsius</td><td>24.0 celsius</td><td>-0.60</td><td class="bad">no</td><td class="good">24°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Beijing on May 10?</td><td>32.4329 celsius</td><td>33.0 celsius</td><td>-0.57</td><td class="bad">no</td><td class="good">33°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Madrid on May 10?</td><td>15.1276 celsius</td><td>16.0 celsius</td><td>-0.87</td><td class="bad">no</td><td class="good">16°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in NYC on May 10?</td><td>73.4364 fahrenheit</td><td>73.0 fahrenheit</td><td>+0.44</td><td class="good">yes</td><td class="good">72-73°F</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Paris on May 10?</td><td>17.6096 celsius</td><td>18.0 celsius</td><td>-0.39</td><td class="good">yes</td><td class="good">18°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Qingdao on May 10?</td><td>26.7513 celsius</td><td>23.0 celsius</td><td>+3.75</td><td class="bad">no</td><td class="bad">27°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Shenzhen on May 10?</td><td>27.4173 celsius</td><td>27.0 celsius</td><td>+0.42</td><td class="good">yes</td><td class="good">27°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Chongqing on May 10?</td><td>24.7801 celsius</td><td>28.0 celsius</td><td>-3.22</td><td class="bad">no</td><td class="good">28°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Chengdu on May 10?</td><td>30.7009 celsius</td><td>31.0 celsius</td><td>-0.30</td><td class="good">yes</td><td class="good">31°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Sao Paulo on May 10?</td><td>18.5963 celsius</td><td>20.0 celsius</td><td>-1.40</td><td class="bad">no</td><td class="good">20°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Taipei on May 10?</td><td>28.5038 celsius</td><td>29.0 celsius</td><td>-0.50</td><td class="good">yes</td><td class="good">29°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Ankara on May 10?</td><td>22.1397 celsius</td><td>23.0 celsius</td><td>-0.86</td><td class="bad">no</td><td class="good">23°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Singapore on May 10?</td><td>31.3174 celsius</td><td>33.0 celsius</td><td>-1.68</td><td class="bad">no</td><td class="good">33°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Amsterdam on May 10?</td><td>17.2475 celsius</td><td>16.0 celsius</td><td>+1.25</td><td class="bad">no</td><td class="bad">17°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Jakarta on May 10?</td><td>33.7141 celsius</td><td>34.0 celsius</td><td>-0.29</td><td class="good">yes</td><td class="good">34°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Munich on May 10?</td><td>22.513 celsius</td><td>23.0 celsius</td><td>-0.49</td><td class="good">yes</td><td class="good">23°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Cape Town on May 10?</td><td>13.8351 celsius</td><td>15.0 celsius</td><td>-1.16</td><td class="bad">no</td><td class="good">15°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Tel Aviv on May 10?</td><td>26.5226 celsius</td><td>27.0 celsius</td><td>-0.48</td><td class="good">yes</td><td class="good">27°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Atlanta on May 10?</td><td>80.399 fahrenheit</td><td>82.0 fahrenheit</td><td>-1.60</td><td class="bad">no</td><td class="bad">80-81°F</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Milan on May 10?</td><td>16.8081 celsius</td><td>16.0 celsius</td><td>+0.81</td><td class="bad">no</td><td class="bad">17°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Helsinki on May 10?</td><td>15.3287 celsius</td><td>15.0 celsius</td><td>+0.33</td><td class="good">yes</td><td class="good">15°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Seattle on May 10?</td><td>64.5411 fahrenheit</td><td>58.0 fahrenheit</td><td>+6.54</td><td class="bad">no</td><td class="bad">64-65°F</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Miami on May 10?</td><td>88.9603 fahrenheit</td><td>91.0 fahrenheit</td><td>-2.04</td><td class="bad">no</td><td class="good">90-91°F</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Moscow on May 10?</td><td>14.0076 celsius</td><td>13.0 celsius</td><td>+1.01</td><td class="bad">no</td><td class="bad">14°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Istanbul on May 10?</td><td>21.301 celsius</td><td>20.0 celsius</td><td>+1.30</td><td class="bad">no</td><td class="bad">21°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Wuhan on May 10?</td><td>26.3934 celsius</td><td>28.0 celsius</td><td>-1.61</td><td class="bad">no</td><td class="good">28°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Guangzhou on May 10?</td><td>27.417 celsius</td><td>27.0 celsius</td><td>+0.42</td><td class="good">yes</td><td class="good">27°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Lagos on May 10?</td><td>31.3183 celsius</td><td>33.0 celsius</td><td>-1.68</td><td class="bad">no</td><td class="good">33°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Warsaw on May 10?</td><td>20.7038 celsius</td><td>20.0 celsius</td><td>+0.70</td><td class="bad">no</td><td class="bad">22°C or higher</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Buenos Aires on May 10?</td><td>14.2257 celsius</td><td>16.0 celsius</td><td>-1.77</td><td class="bad">no</td><td class="bad">13°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Chicago on May 10?</td><td>63.1857 fahrenheit</td><td>64.0 fahrenheit</td><td>-0.81</td><td class="bad">no</td><td class="good">64°F or higher</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Kuala Lumpur on May 10?</td><td>32.8079 celsius</td><td>34.0 celsius</td><td>-1.19</td><td class="bad">no</td><td class="good">34°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Toronto on May 10?</td><td>12.5556 celsius</td><td>13.0 celsius</td><td>-0.44</td><td class="good">yes</td><td class="good">13°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Jeddah on May 10?</td><td>36.2155 celsius</td><td>34.0 celsius</td><td>+2.22</td><td class="bad">no</td><td class="bad">37°C or higher</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Los Angeles on May 10?</td><td>67.9317 fahrenheit</td><td>69.0 fahrenheit</td><td>-1.07</td><td class="bad">no</td><td class="good">68-69°F</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Manila on May 10?</td><td>36.7077 celsius</td><td>36.0 celsius</td><td>+0.71</td><td class="bad">no</td><td class="bad">37°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in San Francisco on May 10?</td><td>62.752 fahrenheit</td><td>61.0 fahrenheit</td><td>+1.75</td><td class="bad">no</td><td class="bad">62-63°F</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Houston on May 10?</td><td>85.8794 fahrenheit</td><td>89.0 fahrenheit</td><td>-3.12</td><td class="bad">no</td><td class="good">86°F or higher</td></tr>
+<tr><td>2026-05-10</td><td class="title">Lowest temperature in NYC on May 10?</td><td>50.5109 fahrenheit</td><td>51.0 fahrenheit</td><td>-0.49</td><td class="good">yes</td><td class="good">50-51°F</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Karachi on May 10?</td><td>35.5094 celsius</td><td>35.0 celsius</td><td>+0.51</td><td class="bad">no</td><td class="bad">36°C or higher</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Austin on May 10?</td><td>88.3345 fahrenheit</td><td>89.0 fahrenheit</td><td>-0.67</td><td class="bad">no</td><td class="good">74°F or higher</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Lucknow on May 10?</td><td>34.7835 celsius</td><td>34.0 celsius</td><td>+0.78</td><td class="bad">no</td><td class="good">35°C or below</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Denver on May 10?</td><td>68.462 fahrenheit</td><td>63.0 fahrenheit</td><td>+5.46</td><td class="bad">no</td><td class="bad">68°F or higher</td></tr>
+<tr><td>2026-05-10</td><td class="title">Lowest temperature in Miami on May 10?</td><td>76.1224 fahrenheit</td><td>80.0 fahrenheit</td><td>-3.88</td><td class="bad">no</td><td class="bad">76-77°F</td></tr>
+<tr><td>2026-05-10</td><td class="title">Lowest temperature in Paris on May 10?</td><td>11.6943 celsius</td><td>12.0 celsius</td><td>-0.31</td><td class="good">yes</td><td class="good">12°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Lowest temperature in London on May 10?</td><td>7.7997 celsius</td><td>9.0 celsius</td><td>-1.20</td><td class="bad">no</td><td class="bad">8°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Lowest temperature in Shanghai on May 10?</td><td>14.0656 celsius</td><td>14.0 celsius</td><td>+0.07</td><td class="good">yes</td><td class="good">14°C</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Mexico City on May 10?</td><td>26.852 celsius</td><td>25.0 celsius</td><td>+1.85</td><td class="bad">no</td><td class="good">25°C or higher</td></tr>
+<tr><td>2026-05-10</td><td class="title">Highest temperature in Panama City on May 10?</td><td>32.8118 celsius</td><td>34.0 celsius</td><td>-1.19</td><td class="bad">no</td><td class="good">33°C or higher</td></tr></tbody>
       </table>
     </div>
     <h2>Outcome/signal результат</h2>
