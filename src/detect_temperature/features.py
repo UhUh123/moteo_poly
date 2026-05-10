@@ -7,6 +7,7 @@ from typing import Any
 
 from .schema import MarketTarget
 from .sources.base import ForecastSnapshot, ObservationSnapshot, StationMetadata
+from .station_verifier import verify_target
 
 
 def build_feature_row(
@@ -21,6 +22,7 @@ def build_feature_row(
     row.update(_station_features(target, station))
     row.update(_forecast_features(forecast))
     row.update(_observation_features(observation, as_of=as_of))
+    row.update(_verification_features(target, station))
     return row
 
 
@@ -117,6 +119,14 @@ def stable_hash(value: str, modulo: int = 10_000) -> int:
         return 0
     digest = hashlib.sha256(value.encode("utf-8")).hexdigest()
     return int(digest[:8], 16) % modulo
+
+
+def _verification_features(target: MarketTarget, station: StationMetadata | None) -> dict[str, Any]:
+    verified, reason = verify_target(target, station)
+    return {
+        "station_verified": int(verified),
+        "station_verification_reason": reason,
+    }
 
 
 def _stable_hash(value: str, modulo: int = 10_000) -> int:

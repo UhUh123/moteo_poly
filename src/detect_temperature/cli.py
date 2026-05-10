@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 
 from .pipeline import (
@@ -10,6 +11,7 @@ from .pipeline import (
     build_targets,
     collect_actuals,
     evaluate_resolved_model,
+    fetch_clob_orderbooks,
     open_paper_trades,
     open_strategy_paper_trades,
     predict_baseline,
@@ -20,6 +22,8 @@ from .pipeline import (
     train_gbm_model,
 )
 from .paper_server import run_server as run_paper_dashboard_server
+from .risk_guards import DrawdownAbort, check_drawdown
+from .risk_profiles import profile_names, risk_profile_values
 from .sources.base import CompositeStationCatalog
 from .sources.aviation_weather import AviationWeatherMetarProvider, AviationWeatherStationCatalog
 from .sources.manual import ManualStationCatalog
@@ -27,6 +31,8 @@ from .sources.open_meteo import OpenMeteoForecastProvider
 
 
 def main(argv: list[str] | None = None) -> int:
+    raw_argv = list(argv) if argv is not None else sys.argv[1:]
+    explicit_flags = _explicit_flags(raw_argv)
     parser = argparse.ArgumentParser(prog="detect-temperature")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -85,7 +91,15 @@ def main(argv: list[str] | None = None) -> int:
     scan_poly_parser.add_argument("--raw-output", default="data/polymarket_weather_events.json")
     scan_poly_parser.add_argument("--geoblock-output", default="data/polymarket_geoblock.json")
 
+    clob_books_parser = subparsers.add_parser("fetch-clob-orderbooks")
+    clob_books_parser.add_argument("--markets", default="data/polymarket_weather_markets.csv")
+    clob_books_parser.add_argument("--output", default="data/polymarket_orderbooks.json")
+    clob_books_parser.add_argument("--yes-only", action="store_true")
+    clob_books_parser.add_argument("--limit", type=int, default=None)
+    clob_books_parser.add_argument("--insecure", action="store_true", help="Disable TLS verification for local certificate issues.")
+
     signals_parser = subparsers.add_parser("build-market-signals")
+    signals_parser.add_argument("--risk-profile", choices=profile_names(), default="default")
     signals_parser.add_argument("--markets", default="data/polymarket_weather_markets.csv")
     signals_parser.add_argument("--predictions", default="artifacts/predictions_gbm.csv")
     signals_parser.add_argument("--output", default="artifacts/market_signals.csv")
@@ -99,8 +113,22 @@ def main(argv: list[str] | None = None) -> int:
     signals_parser.add_argument("--min-liquidity", type=float, default=0.0)
     signals_parser.add_argument("--allow-no-on-top-bucket", action="store_true")
     signals_parser.add_argument("--near-top-no-guard-ratio", type=float, default=0.75)
+    signals_parser.add_argument(
+        "--allow-buy-yes",
+        dest="allow_buy_yes",
+        action="store_true",
+        default=True,
+        help="Allow BUY_YES candidates (default).",
+    )
+    signals_parser.add_argument(
+        "--no-buy-yes",
+        dest="allow_buy_yes",
+        action="store_false",
+        help="Disable BUY_YES candidates; useful when the current model over-confidently bets narrow buckets.",
+    )
 
     open_paper_parser = subparsers.add_parser("open-paper-trades")
+    open_paper_parser.add_argument("--risk-profile", choices=profile_names(), default="default")
     open_paper_parser.add_argument("--signals", default="artifacts/market_signals.csv")
     open_paper_parser.add_argument("--output", default="artifacts/paper_portfolio.csv")
     open_paper_parser.add_argument("--state", default="artifacts/paper_portfolio.json")
@@ -116,6 +144,7 @@ def main(argv: list[str] | None = None) -> int:
     open_paper_parser.add_argument("--allow-ended", action="store_true")
 
     open_strategy_paper_parser = subparsers.add_parser("open-strategy-paper-trades")
+    open_strategy_paper_parser.add_argument("--risk-profile", choices=profile_names(), default="default")
     open_strategy_paper_parser.add_argument("--strategy-portfolio", default="artifacts/strategy_portfolio_v2.csv")
     open_strategy_paper_parser.add_argument("--output", default="artifacts/paper_portfolio.csv")
     open_strategy_paper_parser.add_argument("--state", default="artifacts/paper_portfolio.json")
@@ -129,6 +158,18 @@ def main(argv: list[str] | None = None) -> int:
     )
     open_strategy_paper_parser.add_argument("--weather-fee-rate", type=float, default=0.05)
     open_strategy_paper_parser.add_argument("--maker-fee-rate", type=float, default=0.0)
+    open_strategy_paper_parser.add_argument(
+        "--drawdown-abort-usdc",
+        type=float,
+        default=None,
+        help="Abort when realized_pnl_usdc in paper state <= this threshold (negative value, e.g. -10).",
+    )
+    open_strategy_paper_parser.add_argument(
+        "--drawdown-state-path",
+        action="append",
+        default=[],
+        help="Paper state JSON path to inspect for drawdown. Repeat for fallback order.",
+    )
 
     settle_paper_parser = subparsers.add_parser("settle-paper-trades")
     settle_paper_parser.add_argument("--portfolio", default="artifacts/paper_portfolio.csv")
@@ -147,11 +188,13 @@ def main(argv: list[str] | None = None) -> int:
     resolved_parser.add_argument("--report", default="artifacts/resolved_model_report.html")
 
     strategy_lab_parser = subparsers.add_parser("run-strategy-lab")
+    strategy_lab_parser.add_argument("--risk-profile", choices=profile_names(), default="default")
     strategy_lab_parser.add_argument("--signals", default="artifacts/market_signals.csv")
     strategy_lab_parser.add_argument("--candidates-output", default="artifacts/strategy_candidates_v2.csv")
     strategy_lab_parser.add_argument("--portfolio-output", default="artifacts/strategy_portfolio_v2.csv")
     strategy_lab_parser.add_argument("--summary-output", default="artifacts/strategy_lab_summary.json")
     strategy_lab_parser.add_argument("--report", default="artifacts/strategy_lab_report.html")
+    strategy_lab_parser.add_argument("--orderbooks", default="")
     strategy_lab_parser.add_argument("--bankroll-usdc", type=float, default=1000.0)
     strategy_lab_parser.add_argument("--max-positions", type=int, default=100)
     strategy_lab_parser.add_argument("--max-stake-usdc", type=float, default=5.0)
@@ -174,6 +217,18 @@ def main(argv: list[str] | None = None) -> int:
     strategy_lab_parser.add_argument("--mean-shifts-c", default="-1,0,1")
     strategy_lab_parser.add_argument("--sigma-values-c", default="1.5,2.0,2.5")
     strategy_lab_parser.add_argument("--slippage-values", default="0,0.01")
+    strategy_lab_parser.add_argument(
+        "--drawdown-abort-usdc",
+        type=float,
+        default=None,
+        help="Abort when realized_pnl_usdc in paper state <= this threshold (negative value, e.g. -10).",
+    )
+    strategy_lab_parser.add_argument(
+        "--drawdown-state-path",
+        action="append",
+        default=[],
+        help="Paper state JSON path to inspect for drawdown. Repeat for fallback order.",
+    )
 
     serve_paper_parser = subparsers.add_parser("serve-paper-dashboard")
     serve_paper_parser.add_argument("--host", default="127.0.0.1")
@@ -182,7 +237,7 @@ def main(argv: list[str] | None = None) -> int:
     serve_paper_parser.add_argument("--bankroll-usdc", type=float, default=1000.0)
     serve_paper_parser.add_argument("--finalization-lag-days", type=int, default=1)
 
-    args = parser.parse_args(argv)
+    args = parser.parse_args(raw_argv)
 
     if args.command == "build-targets":
         targets = build_targets(
@@ -294,7 +349,22 @@ def main(argv: list[str] | None = None) -> int:
         print(f"scanned {len(rows)} temperature markets, active={active} -> {args.output}")
         return 0
 
+    if args.command == "fetch-clob-orderbooks":
+        payload = fetch_clob_orderbooks(
+            markets_path=args.markets,
+            output_path=args.output,
+            include_no=not args.yes_only,
+            limit=args.limit,
+            insecure=args.insecure,
+        )
+        print(
+            "fetched CLOB orderbooks -> "
+            f"requested={payload['requested_token_ids']}, books={len(payload['books'])} -> {args.output}"
+        )
+        return 0
+
     if args.command == "build-market-signals":
+        _apply_risk_profile(args, "build-market-signals", explicit_flags)
         rows = build_market_signals(
             markets_path=args.markets,
             predictions_path=args.predictions,
@@ -309,13 +379,20 @@ def main(argv: list[str] | None = None) -> int:
             min_liquidity=args.min_liquidity,
             guard_no_on_top_bucket=not args.allow_no_on_top_bucket,
             near_top_no_guard_ratio=args.near_top_no_guard_ratio,
+            allow_buy_yes=args.allow_buy_yes,
         )
         matched = sum(1 for row in rows if row.get("matched_prediction_slug"))
         trades = sum(1 for row in rows if row.get("paper_side") in {"BUY_YES", "BUY_NO"})
-        print(f"built {len(rows)} paper signals, matched={matched}, trades={trades} -> {args.output}")
+        yes_trades = sum(1 for row in rows if row.get("paper_side") == "BUY_YES")
+        no_trades = sum(1 for row in rows if row.get("paper_side") == "BUY_NO")
+        print(
+            f"built {len(rows)} paper signals, matched={matched}, trades={trades} "
+            f"(BUY_YES={yes_trades}, BUY_NO={no_trades}) -> {args.output}"
+        )
         return 0
 
     if args.command == "open-paper-trades":
+        _apply_risk_profile(args, "open-paper-trades", explicit_flags)
         payload = open_paper_trades(
             signals_path=args.signals,
             output_path=args.output,
@@ -340,6 +417,17 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.command == "open-strategy-paper-trades":
+        _apply_risk_profile(args, "open-strategy-paper-trades", explicit_flags)
+        drawdown_limit = getattr(args, "drawdown_abort_usdc", None)
+        if drawdown_limit is not None:
+            try:
+                check_drawdown(
+                    state_paths=_drawdown_state_paths(args),
+                    abort_usdc=float(drawdown_limit),
+                )
+            except DrawdownAbort as exc:
+                print(f"drawdown kill-switch: {exc}")
+                return 3
         payload = open_strategy_paper_trades(
             strategy_portfolio_path=args.strategy_portfolio,
             output_path=args.output,
@@ -407,12 +495,24 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.command == "run-strategy-lab":
+        _apply_risk_profile(args, "run-strategy-lab", explicit_flags)
+        drawdown_limit = getattr(args, "drawdown_abort_usdc", None)
+        if drawdown_limit is not None:
+            try:
+                check_drawdown(
+                    state_paths=_drawdown_state_paths(args),
+                    abort_usdc=float(drawdown_limit),
+                )
+            except DrawdownAbort as exc:
+                print(f"drawdown kill-switch: {exc}")
+                return 3
         payload = run_strategy_lab(
             signals_path=args.signals,
             candidates_output_path=args.candidates_output,
             portfolio_output_path=args.portfolio_output,
             summary_output_path=args.summary_output,
             report_path=args.report,
+            orderbooks_path=args.orderbooks or None,
             bankroll_usdc=args.bankroll_usdc,
             max_positions=args.max_positions,
             max_stake_usdc=args.max_stake_usdc,
@@ -465,6 +565,30 @@ def _parse_float_tuple(value: str) -> tuple[float, ...]:
     if not items:
         raise argparse.ArgumentTypeError("expected at least one comma-separated float")
     return tuple(float(item) for item in items)
+
+
+def _explicit_flags(argv: list[str]) -> set[str]:
+    return {item.split("=", 1)[0] for item in argv if item.startswith("--")}
+
+
+def _apply_risk_profile(args: argparse.Namespace, command: str, explicit_flags: set[str]) -> None:
+    profile_name = getattr(args, "risk_profile", "default")
+    for attr, value in risk_profile_values(profile_name, command).items():
+        flag = f"--{attr.replace('_', '-')}"
+        if flag not in explicit_flags:
+            setattr(args, attr, value)
+
+
+def _drawdown_state_paths(args: argparse.Namespace) -> list[str]:
+    explicit = list(getattr(args, "drawdown_state_path", []) or [])
+    if explicit:
+        return explicit
+    candidates = [
+        getattr(args, "state", None),
+        "artifacts/paper_portfolio_settled.json",
+        "artifacts/paper_portfolio.json",
+    ]
+    return [str(path) for path in candidates if path]
 
 
 def _format_pct(value: float | None) -> str:

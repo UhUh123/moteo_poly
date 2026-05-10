@@ -161,7 +161,7 @@ PYTHONPATH=src python3 -m detect_temperature.cli open-paper-trades \
 
 Он отбирает только pre-end paper candidates, применяет лимиты риска и создает `artifacts/paper_dashboard.html`.
 
-Текущий запуск:
+Pre-risk-profile запуск 2026-05-05, сохранен для сравнения:
 
 - bankroll: `1000 USDC`;
 - opened positions: `100`;
@@ -209,7 +209,7 @@ PYTHONPATH=src python3 -m detect_temperature.cli run-strategy-lab \
   --maker-adverse-selection-penalty 0.01
 ```
 
-Текущий запуск:
+Pre-risk-profile Strategy Lab запуск 2026-05-05, сохранен для сравнения:
 
 - `365` v2 trade candidates;
 - `163` проходят stress scenarios и execution checks;
@@ -247,6 +247,54 @@ PYTHONPATH=src python3 -m detect_temperature.cli open-strategy-paper-trades \
 Режим `--execution-mode taker` использует `execution_price` из Strategy Lab, то есть цену уже с estimated slippage. Режим `maker-preferred` нужен только для отдельного what-if, потому что без live orderbook log мы не знаем, была бы лимитка реально исполнена.
 
 Это не доказательство прибыльности. Это фильтр стабильности перед forward-test: он отсекает сделки, чей edge исчезает от небольшого сдвига прогноза, ухудшения исполнения или плохого quote quality.
+
+## Bankroll 100 risk profile + CLOB depth check
+
+После расследования 2026-05-05 добавлен профиль `bankroll_100`. Его задача - не максимизировать количество ставок, а агрессивно отказываться от сделок, которые не подходят для маленького банка.
+
+Команды:
+
+```bash
+PYTHONPATH=src python3 -m detect_temperature.cli build-market-signals \
+  --risk-profile bankroll_100 \
+  --markets data/polymarket_weather_markets.csv \
+  --predictions artifacts/predictions_gbm.csv \
+  --output artifacts/market_signals.csv
+
+PYTHONPATH=src python3 -m detect_temperature.cli fetch-clob-orderbooks \
+  --markets data/polymarket_weather_markets.csv \
+  --output data/polymarket_orderbooks.json
+
+PYTHONPATH=src python3 -m detect_temperature.cli run-strategy-lab \
+  --risk-profile bankroll_100 \
+  --signals artifacts/market_signals.csv \
+  --orderbooks data/polymarket_orderbooks.json \
+  --candidates-output artifacts/strategy_candidates_v2.csv \
+  --portfolio-output artifacts/strategy_portfolio_v2.csv \
+  --summary-output artifacts/strategy_lab_summary.json \
+  --report artifacts/strategy_lab_report.html
+
+PYTHONPATH=src python3 -m detect_temperature.cli open-strategy-paper-trades \
+  --risk-profile bankroll_100 \
+  --strategy-portfolio artifacts/strategy_portfolio_v2.csv \
+  --output artifacts/paper_portfolio.csv \
+  --state artifacts/paper_portfolio.json \
+  --dashboard artifacts/paper_dashboard.html
+```
+
+Текущий snapshot:
+
+- `1718` token ids requested from CLOB, `1642` orderbooks returned;
+- `133` trade-сигнала после первичных фильтров;
+- `9` robust candidates после stress + execution checks;
+- `8` selected positions;
+- selected stake: `$4.00` из `$100`;
+- selected depth-fillable: `8 / 8`;
+- selected worst-edge min: `8.48%`;
+- selected max city exposure: `$1.00`;
+- selected max date exposure: `$2.00`.
+
+Depth check идет по ask levels выбранного YES/NO token и planned stake. Если стакан не покрывает размер paper-ставки, кандидат получает reject reason `orderbook depth does not fill planned stake`.
 
 ## Источники и артефакты
 

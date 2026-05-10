@@ -12,6 +12,7 @@ import requests
 
 POLYMARKET_WEATHER_URL = "https://polymarket.com/weather"
 POLYMARKET_GEOBLOCK_URL = "https://polymarket.com/api/geoblock"
+CLOB_BOOKS_URL = "https://clob.polymarket.com/books"
 USER_AGENT = "detect-temperature/0.1"
 
 
@@ -102,6 +103,36 @@ class PolymarketWeatherClient:
         return payload if isinstance(payload, dict) else {}
 
 
+class PolymarketClobClient:
+    def __init__(
+        self,
+        books_url: str = CLOB_BOOKS_URL,
+        timeout_s: int = 30,
+        verify_tls: bool = True,
+    ) -> None:
+        self.books_url = books_url
+        self.timeout_s = timeout_s
+        self.verify_tls = verify_tls
+
+    def fetch_order_books(self, token_ids: list[str], batch_size: int = 500) -> list[dict[str, Any]]:
+        books: list[dict[str, Any]] = []
+        unique_token_ids = [token_id for token_id in dict.fromkeys(token_ids) if token_id]
+        for start in range(0, len(unique_token_ids), batch_size):
+            batch = unique_token_ids[start:start + batch_size]
+            response = requests.post(
+                self.books_url,
+                json=[{"token_id": token_id} for token_id in batch],
+                headers={"User-Agent": USER_AGENT, "Accept": "application/json"},
+                timeout=self.timeout_s,
+                verify=self.verify_tls,
+            )
+            response.raise_for_status()
+            payload = response.json()
+            if isinstance(payload, list):
+                books.extend(book for book in payload if isinstance(book, dict))
+        return books
+
+
 def extract_weather_events_from_html(page_html: str) -> list[dict[str, Any]]:
     match = re.search(
         r'<script id="__NEXT_DATA__" type="application/json"[^>]*>(.*?)</script>',
@@ -188,6 +219,18 @@ def write_json(payload: Any, path: str | Path) -> None:
     with Path(path).open("w", encoding="utf-8") as fh:
         json.dump(payload, fh, indent=2, ensure_ascii=False)
         fh.write("\n")
+
+
+def token_ids_from_market_records(records: list[dict[str, Any]], include_no: bool = True) -> list[str]:
+    token_ids = []
+    for record in records:
+        yes_token = str(record.get("yes_token_id") or "").strip()
+        no_token = str(record.get("no_token_id") or "").strip()
+        if yes_token:
+            token_ids.append(yes_token)
+        if include_no and no_token:
+            token_ids.append(no_token)
+    return list(dict.fromkeys(token_ids))
 
 
 def _find_weather_event_list(payload: Any) -> list[dict[str, Any]] | None:

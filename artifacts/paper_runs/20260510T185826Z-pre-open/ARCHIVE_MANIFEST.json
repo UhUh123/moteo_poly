@@ -1,0 +1,18 @@
+{
+  "timestamp_utc": "20260510T185826Z",
+  "label": "pre-open",
+  "files": [
+    "market_signals.csv",
+    "strategy_candidates_v2.csv",
+    "strategy_portfolio_v2.csv",
+    "strategy_lab_summary.json",
+    "strategy_lab_report.html",
+    "paper_portfolio.csv",
+    "paper_portfolio.json",
+    "paper_dashboard.html",
+    "predictions_gbm.csv",
+    "polymarket_weather_markets.csv",
+    "targets.csv",
+    "features.csv"
+  ]
+}

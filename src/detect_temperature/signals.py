@@ -35,6 +35,7 @@ def build_market_signals(
     min_liquidity: float = 0.0,
     guard_no_on_top_bucket: bool = True,
     near_top_no_guard_ratio: float = 0.75,
+    allow_buy_yes: bool = True,
 ) -> list[dict[str, Any]]:
     markets = _read_csv(markets_path)
     predictions = {row.get("slug", ""): row for row in _read_csv(predictions_path)}
@@ -55,6 +56,7 @@ def build_market_signals(
             min_liquidity=min_liquidity,
             guard_no_on_top_bucket=guard_no_on_top_bucket,
             near_top_no_guard_ratio=near_top_no_guard_ratio,
+            allow_buy_yes=allow_buy_yes,
         )
         rows.append(row)
     _apply_event_context(
@@ -67,6 +69,7 @@ def build_market_signals(
         guard_no_on_top_bucket=guard_no_on_top_bucket,
         near_top_no_guard_ratio=near_top_no_guard_ratio,
         bankroll_usdc=bankroll_usdc,
+        allow_buy_yes=allow_buy_yes,
     )
     _write_csv(rows, output_path)
     return rows
@@ -85,6 +88,7 @@ def build_market_signal(
     min_liquidity: float = 0.0,
     guard_no_on_top_bucket: bool = True,
     near_top_no_guard_ratio: float = 0.75,
+    allow_buy_yes: bool = True,
 ) -> dict[str, Any]:
     interval = parse_temperature_interval(market.get("question", ""))
     market_has_ended = _market_has_ended(market.get("end_date"))
@@ -132,6 +136,17 @@ def build_market_signal(
         base["reason"] = "could not parse temperature interval"
         return base
 
+    station_verified = prediction.get("station_verified")
+    if station_verified not in {None, "", "1", 1, True, "True", "true"}:
+        base["station_verified"] = 0
+        base["station_verification_reason"] = str(
+            prediction.get("station_verification_reason") or "station not verified"
+        )
+        _set_no_trade(base, f"station not verified: {base['station_verification_reason']}")
+        return base
+    base["station_verified"] = 1 if station_verified in {"1", 1, True, "True", "true"} else ""
+    base["station_verification_reason"] = str(prediction.get("station_verification_reason") or "")
+
     mean_c = _as_float(prediction.get("corrected_prediction_c"))
     if mean_c is None:
         base["reason"] = "missing corrected_prediction_c"
@@ -173,6 +188,7 @@ def build_market_signal(
         guard_no_on_top_bucket=guard_no_on_top_bucket,
         near_top_no_guard_ratio=near_top_no_guard_ratio,
         bankroll_usdc=bankroll_usdc,
+        allow_buy_yes=allow_buy_yes,
     )
     return base
 
@@ -267,6 +283,7 @@ def _apply_event_context(
     guard_no_on_top_bucket: bool,
     near_top_no_guard_ratio: float,
     bankroll_usdc: float | None,
+    allow_buy_yes: bool = True,
 ) -> None:
     rows_by_event: dict[str, list[dict[str, Any]]] = {}
     for row in rows:
@@ -310,6 +327,7 @@ def _apply_event_context(
                 guard_no_on_top_bucket=guard_no_on_top_bucket,
                 near_top_no_guard_ratio=near_top_no_guard_ratio,
                 bankroll_usdc=bankroll_usdc,
+                allow_buy_yes=allow_buy_yes,
             )
 
 
@@ -323,6 +341,7 @@ def _apply_betting_decision(
     guard_no_on_top_bucket: bool,
     near_top_no_guard_ratio: float,
     bankroll_usdc: float | None,
+    allow_buy_yes: bool = True,
 ) -> None:
     health_block = _market_health_block(row, max_spread=max_spread, min_liquidity=min_liquidity)
     if health_block:
@@ -341,7 +360,9 @@ def _apply_betting_decision(
 
     candidates = []
     rejected = []
-    if yes_edge is None or yes_buy_price is None:
+    if not allow_buy_yes:
+        rejected.append("BUY_YES disabled by risk profile")
+    elif yes_edge is None or yes_buy_price is None:
         rejected.append("BUY_YES no executable price")
     elif yes_edge < min_edge:
         rejected.append("BUY_YES edge below threshold")

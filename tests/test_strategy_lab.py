@@ -89,6 +89,44 @@ def test_strategy_lab_rejects_excessive_execution_slippage(tmp_path) -> None:
     assert "execution slippage" in candidates[0]["robust_reason"]
 
 
+def test_strategy_lab_rejects_when_orderbook_depth_cannot_fill_stake(tmp_path) -> None:
+    signals_path = tmp_path / "signals.csv"
+    candidates_path = tmp_path / "candidates.csv"
+    orderbooks_path = tmp_path / "orderbooks.json"
+    _write_orderbook_depth_signal(signals_path)
+    orderbooks_path.write_text(
+        json.dumps(
+            {
+                "books": [
+                    {
+                        "asset_id": "no-token",
+                        "asks": [{"price": "0.20", "size": "1"}],
+                        "bids": [{"price": "0.19", "size": "10"}],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    payload = run_strategy_lab(
+        signals_path=signals_path,
+        candidates_output_path=candidates_path,
+        orderbooks_path=orderbooks_path,
+        bankroll_usdc=100.0,
+        max_positions=5,
+        max_stake_usdc=2.0,
+        robust_min_edge=0.01,
+    )
+
+    candidates = list(csv.DictReader(candidates_path.open(newline="", encoding="utf-8")))
+    assert payload["summary"]["orderbook_count"] == 1
+    assert payload["summary"]["robust_pass"] == 0
+    assert candidates[0]["execution_fillable"] == "0"
+    assert float(candidates[0]["execution_fill_ratio"]) < 1.0
+    assert "orderbook depth" in candidates[0]["robust_reason"]
+
+
 def _write_signals(path) -> None:
     fieldnames = [
         "event_slug",
@@ -169,6 +207,71 @@ def _write_signals(path) -> None:
             "risk_flags": "",
             "decision_reason": "test robust no",
         },
+    ]
+    with path.open("w", newline="", encoding="utf-8") as fh:
+        writer = csv.DictWriter(fh, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def _write_orderbook_depth_signal(path) -> None:
+    fieldnames = [
+        "event_slug",
+        "event_title",
+        "market_slug",
+        "group_item_title",
+        "paper_side",
+        "paper_price",
+        "paper_fair_probability",
+        "paper_net_edge",
+        "prediction_c",
+        "interval_lower",
+        "interval_upper",
+        "interval_unit",
+        "market_has_ended",
+        "suggested_max_stake_usdc",
+        "best_bid",
+        "best_ask",
+        "spread",
+        "liquidity",
+        "market_volume",
+        "yes_token_id",
+        "no_token_id",
+        "visible_top_bucket",
+        "visible_bucket_rank",
+        "visible_bucket_count",
+        "risk_flags",
+        "decision_reason",
+    ]
+    rows = [
+        {
+            "event_slug": "highest-temperature-in-book-on-may-5-2026",
+            "event_title": "Highest temperature in Book on May 5?",
+            "market_slug": "book-25c",
+            "group_item_title": "25C",
+            "paper_side": "BUY_NO",
+            "paper_price": "0.20",
+            "paper_fair_probability": "0.99",
+            "paper_net_edge": "0.78",
+            "prediction_c": "20.0",
+            "interval_lower": "24.5",
+            "interval_upper": "25.5",
+            "interval_unit": "celsius",
+            "market_has_ended": "0",
+            "suggested_max_stake_usdc": "2",
+            "best_bid": "0.80",
+            "best_ask": "0.82",
+            "spread": "0.01",
+            "liquidity": "1500",
+            "market_volume": "5000",
+            "yes_token_id": "yes-token",
+            "no_token_id": "no-token",
+            "visible_top_bucket": "20C",
+            "visible_bucket_rank": "5",
+            "visible_bucket_count": "5",
+            "risk_flags": "",
+            "decision_reason": "test orderbook depth",
+        }
     ]
     with path.open("w", newline="", encoding="utf-8") as fh:
         writer = csv.DictWriter(fh, fieldnames=fieldnames)

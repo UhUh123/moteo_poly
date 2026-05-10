@@ -195,6 +195,8 @@ def summarize_portfolio(
     taker_positions = sum(1 for row in positions if row.get("entry_mode", "taker") == "taker")
     maker_positions = sum(1 for row in positions if row.get("entry_mode") == "maker")
     maker_preferred_positions = sum(1 for row in positions if str(row.get("maker_preferred", "")) == "1")
+    depth_checked_positions = sum(1 for row in positions if str(row.get("execution_fill_ratio", "")).strip())
+    fillable_positions = sum(1 for row in positions if str(row.get("execution_fillable", "1")) in {"", "1", "True", "true"})
     return {
         "generated_at": generated_at,
         "bankroll_usdc": round(bankroll_usdc, 2),
@@ -216,6 +218,8 @@ def summarize_portfolio(
         "taker_positions": taker_positions,
         "maker_positions": maker_positions,
         "maker_preferred_positions": maker_preferred_positions,
+        "depth_checked_positions": depth_checked_positions,
+        "fillable_positions": fillable_positions,
     }
 
 
@@ -288,6 +292,13 @@ def render_paper_dashboard(payload: dict[str, Any], path: str | Path) -> None:
             "",
             "positions",
             "Позиции, где Strategy Lab считает maker-вход потенциально лучше taker-входа по fill-adjusted ожиданию.",
+        ),
+        (
+            "Fillable",
+            f"{summary.get('fillable_positions', 0)} / {summary.get('positions', 0)}",
+            "",
+            "positions",
+            "Сколько paper-позиций прошли проверку глубины стакана. Если стакан не подключен, поле не доказывает реальный fill.",
         ),
         (
             "Win Rate",
@@ -556,8 +567,10 @@ def render_paper_dashboard(payload: dict[str, Any], path: str | Path) -> None:
       <div class="sub">Обновлено {html.escape(str(summary.get("generated_at", "")))} · paper-only, без реальных ордеров</div>
     </div>
     <div class="header-actions">
+      <button id="dryRunButton">Проверить рынок</button>
+      <button id="openTradesButton">Открыть сделки</button>
       <button class="primary" id="refreshButton">Обновить actuals & PnL</button>
-      <div id="refreshStatus">Кнопка работает через локальный dashboard server.</div>
+      <div id="refreshStatus">Кнопки работают через локальный dashboard server.</div>
     </div>
   </header>
   <main>
@@ -602,6 +615,8 @@ def render_paper_dashboard(payload: dict[str, Any], path: str | Path) -> None:
     const buttons = [...document.querySelectorAll('button[data-filter]')];
     const search = document.getElementById('search');
     const refreshButton = document.getElementById('refreshButton');
+    const openTradesButton = document.getElementById('openTradesButton');
+    const dryRunButton = document.getElementById('dryRunButton');
     const refreshStatus = document.getElementById('refreshStatus');
     const tooltip = document.getElementById('floatingTooltip');
     function applyFilter() {{
@@ -672,6 +687,43 @@ def render_paper_dashboard(payload: dict[str, Any], path: str | Path) -> None:
         refreshButton.disabled = false;
       }}
     }});
+
+    async function callPipeline(url, label, button) {{
+      if (window.location.protocol === 'file:') {{
+        refreshStatus.textContent = 'Сначала открой через локальный сервер: python3 scripts/serve_paper_dashboard.py';
+        return;
+      }}
+      button.disabled = true;
+      refreshStatus.textContent = `${{label}}... Это займёт 30–90 секунд (scan + predict + strategy lab).`;
+      try {{
+        const response = await fetch(url, {{ method: 'POST' }});
+        const data = await response.json();
+        if (!response.ok) {{
+          if (data.kind === 'drawdown') {{
+            refreshStatus.textContent = `Kill-switch: ${{data.error}}. Пересмотри стратегию вручную.`;
+          }} else {{
+            throw new Error(data.error || `${{label}} failed`);
+          }}
+          return;
+        }}
+        const lab = (data.strategy_lab || (data.market_pipeline && data.market_pipeline.strategy_lab)) || {{}};
+        const paper = data.paper_summary || {{}};
+        const parts = [];
+        if (lab.trade_candidates !== undefined) parts.push(`candidates ${{lab.trade_candidates}}`);
+        if (lab.robust_pass !== undefined) parts.push(`robust ${{lab.robust_pass}}`);
+        if (lab.selected_positions !== undefined) parts.push(`selected ${{lab.selected_positions}}`);
+        if (paper.positions !== undefined) parts.push(`opened ${{paper.positions}} @ $${{paper.total_staked_usdc || 0}}`);
+        refreshStatus.textContent = `Готово: ${{parts.join(', ')}}. Перезагружаю...`;
+        setTimeout(() => window.location.reload(), 1200);
+      }} catch (error) {{
+        refreshStatus.textContent = `Не удалось ${{label.toLowerCase()}}: ${{error.message}}`;
+      }} finally {{
+        button.disabled = false;
+      }}
+    }}
+
+    openTradesButton.addEventListener('click', () => callPipeline('/api/open-trades', 'Открыть сделки', openTradesButton));
+    dryRunButton.addEventListener('click', () => callPipeline('/api/dry-run', 'Проверка рынка', dryRunButton));
   </script>
 </body>
 </html>
@@ -799,6 +851,12 @@ def _position_from_strategy_row(
         "maker_reason": row.get("maker_reason", ""),
         "maker_edge_if_filled": row.get("maker_edge_if_filled", ""),
         "maker_worst_edge": row.get("maker_worst_edge", ""),
+        "execution_fillable": row.get("execution_fillable", ""),
+        "execution_fill_ratio": row.get("execution_fill_ratio", ""),
+        "execution_book_price": row.get("execution_book_price", ""),
+        "execution_book_levels_used": row.get("execution_book_levels_used", ""),
+        "execution_book_available_usdc": row.get("execution_book_available_usdc", ""),
+        "execution_token_id": row.get("execution_token_id", ""),
         "robust_reason": row.get("robust_reason", ""),
         "worst_edge": row.get("worst_edge", ""),
         "stress_pass_rate": row.get("stress_pass_rate", ""),
@@ -975,7 +1033,10 @@ def _entry_price_sub(position: dict[str, Any]) -> str:
     if mode == "maker":
         fill = _percent_from_prob(position.get("maker_fill_score"))
         return f"maker · fill {fill}"
+    depth_fill = _percent_from_prob(position.get("execution_fill_ratio"))
     quality = str(position.get("execution_quality") or "").strip()
+    if depth_fill != "-":
+        return f"taker · {quality or 'depth'} · fill {depth_fill}"
     return f"taker · {quality}" if quality else "taker"
 
 
@@ -990,6 +1051,13 @@ def _trade_tooltip(position: dict[str, Any]) -> str:
         f"Shares: {_num(position.get('shares'))}",
         f"Почему выбрано: {_decision_text(position)}",
     ]
+    if str(position.get("execution_fill_ratio") or "").strip():
+        lines.append(
+            "Стакан: "
+            f"fill {_percent_from_prob(position.get('execution_fill_ratio'))}, "
+            f"avg {_num(position.get('execution_book_price'))}, "
+            f"levels {position.get('execution_book_levels_used') or '-'}"
+        )
     robust_reason = str(position.get("robust_reason") or "").strip()
     if robust_reason:
         lines.append(f"Robust: {robust_reason}")

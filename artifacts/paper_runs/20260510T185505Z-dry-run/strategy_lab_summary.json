@@ -1,0 +1,155 @@
+{
+  "summary": {
+    "generated_at": "2026-05-05T14:44:55+00:00",
+    "bankroll_usdc": 100.0,
+    "signals": 859,
+    "trade_candidates": 133,
+    "stress_evaluated_candidates": 124,
+    "robust_pass": 9,
+    "robust_pass_pct": 7.258065,
+    "selected_positions": 8,
+    "selected_events": 8,
+    "selected_stake_usdc": 4.0,
+    "selected_base_expected_pnl_usdc": 4.895315,
+    "selected_base_expected_roi_pct": 122.382875,
+    "selected_execution_expected_pnl_usdc": 4.845969,
+    "selected_execution_expected_roi_pct": 121.149225,
+    "selected_maker_expected_pnl_if_filled_usdc": 5.753386,
+    "selected_maker_fill_adjusted_expected_pnl_usdc": 3.248851,
+    "selected_maker_fill_adjusted_roi_pct": 81.221275,
+    "selected_maker_eligible": 1,
+    "selected_maker_preferred": 0,
+    "selected_maker_fill_score_mean": 0.6025,
+    "selected_execution_slippage_mean": 0.005625,
+    "selected_execution_slippage_max": 0.01,
+    "selected_execution_quality": {
+      "good": 2,
+      "fair": 6,
+      "poor": 0
+    },
+    "selected_execution_fillable": 8,
+    "selected_execution_fill_ratio_mean": 1.0,
+    "selected_worst_edge_min": 0.084836,
+    "selected_worst_edge_mean": 0.175112,
+    "selected_max_city_positions": 2,
+    "selected_max_city_stake_usdc": 1.0,
+    "selected_max_date_stake_usdc": 2.0,
+    "selected_max_extreme_stake_usdc": 3.5,
+    "selected_concentration": {
+      "city": [
+        {
+          "name": "San Francisco",
+          "positions": 2,
+          "stake_usdc": 1.0,
+          "bankroll_pct": 1.0
+        },
+        {
+          "name": "Houston",
+          "positions": 1,
+          "stake_usdc": 0.5,
+          "bankroll_pct": 0.5
+        },
+        {
+          "name": "Jakarta",
+          "positions": 1,
+          "stake_usdc": 0.5,
+          "bankroll_pct": 0.5
+        },
+        {
+          "name": "Milan",
+          "positions": 1,
+          "stake_usdc": 0.5,
+          "bankroll_pct": 0.5
+        },
+        {
+          "name": "Ankara",
+          "positions": 1,
+          "stake_usdc": 0.5,
+          "bankroll_pct": 0.5
+        },
+        {
+          "name": "Sao Paulo",
+          "positions": 1,
+          "stake_usdc": 0.5,
+          "bankroll_pct": 0.5
+        },
+        {
+          "name": "Seoul",
+          "positions": 1,
+          "stake_usdc": 0.5,
+          "bankroll_pct": 0.5
+        }
+      ],
+      "date": [
+        {
+          "name": "May 6",
+          "positions": 4,
+          "stake_usdc": 2.0,
+          "bankroll_pct": 2.0
+        },
+        {
+          "name": "May 7",
+          "positions": 4,
+          "stake_usdc": 2.0,
+          "bankroll_pct": 2.0
+        }
+      ],
+      "extreme": [
+        {
+          "name": "highest",
+          "positions": 7,
+          "stake_usdc": 3.5,
+          "bankroll_pct": 3.5
+        },
+        {
+          "name": "lowest",
+          "positions": 1,
+          "stake_usdc": 0.5,
+          "bankroll_pct": 0.5
+        }
+      ]
+    },
+    "robust_min_edge": 0.08,
+    "min_scenario_pass_rate": 1.0,
+    "max_event_positions": 1,
+    "max_city_positions": 2,
+    "max_city_exposure_pct": 0.01,
+    "max_date_exposure_pct": 0.05,
+    "max_extreme_exposure_pct": 0.15,
+    "max_execution_slippage": 0.01,
+    "maker_quote_improvement": 0.005,
+    "maker_min_fill_score": 0.55,
+    "maker_adverse_selection_penalty": 0.02,
+    "orderbooks_path": "data/polymarket_orderbooks.json",
+    "orderbook_count": 1642,
+    "scenarios": [
+      "shift=-1.5C sigma=1.5C slip=0.000",
+      "shift=-1.5C sigma=1.5C slip=0.010",
+      "shift=-1.5C sigma=1.5C slip=0.020",
+      "shift=-1.5C sigma=2.0C slip=0.000",
+      "shift=-1.5C sigma=2.0C slip=0.010",
+      "shift=-1.5C sigma=2.0C slip=0.020",
+      "shift=-1.5C sigma=2.8C slip=0.000",
+      "shift=-1.5C sigma=2.8C slip=0.010",
+      "shift=-1.5C sigma=2.8C slip=0.020",
+      "shift=+0.0C sigma=1.5C slip=0.000",
+      "shift=+0.0C sigma=1.5C slip=0.010",
+      "shift=+0.0C sigma=1.5C slip=0.020",
+      "shift=+0.0C sigma=2.0C slip=0.000",
+      "shift=+0.0C sigma=2.0C slip=0.010",
+      "shift=+0.0C sigma=2.0C slip=0.020",
+      "shift=+0.0C sigma=2.8C slip=0.000",
+      "shift=+0.0C sigma=2.8C slip=0.010",
+      "shift=+0.0C sigma=2.8C slip=0.020",
+      "shift=+1.5C sigma=1.5C slip=0.000",
+      "shift=+1.5C sigma=1.5C slip=0.010",
+      "shift=+1.5C sigma=1.5C slip=0.020",
+      "shift=+1.5C sigma=2.0C slip=0.000",
+      "shift=+1.5C sigma=2.0C slip=0.010",
+      "shift=+1.5C sigma=2.0C slip=0.020",
+      "shift=+1.5C sigma=2.8C slip=0.000",
+      "shift=+1.5C sigma=2.8C slip=0.010",
+      "shift=+1.5C sigma=2.8C slip=0.020"
+    ]
+  }
+}

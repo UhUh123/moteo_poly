@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Strategy Lab</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #fff;
+      --text: #17202a;
+      --muted: #637083;
+      --line: #d8dee8;
+      --good: #0f7a45;
+      --bad: #b42318;
+      --accent: #0f766e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 14px/1.45 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+    header {
+      padding: 18px 24px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+    }
+    h1 { margin: 0; font-size: 20px; }
+    h2 { margin: 18px 0 10px; font-size: 16px; }
+    main { padding: 18px 24px 28px; }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .metric {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .metric span { display: block; color: var(--muted); font-size: 12px; }
+    .metric strong { display: block; margin-top: 4px; font-size: 21px; }
+    .note {
+      color: var(--muted);
+      max-width: 980px;
+      margin: 8px 0 14px;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+    }
+    .table-wrap {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: auto;
+    }
+    table { width: 100%; min-width: 980px; border-collapse: collapse; }
+    th, td {
+      padding: 9px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      white-space: nowrap;
+    }
+    th { color: var(--muted); font-size: 12px; background: #fafbfc; position: sticky; top: 0; }
+    td.title { white-space: normal; min-width: 260px; }
+    .good { color: var(--good); font-weight: 650; }
+    .bad { color: var(--bad); font-weight: 650; }
+    .muted { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Strategy Lab: Robust Filter + Portfolio Optimizer + Maker Paper Mode</h1>
+    <div class="note">Это не новый live-бот. Это стресс-тест текущих v2 сигналов и оптимизация портфеля: остается ли edge, если прогноз сместился, sigma шире, исполнение хуже, а концентрация по городу/дате ограничена.</div>
+  </header>
+  <main>
+    <div class="metrics">
+      <section class="metric"><span>Trade candidates</span><strong>45</strong></section>
+      <section class="metric"><span>Robust pass</span><strong>18</strong></section>
+      <section class="metric"><span>Selected</span><strong>16</strong></section>
+      <section class="metric"><span>Selected stake</span><strong>$4.00</strong></section>
+      <section class="metric"><span>Base expected PnL</span><strong>$1.20</strong></section>
+      <section class="metric"><span>Exec expected PnL</span><strong>$1.18</strong></section>
+      <section class="metric"><span>Maker fill-adj PnL</span><strong>$0.69</strong></section>
+      <section class="metric"><span>Maker eligible</span><strong>6</strong></section>
+      <section class="metric"><span>Maker preferred</span><strong>0</strong></section>
+      <section class="metric"><span>Orderbooks</span><strong>1696</strong></section>
+      <section class="metric"><span>Fillable</span><strong>16</strong></section>
+      <section class="metric"><span>Worst edge min</span><strong>10.5%</strong></section>
+      <section class="metric"><span>Exec slip max</span><strong>1.0%</strong></section>
+      <section class="metric"><span>Events</span><strong>16</strong></section>
+      <section class="metric"><span>Max city stake</span><strong>$0.50</strong></section>
+      <section class="metric"><span>Max date stake</span><strong>$2.00</strong></section>
+    </div>
+    <section class="panel">
+      <strong>Stress scenarios</strong>
+      <ul><li>shift=-2.0C sigma=2.5C slip=0.000</li><li>shift=-2.0C sigma=2.5C slip=0.010</li><li>shift=-2.0C sigma=2.5C slip=0.020</li><li>shift=-2.0C sigma=3.0C slip=0.000</li><li>shift=-2.0C sigma=3.0C slip=0.010</li><li>shift=-2.0C sigma=3.0C slip=0.020</li><li>shift=-2.0C sigma=3.5C slip=0.000</li><li>shift=-2.0C sigma=3.5C slip=0.010</li><li>shift=-2.0C sigma=3.5C slip=0.020</li><li>shift=+0.0C sigma=2.5C slip=0.000</li><li>shift=+0.0C sigma=2.5C slip=0.010</li><li>shift=+0.0C sigma=2.5C slip=0.020</li><li>shift=+0.0C sigma=3.0C slip=0.000</li><li>shift=+0.0C sigma=3.0C slip=0.010</li><li>shift=+0.0C sigma=3.0C slip=0.020</li><li>shift=+0.0C sigma=3.5C slip=0.000</li><li>shift=+0.0C sigma=3.5C slip=0.010</li><li>shift=+0.0C sigma=3.5C slip=0.020</li><li>shift=+2.0C sigma=2.5C slip=0.000</li><li>shift=+2.0C sigma=2.5C slip=0.010</li><li>shift=+2.0C sigma=2.5C slip=0.020</li><li>shift=+2.0C sigma=3.0C slip=0.000</li><li>shift=+2.0C sigma=3.0C slip=0.010</li><li>shift=+2.0C sigma=3.0C slip=0.020</li><li>shift=+2.0C sigma=3.5C slip=0.000</li><li>shift=+2.0C sigma=3.5C slip=0.010</li><li>shift=+2.0C sigma=3.5C slip=0.020</li></ul>
+      <p class="note">`Worst edge` - худший edge по всем сценариям уже после estimated slippage. `Exec expected PnL` считает taker-вход после execution penalty. Если подключен CLOB orderbook snapshot, Strategy Lab также проверяет, хватило бы ask-depth на planned stake. `Maker fill-adj PnL` считает лимитный вход с fill score и adverse-selection penalty; это гипотеза, а не гарантия исполнения.</p>
+    </section>
+
+    <h2>Concentration</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Type</th><th>Name</th><th>Positions</th><th>Stake</th><th>Share of bankroll</th></tr></thead>
+        <tbody><tr><td>city</td><td>Warsaw</td><td>2</td><td>$0.50</td><td>0.5%</td></tr>
+<tr><td>city</td><td>Miami</td><td>1</td><td>$0.25</td><td>0.25%</td></tr>
+<tr><td>city</td><td>Helsinki</td><td>1</td><td>$0.25</td><td>0.25%</td></tr>
+<tr><td>city</td><td>Sao Paulo</td><td>1</td><td>$0.25</td><td>0.25%</td></tr>
+<tr><td>city</td><td>San Francisco</td><td>1</td><td>$0.25</td><td>0.25%</td></tr>
+<tr><td>city</td><td>Ankara</td><td>1</td><td>$0.25</td><td>0.25%</td></tr>
+<tr><td>city</td><td>Jakarta</td><td>1</td><td>$0.25</td><td>0.25%</td></tr>
+<tr><td>city</td><td>Shenzhen</td><td>1</td><td>$0.25</td><td>0.25%</td></tr>
+<tr><td>city</td><td>Lagos</td><td>1</td><td>$0.25</td><td>0.25%</td></tr>
+<tr><td>city</td><td>Wuhan</td><td>1</td><td>$0.25</td><td>0.25%</td></tr>
+<tr><td>date</td><td>May 11</td><td>8</td><td>$2.00</td><td>2.0%</td></tr>
+<tr><td>date</td><td>May 12</td><td>8</td><td>$2.00</td><td>2.0%</td></tr>
+<tr><td>extreme</td><td>highest</td><td>16</td><td>$4.00</td><td>4.0%</td></tr></tbody>
+      </table>
+    </div>
+
+    <h2>Selected robust portfolio</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Side</th><th>Outcome</th><th>Taker</th><th>Maker</th><th>Fill</th><th>Exec edge</th><th>Maker edge</th><th>Worst edge</th><th>Stake</th><th>Exec/Maker PnL</th><th>Market</th></tr></thead>
+        <tbody><tr><td>BUY_NO</td><td>90-91°F</td><td>0.59</td><td class="">0.575</td><td>60.2%</td><td>31.1%</td><td class="">31.8%</td><td class="good">21.5%</td><td>$0.25</td><td>$0.13 / $0.08</td><td class="title">Highest temperature in Miami on May 11?<div class="muted">good · fill 100.0% · maker viable, taker expected value is higher · passes all stress and execution checks</div></td></tr>
+<tr><td>BUY_NO</td><td>15°C</td><td>0.62</td><td class="">0.615</td><td>56.2%</td><td>20.6%</td><td class="">20.8%</td><td class="good">18.6%</td><td>$0.25</td><td>$0.08 / $0.05</td><td class="title">Highest temperature in Helsinki on May 11?<div class="muted">fair · fill 100.0% · maker viable, taker expected value is higher · passes all stress and execution checks</div></td></tr>
+<tr><td>BUY_NO</td><td>22°C</td><td>0.63</td><td class="">0.615</td><td>53.2%</td><td>24.1%</td><td class="">25.7%</td><td class="good">17.1%</td><td>$0.25</td><td>$0.09 / $0.06</td><td class="title">Highest temperature in Sao Paulo on May 12?<div class="muted">fair · fill 100.0% · maker fill score below 0.55 · passes all stress and execution checks</div></td></tr>
+<tr><td>BUY_NO</td><td>64-65°F</td><td>0.76</td><td class="">0.745</td><td>41.0%</td><td>22.0%</td><td class="">23.3%</td><td class="good">16.9%</td><td>$0.25</td><td>$0.07 / $0.03</td><td class="title">Highest temperature in San Francisco on May 12?<div class="muted">fair · fill 100.0% · maker fill score below 0.55 · passes all stress and execution checks</div></td></tr>
+<tr><td>BUY_NO</td><td>23°C</td><td>0.65</td><td class="">0.635</td><td>53.2%</td><td>22.0%</td><td class="">22.7%</td><td class="good">16.1%</td><td>$0.25</td><td>$0.08 / $0.05</td><td class="title">Highest temperature in Ankara on May 12?<div class="muted">good · fill 100.0% · maker fill score below 0.55 · passes all stress and execution checks</div></td></tr>
+<tr><td>BUY_NO</td><td>14°C</td><td>0.67</td><td class="">0.655</td><td>53.2%</td><td>17.2%</td><td class="">17.8%</td><td class="good">15.3%</td><td>$0.25</td><td>$0.06 / $0.04</td><td class="title">Highest temperature in Warsaw on May 12?<div class="muted">good · fill 100.0% · maker fill score below 0.55 · passes all stress and execution checks</div></td></tr>
+<tr><td>BUY_NO</td><td>34°C</td><td>0.66</td><td class="">0.655</td><td>56.5%</td><td>22.2%</td><td class="">21.9%</td><td class="good">15.1%</td><td>$0.25</td><td>$0.08 / $0.05</td><td class="title">Highest temperature in Jakarta on May 12?<div class="muted">good · fill 100.0% · maker viable, taker expected value is higher · passes all stress and execution checks</div></td></tr>
+<tr><td>BUY_NO</td><td>29°C</td><td>0.66</td><td class="">0.635</td><td>45.2%</td><td>16.3%</td><td class="">18.9%</td><td class="good">14.4%</td><td>$0.25</td><td>$0.06 / $0.03</td><td class="title">Highest temperature in Shenzhen on May 11?<div class="muted">fair · fill 100.0% · maker fill score below 0.55 · passes all stress and execution checks</div></td></tr>
+<tr><td>BUY_NO</td><td>33°C</td><td>0.69</td><td class="">0.685</td><td>62.5%</td><td>22.0%</td><td class="">21.6%</td><td class="good">13.3%</td><td>$0.25</td><td>$0.08 / $0.05</td><td class="title">Highest temperature in Lagos on May 11?<div class="muted">good · fill 100.0% · maker viable, taker expected value is higher · passes all stress and execution checks</div></td></tr>
+<tr><td>BUY_NO</td><td>32°C</td><td>0.68</td><td class="">0.665</td><td>47.2%</td><td>20.3%</td><td class="">20.9%</td><td class="good">13.2%</td><td>$0.25</td><td>$0.07 / $0.04</td><td class="title">Highest temperature in Wuhan on May 12?<div class="muted">good · fill 100.0% · maker fill score below 0.55 · passes all stress and execution checks</div></td></tr>
+<tr><td>BUY_NO</td><td>20°C</td><td>0.68</td><td class="">0.665</td><td>54.0%</td><td>19.8%</td><td class="">20.9%</td><td class="good">12.7%</td><td>$0.25</td><td>$0.07 / $0.04</td><td class="title">Highest temperature in Milan on May 11?<div class="muted">fair · fill 100.0% · maker fill score below 0.55 · passes all stress and execution checks</div></td></tr>
+<tr><td>BUY_NO</td><td>18°C</td><td>0.68</td><td class="">0.655</td><td>51.5%</td><td>18.6%</td><td class="">20.7%</td><td class="good">12.6%</td><td>$0.25</td><td>$0.07 / $0.04</td><td class="title">Highest temperature in Madrid on May 12?<div class="muted">fair · fill 100.0% · maker fill score below 0.55 · passes all stress and execution checks</div></td></tr>
+<tr><td>BUY_NO</td><td>24°C</td><td>0.7</td><td class="">0.675</td><td>52.2%</td><td>20.8%</td><td class="">23.4%</td><td class="good">11.8%</td><td>$0.25</td><td>$0.07 / $0.05</td><td class="title">Highest temperature in Tokyo on May 11?<div class="muted">fair · fill 100.0% · maker fill score below 0.55 · passes all stress and execution checks</div></td></tr>
+<tr><td>BUY_NO</td><td>19°C</td><td>0.71</td><td class="">0.695</td><td>60.2%</td><td>12.9%</td><td class="">13.4%</td><td class="good">10.9%</td><td>$0.25</td><td>$0.04 / $0.03</td><td class="title">Highest temperature in Seoul on May 11?<div class="muted">good · fill 100.0% · maker viable, taker expected value is higher · passes all stress and execution checks</div></td></tr>
+<tr><td>BUY_NO</td><td>68-69°F</td><td>0.7</td><td class="">0.685</td><td>47.2%</td><td>13.0%</td><td class="">13.5%</td><td class="good">10.5%</td><td>$0.25</td><td>$0.05 / $0.02</td><td class="title">Highest temperature in Los Angeles on May 12?<div class="muted">good · fill 100.0% · maker fill score below 0.55 · passes all stress and execution checks</div></td></tr>
+<tr><td>BUY_NO</td><td>23°C</td><td>0.69</td><td class="">0.685</td><td>63.2%</td><td>17.7%</td><td class="">17.7%</td><td class="good">11.6%</td><td>$0.25</td><td>$0.06 / $0.04</td><td class="title">Highest temperature in Warsaw on May 11?<div class="muted">fair · fill 100.0% · maker viable, taker expected value is higher · passes all stress and execution checks</div></td></tr></tbody>
+      </table>
+    </div>
+
+    <h2>Rejected high-base-edge examples</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Side</th><th>Outcome</th><th>Taker</th><th>Maker</th><th>Fill</th><th>Exec edge</th><th>Maker edge</th><th>Worst edge</th><th>Stake</th><th>Exec/Maker PnL</th><th>Market</th></tr></thead>
+        <tbody><tr><td>BUY_NO</td><td>70-71°F</td><td>0.6</td><td class="">0.575</td><td>58.5%</td><td>27.0%</td><td class="">30.7%</td><td class="good">18.0%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Los Angeles on May 11?<div class="muted">poor · fill 100.0% · maker viable, taker expected value is higher · execution slippage above 0.010: 0.020</div></td></tr>
+<tr><td>BUY_NO</td><td>34°C</td><td>0.74</td><td class="">0.715</td><td>41.5%</td><td>18.9%</td><td class="">21.4%</td><td class="good">9.8%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Lagos on May 12?<div class="muted">fair · fill 100.0% · maker fill score below 0.55 · edge below 0.100 under shift=+2.0C sigma=2.5C slip=0.020</div></td></tr>
+<tr><td>BUY_NO</td><td>29°C</td><td>0.72</td><td class="">0.715</td><td>69.5%</td><td>17.8%</td><td class="">17.3%</td><td class="good">9.7%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Hong Kong on May 11?<div class="muted">good · fill 100.0% · maker viable, taker expected value is higher · edge below 0.100 under shift=+2.0C sigma=2.5C slip=0.020</div></td></tr>
+<tr><td>BUY_NO</td><td>32°C</td><td>0.71</td><td class="">0.685</td><td>52.2%</td><td>16.3%</td><td class="">18.8%</td><td class="good">9.3%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Beijing on May 11?<div class="muted">fair · fill 100.0% · maker fill score below 0.55 · edge below 0.100 under shift=+2.0C sigma=2.5C slip=0.020</div></td></tr>
+<tr><td>BUY_NO</td><td>66-67°F</td><td>0.71</td><td class="">0.695</td><td>53.2%</td><td>16.0%</td><td class="">16.6%</td><td class="good">8.5%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Los Angeles on May 12?<div class="muted">good · fill 100.0% · maker fill score below 0.55 · edge below 0.100 under shift=-2.0C sigma=2.5C slip=0.020</div></td></tr>
+<tr><td>BUY_NO</td><td>33°C</td><td>0.72</td><td class="">0.695</td><td>58.5%</td><td>15.2%</td><td class="">17.2%</td><td class="good">8.7%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Singapore on May 12?<div class="muted">fair · fill 100.0% · maker viable, taker expected value is higher · edge below 0.100 under shift=+2.0C sigma=2.5C slip=0.020</div></td></tr>
+<tr><td>BUY_NO</td><td>58-59°F</td><td>0.77</td><td class="">0.745</td><td>58.5%</td><td>14.2%</td><td class="">16.6%</td><td class="good">4.3%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Chicago on May 11?<div class="muted">fair · fill 100.0% · maker viable, taker expected value is higher · edge below 0.100 under shift=+2.0C sigma=2.5C slip=0.020</div></td></tr>
+<tr><td>BUY_NO</td><td>32°C</td><td>0.71</td><td class="">0.695</td><td>41.0%</td><td>13.0%</td><td class="">15.4%</td><td class="good">8.4%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Panama City on May 12?<div class="muted">poor · fill 100.0% · maker fill score below 0.55 · execution slippage above 0.010: 0.020</div></td></tr>
+<tr><td>BUY_NO</td><td>26°C</td><td>0.7</td><td class="">0.695</td><td>46.2%</td><td>8.8%</td><td class="">13.3%</td><td class="good">6.9%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Istanbul on May 12?<div class="muted">poor · fill 100.0% · maker fill score below 0.55 · execution slippage above 0.010: 0.050</div></td></tr>
+<tr><td>BUY_NO</td><td>22°C</td><td>0.83</td><td class="">0.805</td><td>51.5%</td><td>12.6%</td><td class="">14.3%</td><td class="good">4.3%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Buenos Aires on May 12?<div class="muted">fair · fill 100.0% · maker fill score below 0.55 · edge below 0.100 under shift=+2.0C sigma=2.5C slip=0.020</div></td></tr>
+<tr><td>BUY_NO</td><td>30°C</td><td>0.74</td><td class="">0.735</td><td>62.5%</td><td>10.4%</td><td class="">11.8%</td><td class="good">5.4%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Hong Kong on May 12?<div class="muted">poor · fill 100.0% · maker viable, taker expected value is higher · execution slippage above 0.010: 0.020</div></td></tr>
+<tr><td>BUY_NO</td><td>30°C</td><td>0.75</td><td class="">0.725</td><td>41.5%</td><td>11.2%</td><td class="">13.7%</td><td class="good">5.3%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Chengdu on May 12?<div class="muted">fair · fill 100.0% · maker fill score below 0.55 · edge below 0.100 under shift=-2.0C sigma=2.5C slip=0.020</div></td></tr>
+<tr><td>BUY_NO</td><td>82-83°F</td><td>0.75</td><td class="">0.735</td><td>53.2%</td><td>9.3%</td><td class="">12.6%</td><td class="good">1.7%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Austin on May 11?<div class="muted">poor · fill 100.0% · maker fill score below 0.55 · execution slippage above 0.010: 0.030</div></td></tr>
+<tr><td>BUY_NO</td><td>17°C</td><td>0.71</td><td class="">0.685</td><td>58.5%</td><td>11.7%</td><td class="">13.7%</td><td class="good">9.8%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Munich on May 11?<div class="muted">fair · fill 100.0% · maker viable, taker expected value is higher · edge below 0.100 under shift=+0.0C sigma=2.5C slip=0.020</div></td></tr>
+<tr><td>BUY_NO</td><td>36°C</td><td>0.72</td><td class="">0.695</td><td>35.2%</td><td>10.2%</td><td class="">13.1%</td><td class="good">8.2%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Karachi on May 12?<div class="muted">fair · fill 100.0% · maker fill score below 0.55 · execution slippage above 0.010: 0.015</div></td></tr>
+<tr><td>BUY_NO</td><td>25°C</td><td>0.72</td><td class="">0.705</td><td>37.0%</td><td>10.3%</td><td class="">11.8%</td><td class="good">8.3%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Istanbul on May 12?<div class="muted">fair · fill 100.0% · maker fill score below 0.55 · edge below 0.100 under shift=+0.0C sigma=2.5C slip=0.020</div></td></tr>
+<tr><td>BUY_NO</td><td>20°C</td><td>0.72</td><td class="">0.715</td><td>69.5%</td><td>11.2%</td><td class="">10.7%</td><td class="good">9.2%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Seoul on May 11?<div class="muted">good · fill 100.0% · maker viable, taker expected value is higher · edge below 0.100 under shift=+0.0C sigma=2.5C slip=0.020</div></td></tr>
+<tr><td>BUY_NO</td><td>20°C</td><td>0.8</td><td class="">0.775</td><td>52.2%</td><td>8.3%</td><td class="">10.6%</td><td class="good">0.7%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Madrid on May 11?<div class="muted">fair · fill 100.0% · maker fill score below 0.55 · edge below 0.100 under shift=+2.0C sigma=2.5C slip=0.020</div></td></tr>
+<tr><td>BUY_NO</td><td>17°C</td><td>0.75</td><td class="">0.735</td><td>53.2%</td><td>9.2%</td><td class="">9.7%</td><td class="good">7.3%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Madrid on May 12?<div class="muted">good · fill 100.0% · maker fill score below 0.55 · edge below 0.100 under shift=+0.0C sigma=2.5C slip=0.020</div></td></tr>
+<tr><td>BUY_NO</td><td>19°C</td><td>0.82</td><td class="">0.815</td><td>62.5%</td><td>9.2%</td><td class="">8.4%</td><td class="good">0.5%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Madrid on May 12?<div class="muted">good · fill 100.0% · maker viable, taker expected value is higher · edge below 0.100 under shift=+2.0C sigma=2.5C slip=0.020</div></td></tr>
+<tr><td>BUY_NO</td><td>34°C</td><td>0.82</td><td class="">0.795</td><td>51.5%</td><td>7.6%</td><td class="">9.3%</td><td class="bad">-0.5%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Beijing on May 12?<div class="muted">fair · fill 100.0% · maker fill score below 0.55 · negative edge under shift=+2.0C sigma=2.5C slip=0.020</div></td></tr>
+<tr><td>BUY_NO</td><td>22°C</td><td>0.815</td><td class="">0.814</td><td>75.0%</td><td>7.8%</td><td class="">6.7%</td><td class="good">0.2%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Sao Paulo on May 11?<div class="muted">good · fill 100.0% · maker viable, taker expected value is higher · edge below 0.100 under shift=+2.0C sigma=2.5C slip=0.020</div></td></tr>
+<tr><td>BUY_NO</td><td>19°C</td><td>0.8</td><td class="">0.775</td><td>51.5%</td><td>6.9%</td><td class="">8.7%</td><td class="good">0.9%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Seoul on May 12?<div class="muted">fair · fill 100.0% · maker fill score below 0.55 · edge below 0.100 under shift=-2.0C sigma=2.5C slip=0.020</div></td></tr>
+<tr><td>BUY_NO</td><td>24°C</td><td>0.84</td><td class="">0.815</td><td>45.2%</td><td>6.3%</td><td class="">8.4%</td><td class="bad">-2.4%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Ankara on May 12?<div class="muted">fair · fill 100.0% · maker fill score below 0.55 · negative edge under shift=+2.0C sigma=2.5C slip=0.020</div></td></tr>
+<tr><td>BUY_NO</td><td>13°C</td><td>0.81</td><td class="">0.785</td><td>51.5%</td><td>6.6%</td><td class="">8.3%</td><td class="bad">-0.0%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Toronto on May 11?<div class="muted">fair · fill 100.0% · maker fill score below 0.55 · negative edge under shift=+2.0C sigma=2.5C slip=0.020</div></td></tr>
+<tr><td>BUY_NO</td><td>60-61°F</td><td>0.9</td><td class="">0.875</td><td>51.5%</td><td>5.6%</td><td class="">7.1%</td><td class="bad">-3.4%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Chicago on May 11?<div class="muted">fair · fill 100.0% · maker fill score below 0.55 · negative edge under shift=+2.0C sigma=2.5C slip=0.020</div></td></tr>
+<tr><td>BUY_NO</td><td>24°C</td><td>0.9</td><td class="">0.895</td><td>56.5%</td><td>2.8%</td><td class="">4.6%</td><td class="bad">-6.0%</td><td>-</td><td>- / -</td><td class="title">Highest temperature in Sao Paulo on May 12?<div class="muted">poor · fill 100.0% · maker worst stress edge not positive · execution slippage above 0.010: 0.030</div></td></tr></tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>

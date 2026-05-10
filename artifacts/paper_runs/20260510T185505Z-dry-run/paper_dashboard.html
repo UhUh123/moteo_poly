@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Paper Weather Desk</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --text: #17202a;
+      --muted: #637083;
+      --line: #d8dee8;
+      --accent: #0f766e;
+      --accent-2: #b45309;
+      --good: #0f7a45;
+      --bad: #b42318;
+      --chip: #eef2f6;
+      --warn-bg: #fff7ed;
+      --warn-line: #fed7aa;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 14px/1.45 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+    header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    h1 { margin: 0; font-size: 20px; font-weight: 700; }
+    .sub { color: var(--muted); font-size: 13px; }
+    main { padding: 18px 24px 28px; }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+      font-weight: 650;
+    }
+    .primary:disabled {
+      opacity: 0.65;
+      cursor: wait;
+    }
+    #refreshStatus {
+      width: 360px;
+      max-width: 40vw;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: right;
+    }
+    .notice {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding: 10px 12px;
+      border: 1px solid var(--warn-line);
+      background: var(--warn-bg);
+      border-radius: 8px;
+      color: #7c2d12;
+    }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .metric {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      min-height: 72px;
+    }
+    .metric span { display: block; color: var(--muted); font-size: 12px; }
+    .metric strong { display: block; margin-top: 4px; font-size: 21px; }
+    .metric em { color: var(--muted); font-style: normal; font-size: 12px; }
+    .positive { color: var(--good); }
+    .negative { color: var(--bad); }
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      margin: 14px 0;
+    }
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+    button {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 8px;
+      padding: 7px 10px;
+      color: var(--text);
+      cursor: pointer;
+    }
+    button.active { border-color: var(--accent); color: var(--accent); background: #ecfdf5; }
+    .has-tip {
+      cursor: help;
+      text-decoration: underline dotted rgba(99, 112, 131, 0.75);
+      text-underline-offset: 3px;
+    }
+    #floatingTooltip {
+      position: fixed;
+      z-index: 10000;
+      display: none;
+      max-width: min(340px, calc(100vw - 24px));
+      padding: 9px 11px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #111827;
+      color: #fff;
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.22);
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.35;
+      pointer-events: none;
+      white-space: normal;
+    }
+    input {
+      min-width: 240px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 8px;
+      padding: 8px 10px;
+      color: var(--text);
+    }
+    .table-wrap {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: auto;
+    }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    col.status { width: 86px; }
+    col.trade { width: 34%; }
+    col.stake { width: 82px; }
+    col.price { width: 76px; }
+    col.fair { width: 104px; }
+    col.model { width: 18%; }
+    col.pnl { width: 96px; }
+    col.actual { width: 86px; }
+    th, td {
+      padding: 9px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      overflow-wrap: anywhere;
+    }
+    td.num { white-space: nowrap; }
+    th { color: var(--muted); font-size: 12px; font-weight: 650; background: #fafbfc; position: sticky; top: 0; }
+    td.trade-cell { min-width: 0; }
+    .trade-main {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+      font-weight: 650;
+    }
+    .trade-main span:last-child {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .trade-sub, .cell-sub {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.25;
+    }
+    .trade-sub {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .chip { display: inline-flex; align-items: center; min-height: 22px; border-radius: 999px; padding: 2px 8px; background: var(--chip); font-size: 12px; }
+    .buy_yes { color: var(--accent); }
+    .buy_no { color: var(--accent-2); }
+    .won { color: var(--good); }
+    .lost { color: var(--bad); }
+    footer { color: var(--muted); padding: 14px 24px 24px; font-size: 12px; }
+    @media (max-width: 1000px) {
+      .metrics { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+      header, main, footer { padding-left: 14px; padding-right: 14px; }
+      .toolbar { align-items: stretch; flex-direction: column; }
+      .header-actions { justify-content: flex-start; }
+      #refreshStatus { width: 100%; max-width: none; text-align: left; }
+      input { min-width: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Paper Weather Desk</h1>
+      <div class="sub">Обновлено 2026-05-10T18:54:44+00:00 · paper-only, без реальных ордеров</div>
+    </div>
+    <div class="header-actions">
+      <button id="dryRunButton">Проверить рынок</button>
+      <button id="openTradesButton">Открыть сделки</button>
+      <button class="primary" id="refreshButton">Обновить actuals & PnL</button>
+      <div id="refreshStatus">Кнопки работают через локальный dashboard server.</div>
+    </div>
+  </header>
+  <main>
+    <div class="notice">
+      <strong>Paper mode.</strong>
+      <span>Реальные ордера не выставляются. Обновление собирает фактические температуры, проверяет выигрыш/проигрыш paper-позиций и пересчитывает виртуальный PnL.</span>
+    </div>
+    <div class="metrics"><section class="metric"><span class="has-tip" data-tip="Виртуальный стартовый баланс для paper-теста. Это не реальные деньги; число влияет только на размер ставок и лимиты риска.">Bankroll</span><strong class="">$100.00</strong><em></em></section>
+<section class="metric"><span class="has-tip" data-tip="Свободные виртуальные деньги: баланс минус открытые ставки плюс выплаты по уже закрытым позициям.">Cash</span><strong class="">$99.19</strong><em></em></section>
+<section class="metric"><span class="has-tip" data-tip="Позиции, по которым еще нет финальной температуры. Они пока не выиграли и не проиграли.">Open</span><strong class="">0</strong><em>positions</em></section>
+<section class="metric"><span class="has-tip" data-tip="Позиции, которые уже проверены по фактической температуре и получили статус won или lost.">Settled</span><strong class="">8</strong><em>positions</em></section>
+<section class="metric"><span class="has-tip" data-tip="Фактическая виртуальная прибыль или убыток по уже закрытым позициям. Это главный показатель после появления actuals.">Realized PnL</span><strong class="negative">$-0.81</strong><em></em></section>
+<section class="metric"><span class="has-tip" data-tip="Ожидаемая прибыль по оценке модели. Это прогноз, а не факт; он может сильно ошибаться.">Expected PnL</span><strong class="negative">$-0.81</strong><em></em></section>
+<section class="metric"><span class="has-tip" data-tip="Сколько позиций пришло из Strategy Lab после stress-фильтра, execution penalty и лимитов концентрации.">Robust</span><strong class="">8</strong><em>positions</em></section>
+<section class="metric"><span class="has-tip" data-tip="Taker - paper-вход по цене с учетом estimated slippage. Maker - гипотетическая лимитка; её реальное исполнение нужно проверять отдельно.">Entry Mix</span><strong class="">T 8 / M 0</strong><em></em></section>
+<section class="metric"><span class="has-tip" data-tip="Позиции, где Strategy Lab считает maker-вход потенциально лучше taker-входа по fill-adjusted ожиданию.">Maker Pref</span><strong class="">0</strong><em>positions</em></section>
+<section class="metric"><span class="has-tip" data-tip="Сколько paper-позиций прошли проверку глубины стакана. Если стакан не подключен, поле не доказывает реальный fill.">Fillable</span><strong class="">8 / 8</strong><em>positions</em></section>
+<section class="metric"><span class="has-tip" data-tip="Доля выигравших позиций среди уже закрытых. Пусто, пока нет ни одной закрытой позиции.">Win Rate</span><strong class="">50.0%</strong><em></em></section>
+<section class="metric"><span class="has-tip" data-tip="Сколько рынков уже получили фактическую температуру из resolution source.">Actuals OK</span><strong class="">175</strong><em>markets</em></section>
+<section class="metric"><span class="has-tip" data-tip="Сколько рынков еще ждут финализации или пока не имеют доступных данных.">Actuals Pending</span><strong class="">0</strong><em>markets</em></section>
+<section class="metric"><span class="has-tip" data-tip="Сколько рынков не удалось обновить из-за ошибки источника, например timeout. Обычно можно повторить позже.">Actuals Error</span><strong class="">0</strong><em>markets</em></section></div>
+    <div class="toolbar">
+      <div class="tabs">
+        <button class="active" data-filter="all">Все</button>
+        <button data-filter="open">Открытые</button>
+        <button data-filter="settled">Закрытые</button>
+        <button data-filter="won">Win</button>
+        <button data-filter="lost">Loss</button>
+      </div>
+      <input id="search" placeholder="Поиск: город, рынок, сторона">
+    </div>
+    <div class="table-wrap">
+      <table>
+        <colgroup>
+          <col class="status">
+          <col class="trade">
+          <col class="stake">
+          <col class="price">
+          <col class="fair">
+          <col class="model">
+          <col class="pnl">
+          <col class="actual">
+        </colgroup>
+        <thead>
+          <tr><th class="has-tip" data-tip="open значит ждем фактическую температуру. won/lost появится после проверки результата.">Status</th><th class="has-tip" data-tip="Сторона, outcome и рынок. Наведи на строку, чтобы увидеть полное объяснение сигнала.">Trade</th><th class="has-tip" data-tip="Сколько виртуальных USDC поставлено на эту paper-позицию.">Stake</th><th class="has-tip" data-tip="Цена paper-входа. Для Strategy Lab taker-режима это цена уже с estimated slippage.">Price</th><th class="has-tip" data-tip="Fair - наша вероятность выигрыша выбранной стороны. Edge - запас над ценой и комиссией.">Fair / Edge</th><th class="has-tip" data-tip="Главный bucket модели и точечный прогноз температуры.">Model</th><th class="has-tip" data-tip="Для открытых позиций показывает ожидаемый PnL. Для закрытых - фактический выигрыш или проигрыш.">PnL</th><th class="has-tip" data-tip="Фактическая resolved-температура, когда она будет собрана.">Actual</th></tr>
+        </thead>
+        <tbody><tr data-status="lost"><td><span class="chip lost">lost</span></td><td class="trade-cell has-tip" data-tip="Рынок: Highest temperature in Houston on May 6?
+Outcome: 81°F or below
+Сторона: BUY_YES
+Вход: taker · good · fill 100.0%
+Модель top: 81°F or below · rank 1/5
+Fair / Edge: 78.9% / 68.5%
+Shares: 4.7847
+Почему выбрано: BUY_YES: our bucket probability is above market ask after fee; rank 1 of 5 | Risk: model top bucket
+Стакан: fill 100.0%, avg 0.09, levels 1
+Robust: passes all stress and execution checks
+Maker: maker viable, taker expected value is higher
+Strategy: strategy_lab_v2"><div class="trade-main"><span class="buy_yes">BUY_YES</span><span>81°F or below</span></div><div class="trade-sub">High · Houston · May 6</div></td><td class="num">$0.50</td><td class="num">0.1<div class="cell-sub">taker · good · fill 100.0%</div></td><td class="num">78.9%<div class="cell-sub">68.5%</div></td><td><strong>81°F or below</strong><div class="cell-sub">pred 26.2953C · 1/5</div></td><td class="num negative">$-0.50</td><td>85F</td></tr>
+<tr data-status="won"><td><span class="chip won">won</span></td><td class="trade-cell has-tip" data-tip="Рынок: Highest temperature in San Francisco on May 7?
+Outcome: 62-63°F
+Сторона: BUY_NO
+Вход: taker · fair · fill 100.0%
+Модель top: 66°F or higher · rank 3/5
+Fair / Edge: 99.9% / 34.7%
+Shares: 0.7674
+Почему выбрано: BUY_NO: model thinks this bucket is unlikely and it is not the model top bucket; top bucket is 66°F or higher
+Стакан: fill 100.0%, avg 0.6, levels 1
+Robust: passes all stress and execution checks
+Maker: maker fill score below 0.55
+Strategy: strategy_lab_v2"><div class="trade-main"><span class="buy_no">BUY_NO</span><span>62-63°F</span></div><div class="trade-sub">High · San Francisco · May 7</div></td><td class="num">$0.50</td><td class="num">0.64<div class="cell-sub">taker · fair · fill 100.0%</div></td><td class="num">99.9%<div class="cell-sub">34.7%</div></td><td><strong>66°F or higher</strong><div class="cell-sub">pred 22.3099C · 3/5</div></td><td class="num positive">$0.27</td><td>61F</td></tr>
+<tr data-status="won"><td><span class="chip won">won</span></td><td class="trade-cell has-tip" data-tip="Рынок: Highest temperature in San Francisco on May 6?
+Outcome: 64-65°F
+Сторона: BUY_NO
+Вход: taker · good · fill 100.0%
+Модель top: 60-61°F · rank 3/5
+Fair / Edge: 96.1% / 36.9%
+Shares: 0.8443
+Почему выбрано: BUY_NO: model thinks this bucket is unlikely and it is not the model top bucket; top bucket is 60-61°F
+Стакан: fill 100.0%, avg 0.58, levels 1
+Robust: passes all stress and execution checks
+Maker: maker fill score below 0.55
+Strategy: strategy_lab_v2"><div class="trade-main"><span class="buy_no">BUY_NO</span><span>64-65°F</span></div><div class="trade-sub">High · San Francisco · May 6</div></td><td class="num">$0.50</td><td class="num">0.58<div class="cell-sub">taker · good · fill 100.0%</div></td><td class="num">96.1%<div class="cell-sub">36.9%</div></td><td><strong>60-61°F</strong><div class="cell-sub">pred 15.2651C · 3/5</div></td><td class="num positive">$0.34</td><td>67F</td></tr>
+<tr data-status="won"><td><span class="chip won">won</span></td><td class="trade-cell has-tip" data-tip="Рынок: Highest temperature in Jakarta on May 7?
+Outcome: 34°C
+Сторона: BUY_NO
+Вход: taker · fair · fill 100.0%
+Модель top: 31°C · rank 4/5
+Fair / Edge: 97.5% / 30.9%
+Shares: 0.7504
+Почему выбрано: BUY_NO: model thinks this bucket is unlikely and it is not the model top bucket; top bucket is 31°C
+Стакан: fill 100.0%, avg 0.63, levels 1
+Robust: passes all stress and execution checks
+Maker: maker fill score below 0.55
+Strategy: strategy_lab_v2"><div class="trade-main"><span class="buy_no">BUY_NO</span><span>34°C</span></div><div class="trade-sub">High · Jakarta · May 7</div></td><td class="num">$0.50</td><td class="num">0.655<div class="cell-sub">taker · fair · fill 100.0%</div></td><td class="num">97.5%<div class="cell-sub">30.9%</div></td><td><strong>31°C</strong><div class="cell-sub">pred 30.6772C · 4/5</div></td><td class="num positive">$0.25</td><td>33C</td></tr>
+<tr data-status="lost"><td><span class="chip lost">lost</span></td><td class="trade-cell has-tip" data-tip="Рынок: Highest temperature in Milan on May 7?
+Outcome: 21°C
+Сторона: BUY_NO
+Вход: taker · fair · fill 100.0%
+Модель top: 18°C · rank 4/5
+Fair / Edge: 96.9% / 28.3%
+Shares: 0.7289
+Почему выбрано: BUY_NO: model thinks this bucket is unlikely and it is not the model top bucket; top bucket is 18°C
+Стакан: fill 100.0%, avg 0.65, levels 1
+Robust: passes all stress and execution checks
+Maker: maker fill score below 0.55
+Strategy: strategy_lab_v2"><div class="trade-main"><span class="buy_no">BUY_NO</span><span>21°C</span></div><div class="trade-sub">High · Milan · May 7</div></td><td class="num">$0.50</td><td class="num">0.675<div class="cell-sub">taker · fair · fill 100.0%</div></td><td class="num">96.9%<div class="cell-sub">28.3%</div></td><td><strong>18°C</strong><div class="cell-sub">pred 17.8364C · 4/5</div></td><td class="num negative">$-0.50</td><td>21C</td></tr>
+<tr data-status="won"><td><span class="chip won">won</span></td><td class="trade-cell has-tip" data-tip="Рынок: Highest temperature in Ankara on May 6?
+Outcome: 14°C
+Сторона: BUY_NO
+Вход: taker · fair · fill 100.0%
+Модель top: 13°C · rank 2/5
+Fair / Edge: 81.3% / 21.1%
+Shares: 0.8304
+Почему выбрано: BUY_NO: model thinks this bucket is unlikely and it is not the model top bucket; top bucket is 13°C
+Стакан: fill 100.0%, avg 0.59, levels 1
+Robust: passes all stress and execution checks
+Maker: maker fill score below 0.55
+Strategy: strategy_lab_v2"><div class="trade-main"><span class="buy_no">BUY_NO</span><span>14°C</span></div><div class="trade-sub">High · Ankara · May 6</div></td><td class="num">$0.50</td><td class="num">0.59<div class="cell-sub">taker · fair · fill 100.0%</div></td><td class="num">81.3%<div class="cell-sub">21.1%</div></td><td><strong>13°C</strong><div class="cell-sub">pred 12.7546C · 2/5</div></td><td class="num positive">$0.33</td><td>15C</td></tr>
+<tr data-status="lost"><td><span class="chip lost">lost</span></td><td class="trade-cell has-tip" data-tip="Рынок: Highest temperature in Sao Paulo on May 6?
+Outcome: 29°C
+Сторона: BUY_NO
+Вход: taker · fair · fill 100.0%
+Модель top: 27°C · rank 3/5
+Fair / Edge: 89.5% / 24.9%
+Shares: 0.7733
+Почему выбрано: BUY_NO: model thinks this bucket is unlikely and it is not the model top bucket; top bucket is 27°C
+Стакан: fill 100.0%, avg 0.62, levels 1
+Robust: passes all stress and execution checks
+Maker: maker fill score below 0.55
+Strategy: strategy_lab_v2"><div class="trade-main"><span class="buy_no">BUY_NO</span><span>29°C</span></div><div class="trade-sub">High · Sao Paulo · May 6</div></td><td class="num">$0.50</td><td class="num">0.635<div class="cell-sub">taker · fair · fill 100.0%</div></td><td class="num">89.5%<div class="cell-sub">24.9%</div></td><td><strong>27°C</strong><div class="cell-sub">pred 26.9336C · 3/5</div></td><td class="num negative">$-0.50</td><td>29C</td></tr>
+<tr data-status="lost"><td><span class="chip lost">lost</span></td><td class="trade-cell has-tip" data-tip="Рынок: Lowest temperature in Seoul on May 7?
+Outcome: 12°C
+Сторона: BUY_NO
+Вход: taker · fair · fill 100.0%
+Модель top: 10°C · rank 3/5
+Fair / Edge: 90.9% / 24.7%
+Shares: 0.756
+Почему выбрано: BUY_NO: model thinks this bucket is unlikely and it is not the model top bucket; top bucket is 10°C
+Стакан: fill 100.0%, avg 0.64, levels 1
+Robust: passes all stress and execution checks
+Maker: maker fill score below 0.55
+Strategy: strategy_lab_v2"><div class="trade-main"><span class="buy_no">BUY_NO</span><span>12°C</span></div><div class="trade-sub">Low · Seoul · May 7</div></td><td class="num">$0.50</td><td class="num">0.65<div class="cell-sub">taker · fair · fill 100.0%</div></td><td class="num">90.9%<div class="cell-sub">24.7%</div></td><td><strong>10°C</strong><div class="cell-sub">pred 9.7859C · 3/5</div></td><td class="num negative">$-0.50</td><td>12C</td></tr></tbody>
+      </table>
+    </div>
+  </main>
+  <footer>Виртуальный PnL считает, что сделки исполнились по записанной paper-цене, и не учитывает будущие движения стакана. Это только forward-test.</footer>
+  <div id="floatingTooltip" role="tooltip"></div>
+  <script id="paper-data" type="application/json">{&quot;summary&quot;: {&quot;generated_at&quot;: &quot;2026-05-10T18:54:44+00:00&quot;, &quot;bankroll_usdc&quot;: 100.0, &quot;positions&quot;: 8, &quot;open_positions&quot;: 0, &quot;settled_positions&quot;: 8, &quot;won_positions&quot;: 4, &quot;lost_positions&quot;: 4, &quot;win_rate_pct&quot;: 50.0, &quot;total_staked_usdc&quot;: 4.0, &quot;settled_stake_usdc&quot;: 4.0, &quot;cash_balance_usdc&quot;: 99.1925, &quot;realized_payout_usdc&quot;: 3.1925, &quot;realized_pnl_usdc&quot;: -0.8075, &quot;open_expected_payout_usdc&quot;: 0, &quot;expected_equity_usdc&quot;: 99.1925, &quot;expected_total_pnl_usdc&quot;: -0.8075, &quot;strategy_lab_positions&quot;: 8, &quot;taker_positions&quot;: 8, &quot;maker_positions&quot;: 0, &quot;maker_preferred_positions&quot;: 0, &quot;depth_checked_positions&quot;: 8, &quot;fillable_positions&quot;: 8, &quot;source_portfolio_path&quot;: &quot;/Users/opipsy/Desktop/poly/detect_temperature 2/artifacts/paper_portfolio.csv&quot;, &quot;source_actuals_path&quot;: &quot;/Users/opipsy/Desktop/poly/detect_temperature 2/data/actuals.csv&quot;}, &quot;positions&quot;: [{&quot;opened_at&quot;: &quot;2026-05-05T14:45:22+00:00&quot;, &quot;status&quot;: &quot;lost&quot;, &quot;event_slug&quot;: &quot;highest-temperature-in-houston-on-may-6-2026&quot;, &quot;event_title&quot;: &quot;Highest temperature in Houston on May 6?&quot;, &quot;market_slug&quot;: &quot;highest-temperature-in-houston-on-may-6-2026-81forbelow&quot;, &quot;question&quot;: &quot;Highest temperature in Houston on May 6?&quot;, &quot;group_item_title&quot;: &quot;81°F or below&quot;, &quot;side&quot;: &quot;BUY_YES&quot;, &quot;entry_mode&quot;: &quot;taker&quot;, &quot;paper_source&quot;: &quot;strategy_lab&quot;, &quot;stake_usdc&quot;: &quot;0.5&quot;, &quot;price&quot;: &quot;0.1&quot;, &quot;fee_per_share&quot;: &quot;0.0045&quot;, &quot;shares&quot;: &quot;4.784689&quot;, &quot;fair_probability&quot;: &quot;0.789045&quot;, &quot;net_edge&quot;: &quot;0.684545&quot;, &quot;strategy_version&quot;: &quot;strategy_lab_v2&quot;, &quot;strategy_candidate_id&quot;: &quot;highest-temperature-in-houston-on-may-6-2026|highest-temperature-in-houston-on-may-6-2026-81forbelow|BUY_YES&quot;, &quot;execution_quality&quot;: &quot;good&quot;, &quot;execution_slippage&quot;: &quot;0.0&quot;, &quot;maker_preferred&quot;: &quot;0&quot;, &quot;maker_quote_price&quot;: &quot;0.085&quot;, &quot;maker_fill_score&quot;: &quot;0.6025&quot;, &quot;maker_reason&quot;: &quot;maker viable, taker expected value is higher&quot;, &quot;maker_edge_if_filled&quot;: &quot;0.684045&quot;, &quot;maker_worst_edge&quot;: &quot;0.316958&quot;, &quot;execution_fillable&quot;: &quot;1&quot;, &quot;execution_fill_ratio&quot;: &quot;1.0&quot;, &quot;execution_book_price&quot;: &quot;0.09&quot;, &quot;execution_book_levels_used&quot;: &quot;1&quot;, &quot;execution_book_available_usdc&quot;: &quot;2404.0764&quot;, &quot;execution_token_id&quot;: &quot;109409354020513719908630873452920981328674817472033164539170434905111027069567&quot;, &quot;robust_reason&quot;: &quot;passes all stress and execution checks&quot;, &quot;worst_edge&quot;: &quot;0.296678&quot;, &quot;stress_pass_rate&quot;: &quot;1.0&quot;, &quot;decision_reason&quot;: &quot;BUY_YES: our bucket probability is above market ask after fee; rank 1 of 5&quot;, &quot;risk_flags&quot;: &quot;model top bucket&quot;, &quot;visible_top_bucket&quot;: &quot;81°F or below&quot;, &quot;visible_top_bucket_probability&quot;: &quot;&quot;, &quot;visible_bucket_rank&quot;: &quot;1&quot;, &quot;visible_bucket_count&quot;: &quot;5&quot;, &quot;fair_yes_probability&quot;: &quot;&quot;, &quot;fair_no_probability&quot;: &quot;&quot;, &quot;yes_net_edge&quot;: &quot;&quot;, &quot;no_net_edge&quot;: &quot;&quot;, &quot;expected_payout_usdc&quot;: &quot;3.7753&quot;, &quot;expected_pnl_usdc&quot;: &quot;3.2753&quot;, &quot;prediction_c&quot;: &quot;26.29533&quot;, &quot;interval_lower&quot;: &quot;&quot;, &quot;interval_upper&quot;: &quot;81.5&quot;, &quot;interval_unit&quot;: &quot;fahrenheit&quot;, &quot;end_date&quot;: &quot;&quot;, &quot;market_has_ended&quot;: &quot;0&quot;, &quot;actual_value&quot;: 85.0, &quot;actual_status&quot;: &quot;ok&quot;, &quot;won&quot;: 0, &quot;payout_usdc&quot;: 0.0, &quot;pnl_usdc&quot;: -0.5, &quot;roi_pct&quot;: -100.0, &quot;trade_id&quot;: &quot;43d89373a1cf13b1&quot;, &quot;settled_at&quot;: &quot;2026-05-10T18:54:44+00:00&quot;}, {&quot;opened_at&quot;: &quot;2026-05-05T14:45:22+00:00&quot;, &quot;status&quot;: &quot;won&quot;, &quot;event_slug&quot;: &quot;highest-temperature-in-san-francisco-on-may-7-2026&quot;, &quot;event_title&quot;: &quot;Highest temperature in San Francisco on May 7?&quot;, &quot;market_slug&quot;: &quot;highest-temperature-in-san-francisco-on-may-7-2026-62-63f&quot;, &quot;question&quot;: &quot;Highest temperature in San Francisco on May 7?&quot;, &quot;group_item_title&quot;: &quot;62-63°F&quot;, &quot;side&quot;: &quot;BUY_NO&quot;, &quot;entry_mode&quot;: &quot;taker&quot;, &quot;paper_source&quot;: &quot;strategy_lab&quot;, &quot;stake_usdc&quot;: &quot;0.5&quot;, &quot;price&quot;: &quot;0.64&quot;, &quot;fee_per_share&quot;: &quot;0.01152&quot;, &quot;shares&quot;: &quot;0.767436&quot;, &quot;fair_probability&quot;: &quot;0.998826&quot;, &quot;net_edge&quot;: &quot;0.347306&quot;, &quot;strategy_version&quot;: &quot;strategy_lab_v2&quot;, &quot;strategy_candidate_id&quot;: &quot;highest-temperature-in-san-francisco-on-may-7-2026|highest-temperature-in-san-francisco-on-may-7-2026-62-63f|BUY_NO&quot;, &quot;execution_quality&quot;: &quot;fair&quot;, &quot;execution_slippage&quot;: &quot;0.01&quot;, &quot;maker_preferred&quot;: &quot;0&quot;, &quot;maker_quote_price&quot;: &quot;0.625&quot;, &quot;maker_fill_score&quot;: &quot;0.4625&quot;, &quot;maker_reason&quot;: &quot;maker fill score below 0.55&quot;, &quot;maker_edge_if_filled&quot;: &quot;0.353826&quot;, &quot;maker_worst_edge&quot;: &quot;0.285851&quot;, &quot;execution_fillable&quot;: &quot;1&quot;, &quot;execution_fill_ratio&quot;: &quot;1.0&quot;, &quot;execution_book_price&quot;: &quot;0.6&quot;, &quot;execution_book_levels_used&quot;: &quot;1&quot;, &quot;execution_book_available_usdc&quot;: &quot;952.5086&quot;, &quot;execution_token_id&quot;: &quot;61091339194463660707689425149704594099640150945009943837396899216864106621353&quot;, &quot;robust_reason&quot;: &quot;passes all stress and execution checks&quot;, &quot;worst_edge&quot;: &quot;0.259631&quot;, &quot;stress_pass_rate&quot;: &quot;1.0&quot;, &quot;decision_reason&quot;: &quot;BUY_NO: model thinks this bucket is unlikely and it is not the model top bucket; top bucket is 66°F or higher&quot;, &quot;risk_flags&quot;: &quot;&quot;, &quot;visible_top_bucket&quot;: &quot;66°F or higher&quot;, &quot;visible_top_bucket_probability&quot;: &quot;&quot;, &quot;visible_bucket_rank&quot;: &quot;3&quot;, &quot;visible_bucket_count&quot;: &quot;5&quot;, &quot;fair_yes_probability&quot;: &quot;&quot;, &quot;fair_no_probability&quot;: &quot;&quot;, &quot;yes_net_edge&quot;: &quot;&quot;, &quot;no_net_edge&quot;: &quot;&quot;, &quot;expected_payout_usdc&quot;: &quot;0.7665&quot;, &quot;expected_pnl_usdc&quot;: &quot;0.2665&quot;, &quot;prediction_c&quot;: &quot;22.309932&quot;, &quot;interval_lower&quot;: &quot;62.0&quot;, &quot;interval_upper&quot;: &quot;64.0&quot;, &quot;interval_unit&quot;: &quot;fahrenheit&quot;, &quot;end_date&quot;: &quot;&quot;, &quot;market_has_ended&quot;: &quot;0&quot;, &quot;actual_value&quot;: 61.0, &quot;actual_status&quot;: &quot;ok&quot;, &quot;won&quot;: 1, &quot;payout_usdc&quot;: 0.7674, &quot;pnl_usdc&quot;: 0.2674, &quot;roi_pct&quot;: 53.49, &quot;trade_id&quot;: &quot;a4ef3b74f51f631e&quot;, &quot;settled_at&quot;: &quot;2026-05-10T18:54:44+00:00&quot;}, {&quot;opened_at&quot;: &quot;2026-05-05T14:45:22+00:00&quot;, &quot;status&quot;: &quot;won&quot;, &quot;event_slug&quot;: &quot;highest-temperature-in-san-francisco-on-may-6-2026&quot;, &quot;event_title&quot;: &quot;Highest temperature in San Francisco on May 6?&quot;, &quot;market_slug&quot;: &quot;highest-temperature-in-san-francisco-on-may-6-2026-64-65f&quot;, &quot;question&quot;: &quot;Highest temperature in San Francisco on May 6?&quot;, &quot;group_item_title&quot;: &quot;64-65°F&quot;, &quot;side&quot;: &quot;BUY_NO&quot;, &quot;entry_mode&quot;: &quot;taker&quot;, &quot;paper_source&quot;: &quot;strategy_lab&quot;, &quot;stake_usdc&quot;: &quot;0.5&quot;, &quot;price&quot;: &quot;0.58&quot;, &quot;fee_per_share&quot;: &quot;0.01218&quot;, &quot;shares&quot;: &quot;0.844338&quot;, &quot;fair_probability&quot;: &quot;0.960894&quot;, &quot;net_edge&quot;: &quot;0.368714&quot;, &quot;strategy_version&quot;: &quot;strategy_lab_v2&quot;, &quot;strategy_candidate_id&quot;: &quot;highest-temperature-in-san-francisco-on-may-6-2026|highest-temperature-in-san-francisco-on-may-6-2026-64-65f|BUY_NO&quot;, &quot;execution_quality&quot;: &quot;good&quot;, &quot;execution_slippage&quot;: &quot;0.0&quot;, &quot;maker_preferred&quot;: &quot;0&quot;, &quot;maker_quote_price&quot;: &quot;0.565&quot;, &quot;maker_fill_score&quot;: &quot;0.5325&quot;, &quot;maker_reason&quot;: &quot;maker fill score below 0.55&quot;, &quot;maker_edge_if_filled&quot;: &quot;0.375894&quot;, &quot;maker_worst_edge&quot;: &quot;0.243609&quot;, &quot;execution_fillable&quot;: &quot;1&quot;, &quot;execution_fill_ratio&quot;: &quot;1.0&quot;, &quot;execution_book_price&quot;: &quot;0.58&quot;, &quot;execution_book_levels_used&quot;: &quot;1&quot;, &quot;execution_book_available_usdc&quot;: &quot;953.8823&quot;, &quot;execution_token_id&quot;: &quot;20153011250420580768070856319597015115628288587595121372433792313941546498836&quot;, &quot;robust_reason&quot;: &quot;passes all stress and execution checks&quot;, &quot;worst_edge&quot;: &quot;0.216609&quot;, &quot;stress_pass_rate&quot;: &quot;1.0&quot;, &quot;decision_reason&quot;: &quot;BUY_NO: model thinks this bucket is unlikely and it is not the model top bucket; top bucket is 60-61°F&quot;, &quot;risk_flags&quot;: &quot;&quot;, &quot;visible_top_bucket&quot;: &quot;60-61°F&quot;, &quot;visible_top_bucket_probability&quot;: &quot;&quot;, &quot;visible_bucket_rank&quot;: &quot;3&quot;, &quot;visible_bucket_count&quot;: &quot;5&quot;, &quot;fair_yes_probability&quot;: &quot;&quot;, &quot;fair_no_probability&quot;: &quot;&quot;, &quot;yes_net_edge&quot;: &quot;&quot;, &quot;no_net_edge&quot;: &quot;&quot;, &quot;expected_payout_usdc&quot;: &quot;0.8113&quot;, &quot;expected_pnl_usdc&quot;: &quot;0.3113&quot;, &quot;prediction_c&quot;: &quot;15.265089&quot;, &quot;interval_lower&quot;: &quot;64.0&quot;, &quot;interval_upper&quot;: &quot;66.0&quot;, &quot;interval_unit&quot;: &quot;fahrenheit&quot;, &quot;end_date&quot;: &quot;&quot;, &quot;market_has_ended&quot;: &quot;0&quot;, &quot;actual_value&quot;: 67.0, &quot;actual_status&quot;: &quot;ok&quot;, &quot;won&quot;: 1, &quot;payout_usdc&quot;: 0.8443, &quot;pnl_usdc&quot;: 0.3443, &quot;roi_pct&quot;: 68.87, &quot;trade_id&quot;: &quot;58525bb5a64f46ee&quot;, &quot;settled_at&quot;: &quot;2026-05-10T18:54:44+00:00&quot;}, {&quot;opened_at&quot;: &quot;2026-05-05T14:45:22+00:00&quot;, &quot;status&quot;: &quot;won&quot;, &quot;event_slug&quot;: &quot;highest-temperature-in-jakarta-on-may-7-2026&quot;, &quot;event_title&quot;: &quot;Highest temperature in Jakarta on May 7?&quot;, &quot;market_slug&quot;: &quot;highest-temperature-in-jakarta-on-may-7-2026-34c&quot;, &quot;question&quot;: &quot;Highest temperature in Jakarta on May 7?&quot;, &quot;group_item_title&quot;: &quot;34°C&quot;, &quot;side&quot;: &quot;BUY_NO&quot;, &quot;entry_mode&quot;: &quot;taker&quot;, &quot;paper_source&quot;: &quot;strategy_lab&quot;, &quot;stake_usdc&quot;: &quot;0.5&quot;, &quot;price&quot;: &quot;0.655&quot;, &quot;fee_per_share&quot;: &quot;0.011299&quot;, &quot;shares&quot;: &quot;0.750414&quot;, &quot;fair_probability&quot;: &quot;0.975483&quot;, &quot;net_edge&quot;: &quot;0.309184&quot;, &quot;strategy_version&quot;: &quot;strategy_lab_v2&quot;, &quot;strategy_candidate_id&quot;: &quot;highest-temperature-in-jakarta-on-may-7-2026|highest-temperature-in-jakarta-on-may-7-2026-34c|BUY_NO&quot;, &quot;execution_quality&quot;: &quot;fair&quot;, &quot;execution_slippage&quot;: &quot;0.005&quot;, &quot;maker_preferred&quot;: &quot;0&quot;, &quot;maker_quote_price&quot;: &quot;0.645&quot;, &quot;maker_fill_score&quot;: &quot;0.5025&quot;, &quot;maker_reason&quot;: &quot;maker fill score below 0.55&quot;, &quot;maker_edge_if_filled&quot;: &quot;0.310483&quot;, &quot;maker_worst_edge&quot;: &quot;0.203564&quot;, &quot;execution_fillable&quot;: &quot;1&quot;, &quot;execution_fill_ratio&quot;: &quot;1.0&quot;, &quot;execution_book_price&quot;: &quot;0.63&quot;, &quot;execution_book_levels_used&quot;: &quot;1&quot;, &quot;execution_book_available_usdc&quot;: &quot;608.6476&quot;, &quot;execution_token_id&quot;: &quot;105822945122660436199798140384021826248277459944639861325735885970923837540773&quot;, &quot;robust_reason&quot;: &quot;passes all stress and execution checks&quot;, &quot;worst_edge&quot;: &quot;0.182595&quot;, &quot;stress_pass_rate&quot;: &quot;1.0&quot;, &quot;decision_reason&quot;: &quot;BUY_NO: model thinks this bucket is unlikely and it is not the model top bucket; top bucket is 31°C&quot;, &quot;risk_flags&quot;: &quot;&quot;, &quot;visible_top_bucket&quot;: &quot;31°C&quot;, &quot;visible_top_bucket_probability&quot;: &quot;&quot;, &quot;visible_bucket_rank&quot;: &quot;4&quot;, &quot;visible_bucket_count&quot;: &quot;5&quot;, &quot;fair_yes_probability&quot;: &quot;&quot;, &quot;fair_no_probability&quot;: &quot;&quot;, &quot;yes_net_edge&quot;: &quot;&quot;, &quot;no_net_edge&quot;: &quot;&quot;, &quot;expected_payout_usdc&quot;: &quot;0.732&quot;, &quot;expected_pnl_usdc&quot;: &quot;0.232&quot;, &quot;prediction_c&quot;: &quot;30.677161&quot;, &quot;interval_lower&quot;: &quot;33.5&quot;, &quot;interval_upper&quot;: &quot;34.5&quot;, &quot;interval_unit&quot;: &quot;celsius&quot;, &quot;end_date&quot;: &quot;&quot;, &quot;market_has_ended&quot;: &quot;0&quot;, &quot;actual_value&quot;: 33.0, &quot;actual_status&quot;: &quot;ok&quot;, &quot;won&quot;: 1, &quot;payout_usdc&quot;: 0.7504, &quot;pnl_usdc&quot;: 0.2504, &quot;roi_pct&quot;: 50.08, &quot;trade_id&quot;: &quot;e910693eac403ddb&quot;, &quot;settled_at&quot;: &quot;2026-05-10T18:54:44+00:00&quot;}, {&quot;opened_at&quot;: &quot;2026-05-05T14:45:22+00:00&quot;, &quot;status&quot;: &quot;lost&quot;, &quot;event_slug&quot;: &quot;highest-temperature-in-milan-on-may-7-2026&quot;, &quot;event_title&quot;: &quot;Highest temperature in Milan on May 7?&quot;, &quot;market_slug&quot;: &quot;highest-temperature-in-milan-on-may-7-2026-21c&quot;, &quot;question&quot;: &quot;Highest temperature in Milan on May 7?&quot;, &quot;group_item_title&quot;: &quot;21°C&quot;, &quot;side&quot;: &quot;BUY_NO&quot;, &quot;entry_mode&quot;: &quot;taker&quot;, &quot;paper_source&quot;: &quot;strategy_lab&quot;, &quot;stake_usdc&quot;: &quot;0.5&quot;, &quot;price&quot;: &quot;0.675&quot;, &quot;fee_per_share&quot;: &quot;0.010969&quot;, &quot;shares&quot;: &quot;0.728896&quot;, &quot;fair_probability&quot;: &quot;0.969408&quot;, &quot;net_edge&quot;: &quot;0.283439&quot;, &quot;strategy_version&quot;: &quot;strategy_lab_v2&quot;, &quot;strategy_candidate_id&quot;: &quot;highest-temperature-in-milan-on-may-7-2026|highest-temperature-in-milan-on-may-7-2026-21c|BUY_NO&quot;, &quot;execution_quality&quot;: &quot;fair&quot;, &quot;execution_slippage&quot;: &quot;0.005&quot;, &quot;maker_preferred&quot;: &quot;0&quot;, &quot;maker_quote_price&quot;: &quot;0.655&quot;, &quot;maker_fill_score&quot;: &quot;0.41&quot;, &quot;maker_reason&quot;: &quot;maker fill score below 0.55&quot;, &quot;maker_edge_if_filled&quot;: &quot;0.294408&quot;, &quot;maker_worst_edge&quot;: &quot;0.180646&quot;, &quot;execution_fillable&quot;: &quot;1&quot;, &quot;execution_fill_ratio&quot;: &quot;1.0&quot;, &quot;execution_book_price&quot;: &quot;0.65&quot;, &quot;execution_book_levels_used&quot;: &quot;1&quot;, &quot;execution_book_available_usdc&quot;: &quot;793.215&quot;, &quot;execution_token_id&quot;: &quot;80892146589727651491746065099955621852365224731454211681538319164192700789623&quot;, &quot;robust_reason&quot;: &quot;passes all stress and execution checks&quot;, &quot;worst_edge&quot;: &quot;0.150047&quot;, &quot;stress_pass_rate&quot;: &quot;1.0&quot;, &quot;decision_reason&quot;: &quot;BUY_NO: model thinks this bucket is unlikely and it is not the model top bucket; top bucket is 18°C&quot;, &quot;risk_flags&quot;: &quot;&quot;, &quot;visible_top_bucket&quot;: &quot;18°C&quot;, &quot;visible_top_bucket_probability&quot;: &quot;&quot;, &quot;visible_bucket_rank&quot;: &quot;4&quot;, &quot;visible_bucket_count&quot;: &quot;5&quot;, &quot;fair_yes_probability&quot;: &quot;&quot;, &quot;fair_no_probability&quot;: &quot;&quot;, &quot;yes_net_edge&quot;: &quot;&quot;, &quot;no_net_edge&quot;: &quot;&quot;, &quot;expected_payout_usdc&quot;: &quot;0.7066&quot;, &quot;expected_pnl_usdc&quot;: &quot;0.2066&quot;, &quot;prediction_c&quot;: &quot;17.836361&quot;, &quot;interval_lower&quot;: &quot;20.5&quot;, &quot;interval_upper&quot;: &quot;21.5&quot;, &quot;interval_unit&quot;: &quot;celsius&quot;, &quot;end_date&quot;: &quot;&quot;, &quot;market_has_ended&quot;: &quot;0&quot;, &quot;actual_value&quot;: 21.0, &quot;actual_status&quot;: &quot;ok&quot;, &quot;won&quot;: 0, &quot;payout_usdc&quot;: 0.0, &quot;pnl_usdc&quot;: -0.5, &quot;roi_pct&quot;: -100.0, &quot;trade_id&quot;: &quot;cbc9eb828c4d196f&quot;, &quot;settled_at&quot;: &quot;2026-05-10T18:54:44+00:00&quot;}, {&quot;opened_at&quot;: &quot;2026-05-05T14:45:22+00:00&quot;, &quot;status&quot;: &quot;won&quot;, &quot;event_slug&quot;: &quot;highest-temperature-in-ankara-on-may-6-2026&quot;, &quot;event_title&quot;: &quot;Highest temperature in Ankara on May 6?&quot;, &quot;market_slug&quot;: &quot;highest-temperature-in-ankara-on-may-6-2026-14c&quot;, &quot;question&quot;: &quot;Highest temperature in Ankara on May 6?&quot;, &quot;group_item_title&quot;: &quot;14°C&quot;, &quot;side&quot;: &quot;BUY_NO&quot;, &quot;entry_mode&quot;: &quot;taker&quot;, &quot;paper_source&quot;: &quot;strategy_lab&quot;, &quot;stake_usdc&quot;: &quot;0.5&quot;, &quot;price&quot;: &quot;0.59&quot;, &quot;fee_per_share&quot;: &quot;0.012095&quot;, &quot;shares&quot;: &quot;0.830434&quot;, &quot;fair_probability&quot;: &quot;0.812678&quot;, &quot;net_edge&quot;: &quot;0.210583&quot;, &quot;strategy_version&quot;: &quot;strategy_lab_v2&quot;, &quot;strategy_candidate_id&quot;: &quot;highest-temperature-in-ankara-on-may-6-2026|highest-temperature-in-ankara-on-may-6-2026-14c|BUY_NO&quot;, &quot;execution_quality&quot;: &quot;fair&quot;, &quot;execution_slippage&quot;: &quot;0.01&quot;, &quot;maker_preferred&quot;: &quot;0&quot;, &quot;maker_quote_price&quot;: &quot;0.555&quot;, &quot;maker_fill_score&quot;: &quot;0.515&quot;, &quot;maker_reason&quot;: &quot;maker fill score below 0.55&quot;, &quot;maker_edge_if_filled&quot;: &quot;0.237678&quot;, &quot;maker_worst_edge&quot;: &quot;0.167481&quot;, &quot;execution_fillable&quot;: &quot;1&quot;, &quot;execution_fill_ratio&quot;: &quot;1.0&quot;, &quot;execution_book_price&quot;: &quot;0.59&quot;, &quot;execution_book_levels_used&quot;: &quot;1&quot;, &quot;execution_book_available_usdc&quot;: &quot;1053.6838&quot;, &quot;execution_token_id&quot;: &quot;84392451581463930012096161091324779634501431831193943281881109948058272189817&quot;, &quot;robust_reason&quot;: &quot;passes all stress and execution checks&quot;, &quot;worst_edge&quot;: &quot;0.120586&quot;, &quot;stress_pass_rate&quot;: &quot;1.0&quot;, &quot;decision_reason&quot;: &quot;BUY_NO: model thinks this bucket is unlikely and it is not the model top bucket; top bucket is 13°C&quot;, &quot;risk_flags&quot;: &quot;&quot;, &quot;visible_top_bucket&quot;: &quot;13°C&quot;, &quot;visible_top_bucket_probability&quot;: &quot;&quot;, &quot;visible_bucket_rank&quot;: &quot;2&quot;, &quot;visible_bucket_count&quot;: &quot;5&quot;, &quot;fair_yes_probability&quot;: &quot;&quot;, &quot;fair_no_probability&quot;: &quot;&quot;, &quot;yes_net_edge&quot;: &quot;&quot;, &quot;no_net_edge&quot;: &quot;&quot;, &quot;expected_payout_usdc&quot;: &quot;0.6749&quot;, &quot;expected_pnl_usdc&quot;: &quot;0.1749&quot;, &quot;prediction_c&quot;: &quot;12.754572&quot;, &quot;interval_lower&quot;: &quot;13.5&quot;, &quot;interval_upper&quot;: &quot;14.5&quot;, &quot;interval_unit&quot;: &quot;celsius&quot;, &quot;end_date&quot;: &quot;&quot;, &quot;market_has_ended&quot;: &quot;0&quot;, &quot;actual_value&quot;: 15.0, &quot;actual_status&quot;: &quot;ok&quot;, &quot;won&quot;: 1, &quot;payout_usdc&quot;: 0.8304, &quot;pnl_usdc&quot;: 0.3304, &quot;roi_pct&quot;: 66.09, &quot;trade_id&quot;: &quot;ad419a55d5bf3d0c&quot;, &quot;settled_at&quot;: &quot;2026-05-10T18:54:44+00:00&quot;}, {&quot;opened_at&quot;: &quot;2026-05-05T14:45:22+00:00&quot;, &quot;status&quot;: &quot;lost&quot;, &quot;event_slug&quot;: &quot;highest-temperature-in-sao-paulo-on-may-6-2026&quot;, &quot;event_title&quot;: &quot;Highest temperature in Sao Paulo on May 6?&quot;, &quot;market_slug&quot;: &quot;highest-temperature-in-sao-paulo-on-may-6-2026-29c&quot;, &quot;question&quot;: &quot;Highest temperature in Sao Paulo on May 6?&quot;, &quot;group_item_title&quot;: &quot;29°C&quot;, &quot;side&quot;: &quot;BUY_NO&quot;, &quot;entry_mode&quot;: &quot;taker&quot;, &quot;paper_source&quot;: &quot;strategy_lab&quot;, &quot;stake_usdc&quot;: &quot;0.5&quot;, &quot;price&quot;: &quot;0.635&quot;, &quot;fee_per_share&quot;: &quot;0.011589&quot;, &quot;shares&quot;: &quot;0.773289&quot;, &quot;fair_probability&quot;: &quot;0.895363&quot;, &quot;net_edge&quot;: &quot;0.248774&quot;, &quot;strategy_version&quot;: &quot;strategy_lab_v2&quot;, &quot;strategy_candidate_id&quot;: &quot;highest-temperature-in-sao-paulo-on-may-6-2026|highest-temperature-in-sao-paulo-on-may-6-2026-29c|BUY_NO&quot;, &quot;execution_quality&quot;: &quot;fair&quot;, &quot;execution_slippage&quot;: &quot;0.005&quot;, &quot;maker_preferred&quot;: &quot;0&quot;, &quot;maker_quote_price&quot;: &quot;0.605&quot;, &quot;maker_fill_score&quot;: &quot;0.515&quot;, &quot;maker_reason&quot;: &quot;maker fill score below 0.55&quot;, &quot;maker_edge_if_filled&quot;: &quot;0.270363&quot;, &quot;maker_worst_edge&quot;: &quot;0.131215&quot;, &quot;execution_fillable&quot;: &quot;1&quot;, &quot;execution_fill_ratio&quot;: &quot;1.0&quot;, &quot;execution_book_price&quot;: &quot;0.62&quot;, &quot;execution_book_levels_used&quot;: &quot;1&quot;, &quot;execution_book_available_usdc&quot;: &quot;979.8256&quot;, &quot;execution_token_id&quot;: &quot;81098207986586390281960222581420829077816147937759580764831925596873822528603&quot;, &quot;robust_reason&quot;: &quot;passes all stress and execution checks&quot;, &quot;worst_edge&quot;: &quot;0.089917&quot;, &quot;stress_pass_rate&quot;: &quot;1.0&quot;, &quot;decision_reason&quot;: &quot;BUY_NO: model thinks this bucket is unlikely and it is not the model top bucket; top bucket is 27°C&quot;, &quot;risk_flags&quot;: &quot;&quot;, &quot;visible_top_bucket&quot;: &quot;27°C&quot;, &quot;visible_top_bucket_probability&quot;: &quot;&quot;, &quot;visible_bucket_rank&quot;: &quot;3&quot;, &quot;visible_bucket_count&quot;: &quot;5&quot;, &quot;fair_yes_probability&quot;: &quot;&quot;, &quot;fair_no_probability&quot;: &quot;&quot;, &quot;yes_net_edge&quot;: &quot;&quot;, &quot;no_net_edge&quot;: &quot;&quot;, &quot;expected_payout_usdc&quot;: &quot;0.6924&quot;, &quot;expected_pnl_usdc&quot;: &quot;0.1924&quot;, &quot;prediction_c&quot;: &quot;26.933625&quot;, &quot;interval_lower&quot;: &quot;28.5&quot;, &quot;interval_upper&quot;: &quot;29.5&quot;, &quot;interval_unit&quot;: &quot;celsius&quot;, &quot;end_date&quot;: &quot;&quot;, &quot;market_has_ended&quot;: &quot;0&quot;, &quot;actual_value&quot;: 29.0, &quot;actual_status&quot;: &quot;ok&quot;, &quot;won&quot;: 0, &quot;payout_usdc&quot;: 0.0, &quot;pnl_usdc&quot;: -0.5, &quot;roi_pct&quot;: -100.0, &quot;trade_id&quot;: &quot;2d518d64accde272&quot;, &quot;settled_at&quot;: &quot;2026-05-10T18:54:44+00:00&quot;}, {&quot;opened_at&quot;: &quot;2026-05-05T14:45:22+00:00&quot;, &quot;status&quot;: &quot;lost&quot;, &quot;event_slug&quot;: &quot;lowest-temperature-in-seoul-on-may-7-2026&quot;, &quot;event_title&quot;: &quot;Lowest temperature in Seoul on May 7?&quot;, &quot;market_slug&quot;: &quot;lowest-temperature-in-seoul-on-may-7-2026-12c&quot;, &quot;question&quot;: &quot;Lowest temperature in Seoul on May 7?&quot;, &quot;group_item_title&quot;: &quot;12°C&quot;, &quot;side&quot;: &quot;BUY_NO&quot;, &quot;entry_mode&quot;: &quot;taker&quot;, &quot;paper_source&quot;: &quot;strategy_lab&quot;, &quot;stake_usdc&quot;: &quot;0.5&quot;, &quot;price&quot;: &quot;0.65&quot;, &quot;fee_per_share&quot;: &quot;0.011375&quot;, &quot;shares&quot;: &quot;0.756001&quot;, &quot;fair_probability&quot;: &quot;0.908618&quot;, &quot;net_edge&quot;: &quot;0.247243&quot;, &quot;strategy_version&quot;: &quot;strategy_lab_v2&quot;, &quot;strategy_candidate_id&quot;: &quot;lowest-temperature-in-seoul-on-may-7-2026|lowest-temperature-in-seoul-on-may-7-2026-12c|BUY_NO&quot;, &quot;execution_quality&quot;: &quot;fair&quot;, &quot;execution_slippage&quot;: &quot;0.01&quot;, &quot;maker_preferred&quot;: &quot;0&quot;, &quot;maker_quote_price&quot;: &quot;0.625&quot;, &quot;maker_fill_score&quot;: &quot;0.37&quot;, &quot;maker_reason&quot;: &quot;maker fill score below 0.55&quot;, &quot;maker_edge_if_filled&quot;: &quot;0.263618&quot;, &quot;maker_worst_edge&quot;: &quot;0.120891&quot;, &quot;execution_fillable&quot;: &quot;1&quot;, &quot;execution_fill_ratio&quot;: &quot;1.0&quot;, &quot;execution_book_price&quot;: &quot;0.64&quot;, &quot;execution_book_levels_used&quot;: &quot;1&quot;, &quot;execution_book_available_usdc&quot;: &quot;498.9595&quot;, &quot;execution_token_id&quot;: &quot;113977321884758791701980423403710167405752954011096470934670808097913604542907&quot;, &quot;robust_reason&quot;: &quot;passes all stress and execution checks&quot;, &quot;worst_edge&quot;: &quot;0.084836&quot;, &quot;stress_pass_rate&quot;: &quot;1.0&quot;, &quot;decision_reason&quot;: &quot;BUY_NO: model thinks this bucket is unlikely and it is not the model top bucket; top bucket is 10°C&quot;, &quot;risk_flags&quot;: &quot;&quot;, &quot;visible_top_bucket&quot;: &quot;10°C&quot;, &quot;visible_top_bucket_probability&quot;: &quot;&quot;, &quot;visible_bucket_rank&quot;: &quot;3&quot;, &quot;visible_bucket_count&quot;: &quot;5&quot;, &quot;fair_yes_probability&quot;: &quot;&quot;, &quot;fair_no_probability&quot;: &quot;&quot;, &quot;yes_net_edge&quot;: &quot;&quot;, &quot;no_net_edge&quot;: &quot;&quot;, &quot;expected_payout_usdc&quot;: &quot;0.6869&quot;, &quot;expected_pnl_usdc&quot;: &quot;0.1869&quot;, &quot;prediction_c&quot;: &quot;9.78592&quot;, &quot;interval_lower&quot;: &quot;11.5&quot;, &quot;interval_upper&quot;: &quot;12.5&quot;, &quot;interval_unit&quot;: &quot;celsius&quot;, &quot;end_date&quot;: &quot;&quot;, &quot;market_has_ended&quot;: &quot;0&quot;, &quot;actual_value&quot;: 12.0, &quot;actual_status&quot;: &quot;ok&quot;, &quot;won&quot;: 0, &quot;payout_usdc&quot;: 0.0, &quot;pnl_usdc&quot;: -0.5, &quot;roi_pct&quot;: -100.0, &quot;trade_id&quot;: &quot;bf05e2fdf3a84c95&quot;, &quot;settled_at&quot;: &quot;2026-05-10T18:54:44+00:00&quot;}], &quot;actuals&quot;: {&quot;ok&quot;: 175, &quot;pending&quot;: 0, &quot;error&quot;: 0, &quot;path&quot;: &quot;/Users/opipsy/Desktop/poly/detect_temperature 2/data/actuals.csv&quot;}}</script>
+  <script>
+    const buttons = [...document.querySelectorAll('button[data-filter]')];
+    const search = document.getElementById('search');
+    const refreshButton = document.getElementById('refreshButton');
+    const openTradesButton = document.getElementById('openTradesButton');
+    const dryRunButton = document.getElementById('dryRunButton');
+    const refreshStatus = document.getElementById('refreshStatus');
+    const tooltip = document.getElementById('floatingTooltip');
+    function applyFilter() {
+      const active = document.querySelector('button.active').dataset.filter;
+      const term = search.value.trim().toLowerCase();
+      document.querySelectorAll('tbody tr').forEach(row => {
+        const status = row.dataset.status;
+        const text = row.textContent.toLowerCase();
+        const statusOk = active === 'all'
+          || status === active
+          || (active === 'open' && (status === 'open' || status === 'pending_actual'))
+          || (active === 'settled' && (status === 'won' || status === 'lost'));
+        row.style.display = statusOk && (!term || text.includes(term)) ? '' : 'none';
+      });
+    }
+    buttons.forEach(button => button.addEventListener('click', () => {
+      buttons.forEach(item => item.classList.remove('active'));
+      button.classList.add('active');
+      applyFilter();
+    }));
+    search.addEventListener('input', applyFilter);
+    function showTooltip(target) {
+      const tip = target.dataset.tip;
+      if (!tip) return;
+      tooltip.textContent = tip;
+      tooltip.style.display = 'block';
+      const rect = target.getBoundingClientRect();
+      const tooltipRect = tooltip.getBoundingClientRect();
+      let left = rect.left + rect.width / 2 - tooltipRect.width / 2;
+      left = Math.max(12, Math.min(left, window.innerWidth - tooltipRect.width - 12));
+      let top = rect.top - tooltipRect.height - 10;
+      if (top < 12) {
+        top = rect.bottom + 10;
+      }
+      tooltip.style.left = `${left}px`;
+      tooltip.style.top = `${top}px`;
+    }
+    function hideTooltip() {
+      tooltip.style.display = 'none';
+    }
+    document.querySelectorAll('[data-tip]').forEach(item => {
+      item.addEventListener('mouseenter', () => showTooltip(item));
+      item.addEventListener('focus', () => showTooltip(item));
+      item.addEventListener('mouseleave', hideTooltip);
+      item.addEventListener('blur', hideTooltip);
+    });
+    window.addEventListener('scroll', hideTooltip, true);
+    window.addEventListener('resize', hideTooltip);
+    refreshButton.addEventListener('click', async () => {
+      if (window.location.protocol === 'file:') {
+        refreshStatus.textContent = 'Сначала открой через локальный сервер: python3 scripts/serve_paper_dashboard.py';
+        return;
+      }
+      refreshButton.disabled = true;
+      refreshStatus.textContent = 'Собираю actuals и пересчитываю paper PnL...';
+      try {
+        const response = await fetch('/api/refresh-paper', { method: 'POST' });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || 'refresh failed');
+        }
+        const s = data.summary || {};
+        refreshStatus.textContent = `Готово: закрыто ${s.settled_positions || 0}, открыто ${s.open_positions || 0}, realized PnL ${s.realized_pnl_usdc || 0} USDC. Перезагружаю...`;
+        setTimeout(() => window.location.reload(), 900);
+      } catch (error) {
+        refreshStatus.textContent = `Не удалось обновить: ${error.message}`;
+      } finally {
+        refreshButton.disabled = false;
+      }
+    });
+
+    async function callPipeline(url, label, button) {
+      if (window.location.protocol === 'file:') {
+        refreshStatus.textContent = 'Сначала открой через локальный сервер: python3 scripts/serve_paper_dashboard.py';
+        return;
+      }
+      button.disabled = true;
+      refreshStatus.textContent = `${label}... Это займёт 30–90 секунд (scan + predict + strategy lab).`;
+      try {
+        const response = await fetch(url, { method: 'POST' });
+        const data = await response.json();
+        if (!response.ok) {
+          if (data.kind === 'drawdown') {
+            refreshStatus.textContent = `Kill-switch: ${data.error}. Пересмотри стратегию вручную.`;
+          } else {
+            throw new Error(data.error || `${label} failed`);
+          }
+          return;
+        }
+        const lab = (data.strategy_lab || (data.market_pipeline && data.market_pipeline.strategy_lab)) || {};
+        const paper = data.paper_summary || {};
+        const parts = [];
+        if (lab.trade_candidates !== undefined) parts.push(`candidates ${lab.trade_candidates}`);
+        if (lab.robust_pass !== undefined) parts.push(`robust ${lab.robust_pass}`);
+        if (lab.selected_positions !== undefined) parts.push(`selected ${lab.selected_positions}`);
+        if (paper.positions !== undefined) parts.push(`opened ${paper.positions} @ $${paper.total_staked_usdc || 0}`);
+        refreshStatus.textContent = `Готово: ${parts.join(', ')}. Перезагружаю...`;
+        setTimeout(() => window.location.reload(), 1200);
+      } catch (error) {
+        refreshStatus.textContent = `Не удалось ${label.toLowerCase()}: ${error.message}`;
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    openTradesButton.addEventListener('click', () => callPipeline('/api/open-trades', 'Открыть сделки', openTradesButton));
+    dryRunButton.addEventListener('click', () => callPipeline('/api/dry-run', 'Проверка рынка', dryRunButton));
+  </script>
+</body>
+</html>

@@ -12,3 +12,10 @@ build/
 .env
 .env.*
 .playwright-cli/
+# Windows collector output — millions of snapshots per week, not for git
+data/history/
+logs/
+# temp investigation output
+output/
+# macOS resource forks when tarring cross-platform
+._*

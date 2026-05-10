@@ -47,8 +47,9 @@ Polymarket markets
 - `models/gbm.py`: ML-коррекция смещения на исторических labels.
 - `evaluation.py`: time-ordered holdout и метрики MAE/RMSE/bias плюс доля попаданий в 1/2/3 C.
 - `sources/actuals.py`: сбор финальных high/low labels из Wunderground/Weather.com, HKO и weather.gov/Synoptic.
-- `polymarket.py`: read-only live snapshot weather markets, token ids, prices, spreads и geoblock check.
+- `polymarket.py`: read-only live snapshot weather markets, token ids, prices, spreads, CLOB orderbooks и geoblock check.
 - `signals.py`: paper-only перевод прогноза в вероятности ranges и расчет edge после taker fee.
+- `risk_profiles.py`: пресеты риск-лимитов, включая консервативный `bankroll_100`.
 
 ## Почему так
 
@@ -76,6 +77,10 @@ Polymarket markets
 `build-polymarket-targets` превращает свежий `data/polymarket_weather_events.json` в event-level targets. Так как Polymarket weather page не всегда содержит station/source rules, команда переиспользует уже известные станции из `data/targets.csv` по городу и типу high/low. Новые неизвестные города остаются видимыми, но без station forecast до ручного маппинга.
 
 `build-market-signals` соединяет market snapshot с `artifacts/predictions_gbm.csv`, парсит диапазоны вроде `24°C`, `60°F or higher`, `58-59°F`, считает normal probability around `corrected_prediction_c` и пишет paper edge в `artifacts/market_signals.csv`.
+
+`fetch-clob-orderbooks` read-only забирает CLOB стаканы по YES/NO token ids и сохраняет `data/polymarket_orderbooks.json`. Strategy Lab использует этот snapshot, чтобы проверить, хватило бы ask-depth на planned paper stake.
+
+`--risk-profile bankroll_100` включает малый банк: `$100` bankroll, `$0.25-$0.50` stake, жесткие caps по event/city/date, более высокий robust edge threshold и более строгий spread/slippage guard.
 
 `open-paper-trades` превращает лучшие paper signals в виртуальный портфель с bankroll, stake, shares, expected PnL и HTML-интерфейсом `artifacts/paper_dashboard.html`.
 

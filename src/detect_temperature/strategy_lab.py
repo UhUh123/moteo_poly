@@ -27,6 +27,7 @@ def run_strategy_lab(
     portfolio_output_path: str | Path | None = None,
     summary_output_path: str | Path | None = None,
     report_path: str | Path | None = None,
+    orderbooks_path: str | Path | None = None,
     bankroll_usdc: float = 1000.0,
     max_positions: int = 100,
     max_stake_usdc: float = 5.0,
@@ -51,11 +52,15 @@ def run_strategy_lab(
     slippage_values: tuple[float, ...] = (0.0, 0.01),
 ) -> dict[str, Any]:
     signals = _read_csv(signals_path)
+    orderbooks = _load_orderbooks(orderbooks_path) if orderbooks_path else {}
     scenarios = _stress_scenarios(mean_shifts_c, sigma_values_c, slippage_values)
     candidates = [
         _candidate_row(
             signal,
             scenarios,
+            orderbooks=orderbooks,
+            bankroll_usdc=bankroll_usdc,
+            max_stake_usdc=max_stake_usdc,
             robust_min_edge=robust_min_edge,
             weather_fee_rate=weather_fee_rate,
             max_execution_slippage=max_execution_slippage,
@@ -105,6 +110,8 @@ def run_strategy_lab(
         maker_quote_improvement=maker_quote_improvement,
         maker_min_fill_score=maker_min_fill_score,
         maker_adverse_selection_penalty=maker_adverse_selection_penalty,
+        orderbooks_path=str(orderbooks_path) if orderbooks_path else "",
+        orderbook_count=len(orderbooks),
     )
     payload = {"summary": summary, "candidates": candidates, "selected": selected}
 
@@ -229,6 +236,8 @@ def render_strategy_lab_report(payload: dict[str, Any], path: str | Path) -> Non
       {_metric("Maker fill-adj PnL", _money(summary["selected_maker_fill_adjusted_expected_pnl_usdc"]))}
       {_metric("Maker eligible", summary["selected_maker_eligible"])}
       {_metric("Maker preferred", summary["selected_maker_preferred"])}
+      {_metric("Orderbooks", summary.get("orderbook_count", 0))}
+      {_metric("Fillable", summary.get("selected_execution_fillable", 0))}
       {_metric("Worst edge min", _percent(summary["selected_worst_edge_min"]))}
       {_metric("Exec slip max", _percent(summary["selected_execution_slippage_max"]))}
       {_metric("Events", summary["selected_events"])}
@@ -238,7 +247,7 @@ def render_strategy_lab_report(payload: dict[str, Any], path: str | Path) -> Non
     <section class="panel">
       <strong>Stress scenarios</strong>
       <ul>{scenario_items}</ul>
-      <p class="note">`Worst edge` - худший edge по всем сценариям уже после estimated slippage. `Exec expected PnL` считает taker-вход после execution penalty. `Maker fill-adj PnL` считает лимитный вход с fill score и adverse-selection penalty; это гипотеза, а не гарантия исполнения.</p>
+      <p class="note">`Worst edge` - худший edge по всем сценариям уже после estimated slippage. `Exec expected PnL` считает taker-вход после execution penalty. Если подключен CLOB orderbook snapshot, Strategy Lab также проверяет, хватило бы ask-depth на planned stake. `Maker fill-adj PnL` считает лимитный вход с fill score и adverse-selection penalty; это гипотеза, а не гарантия исполнения.</p>
     </section>
 
     <h2>Concentration</h2>
@@ -275,6 +284,9 @@ def render_strategy_lab_report(payload: dict[str, Any], path: str | Path) -> Non
 def _candidate_row(
     signal: dict[str, Any],
     scenarios: list[StressScenario],
+    orderbooks: dict[str, dict[str, Any]],
+    bankroll_usdc: float,
+    max_stake_usdc: float,
     robust_min_edge: float,
     weather_fee_rate: float,
     max_execution_slippage: float,
@@ -290,7 +302,15 @@ def _candidate_row(
     unit = signal.get("interval_unit") or "celsius"
     if prediction_c is None or price is None:
         return None
-    execution = _execution_profile(signal, quoted_price=price)
+    planned_stake = _candidate_stake(signal, bankroll_usdc=bankroll_usdc, max_stake_usdc=max_stake_usdc)
+    execution = _execution_profile(
+        signal,
+        side=side,
+        quoted_price=price,
+        orderbooks=orderbooks,
+        planned_stake_usdc=planned_stake,
+        weather_fee_rate=weather_fee_rate,
+    )
     base_fair = _as_float(signal.get("paper_fair_probability"))
     base_edge = _as_float(signal.get("paper_net_edge"))
     base_fee = fee_per_share(price, weather_fee_rate)
@@ -341,7 +361,7 @@ def _candidate_row(
     mean_edge = sum(edges) / len(edges) if edges else None
     sensitivity = (base_edge - worst_edge) if base_edge is not None and worst_edge is not None else None
     robust_score = (worst_edge or 0.0) + pass_rate * 0.01 - max(sensitivity or 0.0, 0.0) * 0.1
-    execution_ok = execution["estimated_slippage"] <= max_execution_slippage
+    execution_ok = execution["estimated_slippage"] <= max_execution_slippage and execution["fillable"]
     robust_pass = int(bool(edges and passing == len(edges) and (worst_edge or -999.0) >= robust_min_edge and execution_ok))
     context = _market_context(signal.get("event_title", ""), signal.get("event_slug", ""))
     return {
@@ -360,6 +380,12 @@ def _candidate_row(
         "base_expected_roi": _round_or_none(base_expected_roi),
         "execution_price": _round(execution_price),
         "execution_slippage": _round(execution["estimated_slippage"]),
+        "execution_fillable": int(bool(execution["fillable"])),
+        "execution_fill_ratio": _round(execution["fill_ratio"]),
+        "execution_book_price": _round_or_none(execution["book_price"]),
+        "execution_book_levels_used": execution["book_levels_used"],
+        "execution_book_available_usdc": _round(execution["book_available_usdc"]),
+        "execution_token_id": execution["token_id"],
         "execution_quality": execution["quality"],
         "execution_flags": "; ".join(execution["flags"]),
         "execution_base_edge": _round_or_none(execution_base_edge),
@@ -408,6 +434,7 @@ def _candidate_row(
         "decision_reason": signal.get("decision_reason", signal.get("reason", "")),
         "market_has_ended": signal.get("market_has_ended", ""),
         "suggested_max_stake_usdc": signal.get("suggested_max_stake_usdc", ""),
+        "planned_stake_usdc": planned_stake,
         "selected": 0,
         "stake_usdc": "",
         "base_expected_pnl_usdc": "",
@@ -625,6 +652,8 @@ def _summary(
     maker_quote_improvement: float,
     maker_min_fill_score: float,
     maker_adverse_selection_penalty: float,
+    orderbooks_path: str = "",
+    orderbook_count: int = 0,
 ) -> dict[str, Any]:
     trade_rows = [row for row in signals if row.get("paper_side") in {"BUY_YES", "BUY_NO"}]
     robust = [row for row in candidates if row.get("robust_pass") == 1]
@@ -639,6 +668,8 @@ def _summary(
     selected_stake = sum(_as_float(row.get("stake_usdc")) for row in selected)
     selected_slippage = [_as_float(row.get("execution_slippage")) for row in selected]
     selected_slippage = [value for value in selected_slippage if value is not None]
+    selected_fill_ratios = [_as_float(row.get("execution_fill_ratio")) for row in selected]
+    selected_fill_ratios = [value for value in selected_fill_ratios if value is not None]
     selected_fill_scores = [_as_float(row.get("maker_fill_score")) for row in selected if row.get("maker_eligible") == 1]
     selected_fill_scores = [value for value in selected_fill_scores if value is not None]
     concentration = _concentration(selected, bankroll_usdc=bankroll_usdc)
@@ -666,6 +697,8 @@ def _summary(
         "selected_execution_slippage_mean": _round_or_none(sum(selected_slippage) / len(selected_slippage) if selected_slippage else None),
         "selected_execution_slippage_max": _round_or_none(max(selected_slippage) if selected_slippage else None),
         "selected_execution_quality": _quality_counts(selected),
+        "selected_execution_fillable": sum(1 for row in selected if row.get("execution_fillable") == 1),
+        "selected_execution_fill_ratio_mean": _round_or_none(sum(selected_fill_ratios) / len(selected_fill_ratios) if selected_fill_ratios else None),
         "selected_worst_edge_min": _round_or_none(min(selected_worst_edges) if selected_worst_edges else None),
         "selected_worst_edge_mean": _round_or_none(sum(selected_worst_edges) / len(selected_worst_edges) if selected_worst_edges else None),
         "selected_max_city_positions": _max_count(concentration["city"]),
@@ -684,6 +717,8 @@ def _summary(
         "maker_quote_improvement": maker_quote_improvement,
         "maker_min_fill_score": maker_min_fill_score,
         "maker_adverse_selection_penalty": maker_adverse_selection_penalty,
+        "orderbooks_path": orderbooks_path,
+        "orderbook_count": orderbook_count,
         "scenarios": [scenario.name for scenario in scenarios],
     }
 
@@ -706,7 +741,92 @@ def _stress_scenarios(
     ]
 
 
-def _execution_profile(signal: dict[str, Any], quoted_price: float) -> dict[str, Any]:
+def _load_orderbooks(path: str | Path | None) -> dict[str, dict[str, Any]]:
+    if not path:
+        return {}
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    books = payload.get("books", payload) if isinstance(payload, dict) else payload
+    if not isinstance(books, list):
+        return {}
+    result = {}
+    for book in books:
+        if not isinstance(book, dict):
+            continue
+        token_id = str(book.get("asset_id") or book.get("asset") or book.get("token_id") or "").strip()
+        if token_id:
+            result[token_id] = book
+    return result
+
+
+def _token_id_for_side(signal: dict[str, Any], side: str) -> str:
+    key = "yes_token_id" if side == "BUY_YES" else "no_token_id"
+    return str(signal.get(key) or "").strip()
+
+
+def _orderbook_depth_estimate(
+    book: dict[str, Any] | None,
+    quoted_price: float,
+    planned_stake_usdc: float,
+    weather_fee_rate: float,
+) -> dict[str, Any]:
+    if not book:
+        return {
+            "missing_book": True,
+            "fillable": False,
+            "fill_ratio": 0.0,
+            "average_price": None,
+            "levels_used": 0,
+            "available_usdc": 0.0,
+        }
+
+    fee = fee_per_share(quoted_price, weather_fee_rate)
+    target_shares = planned_stake_usdc / (quoted_price + fee) if quoted_price + fee > 0 else 0.0
+    remaining = target_shares
+    filled = 0.0
+    notional = 0.0
+    levels_used = 0
+    available_usdc = 0.0
+    asks = sorted(
+        (_book_level(level) for level in book.get("asks") or []),
+        key=lambda item: item[0],
+    )
+    asks = [(price, size) for price, size in asks if price is not None and size is not None and price > 0 and size > 0]
+    for price, size in asks:
+        available_usdc += price * size
+        if remaining <= 0:
+            continue
+        take = min(size, remaining)
+        filled += take
+        notional += take * price
+        remaining -= take
+        levels_used += 1
+
+    fill_ratio = (filled / target_shares) if target_shares > 0 else 0.0
+    average_price = (notional / filled) if filled > 0 else None
+    return {
+        "missing_book": False,
+        "fillable": fill_ratio >= 0.999,
+        "fill_ratio": _round(min(1.0, fill_ratio)) or 0.0,
+        "average_price": _round_or_none(average_price),
+        "levels_used": levels_used,
+        "available_usdc": _round(available_usdc) or 0.0,
+    }
+
+
+def _book_level(level: Any) -> tuple[float | None, float | None]:
+    if not isinstance(level, dict):
+        return None, None
+    return _as_optional_float(level.get("price")), _as_optional_float(level.get("size"))
+
+
+def _execution_profile(
+    signal: dict[str, Any],
+    side: str,
+    quoted_price: float,
+    orderbooks: dict[str, dict[str, Any]],
+    planned_stake_usdc: float,
+    weather_fee_rate: float,
+) -> dict[str, Any]:
     spread = _as_optional_float(signal.get("spread"))
     liquidity = _as_optional_float(signal.get("liquidity"))
     market_volume = _as_optional_float(signal.get("market_volume"))
@@ -745,6 +865,36 @@ def _execution_profile(signal: dict[str, Any], quoted_price: float) -> dict[str,
         flags.append("extreme price")
 
     estimated = min(0.05, spread_penalty + liquidity_penalty + volume_penalty + price_penalty)
+    book_price = None
+    book_levels_used = 0
+    book_available_usdc = 0.0
+    fill_ratio = 1.0
+    fillable = True
+    token_id = _token_id_for_side(signal, side)
+    if orderbooks:
+        depth = _orderbook_depth_estimate(
+            book=orderbooks.get(token_id or ""),
+            quoted_price=quoted_price,
+            planned_stake_usdc=planned_stake_usdc,
+            weather_fee_rate=weather_fee_rate,
+        )
+        book_price = depth["average_price"]
+        book_levels_used = depth["levels_used"]
+        book_available_usdc = depth["available_usdc"]
+        fill_ratio = depth["fill_ratio"]
+        fillable = bool(depth["fillable"])
+        if depth["missing_book"]:
+            estimated = max(estimated, 0.05)
+            flags.append("missing orderbook")
+        elif not fillable:
+            estimated = max(estimated, 0.05)
+            flags.append("insufficient orderbook depth")
+        elif book_price is not None:
+            book_slippage = max(0.0, book_price - quoted_price)
+            if book_slippage > 0:
+                flags.append("depth slippage")
+            estimated = min(0.10, max(estimated, book_slippage))
+
     if estimated <= 0.005 and (spread or 0.0) <= 0.02 and (liquidity or 0.0) >= 1000:
         quality = "good"
     elif estimated <= 0.02 and (spread or 0.0) <= 0.05 and (liquidity or 0.0) >= 100:
@@ -755,6 +905,12 @@ def _execution_profile(signal: dict[str, Any], quoted_price: float) -> dict[str,
         "estimated_slippage": _round(estimated) or 0.0,
         "quality": quality,
         "flags": flags,
+        "fillable": fillable,
+        "fill_ratio": fill_ratio,
+        "book_price": book_price,
+        "book_levels_used": book_levels_used,
+        "book_available_usdc": book_available_usdc,
+        "token_id": token_id or "",
     }
 
 
@@ -1037,6 +1193,8 @@ def _robust_reject_reason(
     execution: dict[str, Any],
     max_execution_slippage: float,
 ) -> str:
+    if not execution.get("fillable", True):
+        return "orderbook depth does not fill planned stake"
     if execution["estimated_slippage"] > max_execution_slippage:
         return f"execution slippage above {max_execution_slippage:.3f}: {execution['estimated_slippage']:.3f}"
     if not rows:
@@ -1064,7 +1222,7 @@ def _candidate_html(row: dict[str, Any]) -> str:
         f"<td class=\"{edge_class}\">{_percent(row.get('worst_edge'))}</td>"
         f"<td>{_money(row.get('stake_usdc'))}</td>"
         f"<td>{exec_pnl} / {maker_pnl}</td>"
-        f"<td class=\"title\">{html.escape(str(row.get('event_title', '')))}<div class=\"muted\">{html.escape(str(row.get('execution_quality', '')))} · {html.escape(str(row.get('maker_reason', '')))} · {html.escape(str(row.get('robust_reason', '')))}</div></td>"
+        f"<td class=\"title\">{html.escape(str(row.get('event_title', '')))}<div class=\"muted\">{html.escape(str(row.get('execution_quality', '')))} · fill {_percent(row.get('execution_fill_ratio'))} · {html.escape(str(row.get('maker_reason', '')))} · {html.escape(str(row.get('robust_reason', '')))}</div></td>"
         "</tr>"
     )
 

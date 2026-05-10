@@ -21,8 +21,10 @@ from .models.baseline import ExtremeTemperatureBaseline
 from .models.gbm import BiasCorrectedGBM, select_available_feature_columns
 from .paper import open_paper_portfolio, open_strategy_paper_portfolio, settle_paper_portfolio
 from .polymarket import (
+    PolymarketClobClient,
     PolymarketWeatherClient,
     flatten_temperature_markets,
+    token_ids_from_market_records,
     write_json,
     write_polymarket_markets_csv,
 )
@@ -276,6 +278,28 @@ def scan_polymarket_weather(
     return [market.to_record() for market in markets]
 
 
+def fetch_clob_orderbooks(
+    markets_path: str | Path,
+    output_path: str | Path,
+    include_no: bool = True,
+    limit: int | None = None,
+    insecure: bool = False,
+) -> dict:
+    market_records = read_records_csv(markets_path)
+    token_ids = token_ids_from_market_records(market_records, include_no=include_no)
+    if limit is not None:
+        token_ids = token_ids[:limit]
+    client = PolymarketClobClient(verify_tls=not insecure)
+    books = client.fetch_order_books(token_ids)
+    payload = {
+        "source_markets_path": str(markets_path),
+        "requested_token_ids": len(token_ids),
+        "books": books,
+    }
+    write_json(payload, output_path)
+    return payload
+
+
 def build_market_signals(
     markets_path: str | Path,
     predictions_path: str | Path,
@@ -290,6 +314,7 @@ def build_market_signals(
     min_liquidity: float = 0.0,
     guard_no_on_top_bucket: bool = True,
     near_top_no_guard_ratio: float = 0.75,
+    allow_buy_yes: bool = True,
 ) -> list[dict]:
     return build_market_signals_file(
         markets_path=markets_path,
@@ -305,6 +330,7 @@ def build_market_signals(
         min_liquidity=min_liquidity,
         guard_no_on_top_bucket=guard_no_on_top_bucket,
         near_top_no_guard_ratio=near_top_no_guard_ratio,
+        allow_buy_yes=allow_buy_yes,
     )
 
 
@@ -406,6 +432,7 @@ def run_strategy_lab(
     portfolio_output_path: str | Path | None = None,
     summary_output_path: str | Path | None = None,
     report_path: str | Path | None = None,
+    orderbooks_path: str | Path | None = None,
     bankroll_usdc: float = 1000.0,
     max_positions: int = 100,
     max_stake_usdc: float = 5.0,
@@ -435,6 +462,7 @@ def run_strategy_lab(
         portfolio_output_path=portfolio_output_path,
         summary_output_path=summary_output_path,
         report_path=report_path,
+        orderbooks_path=orderbooks_path,
         bankroll_usdc=bankroll_usdc,
         max_positions=max_positions,
         max_stake_usdc=max_stake_usdc,
