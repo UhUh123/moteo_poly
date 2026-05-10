@@ -126,6 +126,21 @@ settle-paper-trades     ──►  artifacts/paper_portfolio.csv (updated with w
 - Dashboard в [paper.py](src/detect_temperature/paper.py): header с 3 кнопками: **Проверить рынок** (dry-run), **Открыть сделки** (open-trades), **Обновить actuals & PnL** (refresh-paper).
 - Тесты: **43 passed** (`PYTHONPATH=src python3 -m pytest -q`). Новый [test_risk_guards.py](tests/test_risk_guards.py) покрывает все guard'ы.
 
+### Фаза 2a — модель на реальных данных ✅
+
+- [scripts/build_historical_training.py](scripts/build_historical_training.py) — скачивает для каждой ICAO станции:
+  - observed daily max/min из Open-Meteo ERA5 archive (https://archive-api.open-meteo.com/v1/archive)
+  - operational forecast из Open-Meteo Historical Forecast API (https://historical-forecast-api.open-meteo.com/v1/forecast)
+- [data/training_stations.json](data/training_stations.json): 51 верифицированная станция.
+- [data/training_real.csv](data/training_real.csv): **124 032 строки** за 2023-01-01 … 2026-04-30 (было 3100 синтетических).
+- [scripts/compare_training_sources.py](scripts/compare_training_sources.py) сравнивает модели на одном holdout.
+- **Holdout-метрики на real data (18 666 событий, 2025-10-30 … 2026-04-30):**
+  - Baseline (Open-Meteo raw): MAE 0.547°C, within-1C 81.2%
+  - Synthetic GBM (старая): MAE 0.734°C — **ухудшала baseline**
+  - Real GBM (новая): **MAE 0.455°C**, within-1C 83.8%, within-2C 96.3%
+- Production model: `artifacts/models/gbm.joblib` (копия `gbm_real.joblib`). Старая сохранена как `gbm_synthetic_backup.joblib`.
+- После переключения: сигналы `bankroll_100` дают 35 BUY_NO кандидатов (было 0 на устаревших снимках).
+
 ### Windows collector — работает
 
 - `C:\poly\detect-temperature` — репо на Windows, установлен через venv, Python 3.14.
@@ -156,16 +171,15 @@ settle-paper-trades     ──►  artifacts/paper_portfolio.csv (updated with w
 
 Windows collector работает сам — проверять логи раз в 2–3 дня.
 
-### Фаза 2 (неделя 3–6)
+### Фаза 2 (неделя 3–6) — частично готово
 
-**Калибровка sigma по реальным данным.**
+- [x] **2a. Реальная модель.** Обучено на 124K Open-Meteo пар 2023–2026. Production model теперь даёт MAE 0.45°C на реальных данных вместо 0.73°C у синтетической.
+- [ ] **2b. Per-station rolling MAE + bias.** Используем `data/training_real.csv` чтобы посчитать для каждой станции реальную sigma и bias, сохранить в `data/station_calibration.csv`. Сейчас sigma 2.5 захардкожена глобально.
+- [ ] **2c. Signals.py читает sigma per station.** Заменить захардкоженную sigma на чтение из calibration файла + fallback 2.5.
+- [ ] **2d. Backtesting на 2025-10-30 … 2026-04-30 holdout.** Реконструировать bucket-вероятности для архивных Polymarket рынков если доступны, оценить win rate BUY_NO.
+- [ ] **2e. Когда `data/actuals.csv` соберёт ≥ 500 реальных resolved — переобучить с включением этих пар.**
 
-1. Использовать накопленный `data/history/` + `data/actuals.csv` для построения rolling MAE per station.
-2. Создать `data/station_calibration.csv` с колонками `station_id`, `rolling_mae_c`, `rolling_bias_c`, `n_samples`, `updated_at`.
-3. Заменить захардкоженную `sigma_c` на `max(1.5, rolling_mae * 1.5)` per station.
-4. Добавить rolling bias correction в `models/gbm.py`: `corrected = baseline + gbm_residual - rolling_bias`.
-5. Переобучить GBM, когда наберётся ≥ 500 реальных `(station, date)` пар.
-6. **Метрика успеха:** MAE на resolved ≤ 1.3 °C, BUY_NO win rate ≥ 75%.
+Критерии успеха фазы 2: MAE на Polymarket resolved ≤ 1.3 °C, BUY_NO win rate ≥ 75 %.
 
 ### Фаза 3 (неделя 6–10)
 

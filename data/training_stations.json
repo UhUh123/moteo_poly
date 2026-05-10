@@ -1,0 +1,359 @@
+[
+  {
+    "id": "EGLC",
+    "lat": 51.505,
+    "lon": 0.055,
+    "elev": 10.0,
+    "country": "GB"
+  },
+  {
+    "id": "HKO",
+    "lat": 22.301944,
+    "lon": 114.174167,
+    "elev": 32.0,
+    "country": "HK"
+  },
+  {
+    "id": "ZSPD",
+    "lat": 31.146,
+    "lon": 121.8,
+    "elev": 4.0,
+    "country": "CN"
+  },
+  {
+    "id": "ZBAA",
+    "lat": 40.082,
+    "lon": 116.603,
+    "elev": 31.0,
+    "country": "CN"
+  },
+  {
+    "id": "LEMD",
+    "lat": 40.466,
+    "lon": -3.555,
+    "elev": 589.0,
+    "country": "ES"
+  },
+  {
+    "id": "KLGA",
+    "lat": 40.77945,
+    "lon": -73.88027,
+    "elev": 9.0,
+    "country": "US"
+  },
+  {
+    "id": "LFPB",
+    "lat": 48.967,
+    "lon": 2.428,
+    "elev": 50.0,
+    "country": "FR"
+  },
+  {
+    "id": "ZSQD",
+    "lat": 36.362,
+    "lon": 120.087,
+    "elev": 2.0,
+    "country": "CN"
+  },
+  {
+    "id": "ZGSZ",
+    "lat": 22.639,
+    "lon": 113.803,
+    "elev": 18.0,
+    "country": "CN"
+  },
+  {
+    "id": "ZUCK",
+    "lat": 29.718,
+    "lon": 106.639,
+    "elev": 416.0,
+    "country": "CN"
+  },
+  {
+    "id": "ZUUU",
+    "lat": 30.576,
+    "lon": 103.95,
+    "elev": 494.0,
+    "country": "CN"
+  },
+  {
+    "id": "SBGR",
+    "lat": -23.432,
+    "lon": -46.469,
+    "elev": 745.0,
+    "country": "BR"
+  },
+  {
+    "id": "RKSI",
+    "lat": 37.469,
+    "lon": 126.451,
+    "elev": 7.0,
+    "country": "KR"
+  },
+  {
+    "id": "RCSS",
+    "lat": 25.069,
+    "lon": 121.552,
+    "elev": 8.0,
+    "country": "TW"
+  },
+  {
+    "id": "LTAC",
+    "lat": 40.128,
+    "lon": 32.995,
+    "elev": 952.0,
+    "country": "TR"
+  },
+  {
+    "id": "WSSS",
+    "lat": 1.368,
+    "lon": 103.982,
+    "elev": 17.0,
+    "country": "SG"
+  },
+  {
+    "id": "EHAM",
+    "lat": 52.315,
+    "lon": 4.79,
+    "elev": -2.0,
+    "country": "NL"
+  },
+  {
+    "id": "WIHH",
+    "lat": -6.267,
+    "lon": 106.891,
+    "elev": 26.0,
+    "country": "ID"
+  },
+  {
+    "id": "EDDM",
+    "lat": 48.348,
+    "lon": 11.813,
+    "elev": 445.0,
+    "country": "DE"
+  },
+  {
+    "id": "FACT",
+    "lat": -33.965,
+    "lon": 18.602,
+    "elev": 48.0,
+    "country": "ZA"
+  },
+  {
+    "id": "LLBG",
+    "lat": 32.011,
+    "lon": 34.887,
+    "elev": 35.0,
+    "country": "IL"
+  },
+  {
+    "id": "KATL",
+    "lat": 33.62972,
+    "lon": -84.44223,
+    "elev": 309.0,
+    "country": "US"
+  },
+  {
+    "id": "LIMC",
+    "lat": 45.631,
+    "lon": 8.728,
+    "elev": 221.0,
+    "country": "IT"
+  },
+  {
+    "id": "EFHK",
+    "lat": 60.327,
+    "lon": 24.957,
+    "elev": 56.0,
+    "country": "FI"
+  },
+  {
+    "id": "KSEA",
+    "lat": 47.44467,
+    "lon": -122.31442,
+    "elev": 115.0,
+    "country": "US"
+  },
+  {
+    "id": "KMIA",
+    "lat": 25.78806,
+    "lon": -80.31692,
+    "elev": 1.0,
+    "country": "US"
+  },
+  {
+    "id": "UUWW",
+    "lat": 55.592,
+    "lon": 37.261,
+    "elev": 195.0,
+    "country": "RU"
+  },
+  {
+    "id": "LTFM",
+    "lat": 41.262,
+    "lon": 28.74,
+    "elev": 99.0,
+    "country": "TR"
+  },
+  {
+    "id": "ZHHH",
+    "lat": 30.783,
+    "lon": 114.205,
+    "elev": 33.0,
+    "country": "CN"
+  },
+  {
+    "id": "ZGGG",
+    "lat": 23.392,
+    "lon": 113.307,
+    "elev": 11.0,
+    "country": "CN"
+  },
+  {
+    "id": "DNMM",
+    "lat": 6.577,
+    "lon": 3.321,
+    "elev": 27.0,
+    "country": "NG"
+  },
+  {
+    "id": "KAUS",
+    "lat": 30.1831,
+    "lon": -97.68063,
+    "elev": 148.0,
+    "country": "US"
+  },
+  {
+    "id": "EPWA",
+    "lat": 52.163,
+    "lon": 20.961,
+    "elev": 107.0,
+    "country": "PL"
+  },
+  {
+    "id": "NZWN",
+    "lat": -41.331,
+    "lon": 174.806,
+    "elev": 12.0,
+    "country": "NZ"
+  },
+  {
+    "id": "SAEZ",
+    "lat": -34.822,
+    "lon": -58.536,
+    "elev": 16.0,
+    "country": "AR"
+  },
+  {
+    "id": "KORD",
+    "lat": 41.96017,
+    "lon": -87.93161,
+    "elev": 202.0,
+    "country": "US"
+  },
+  {
+    "id": "WMKK",
+    "lat": 2.747,
+    "lon": 101.714,
+    "elev": 21.0,
+    "country": "MY"
+  },
+  {
+    "id": "CYYZ",
+    "lat": 43.679,
+    "lon": -79.629,
+    "elev": 171.0,
+    "country": "CA"
+  },
+  {
+    "id": "OEJN",
+    "lat": 21.685,
+    "lon": 39.166,
+    "elev": 8.0,
+    "country": "SA"
+  },
+  {
+    "id": "KLAX",
+    "lat": 33.93817,
+    "lon": -118.3866,
+    "elev": 30.0,
+    "country": "US"
+  },
+  {
+    "id": "RPLL",
+    "lat": 14.507,
+    "lon": 121.004,
+    "elev": 15.0,
+    "country": "PH"
+  },
+  {
+    "id": "RJTT",
+    "lat": 35.553,
+    "lon": 139.781,
+    "elev": 5.0,
+    "country": "JP"
+  },
+  {
+    "id": "KBKF",
+    "lat": 39.713,
+    "lon": -104.758,
+    "elev": 1703.0,
+    "country": "US"
+  },
+  {
+    "id": "KSFO",
+    "lat": 37.61961,
+    "lon": -122.36561,
+    "elev": 2.0,
+    "country": "US"
+  },
+  {
+    "id": "KHOU",
+    "lat": 29.64582,
+    "lon": -95.28214,
+    "elev": 13.0,
+    "country": "US"
+  },
+  {
+    "id": "OPKC",
+    "lat": 24.902,
+    "lon": 67.139,
+    "elev": 20.0,
+    "country": "PK"
+  },
+  {
+    "id": "RKPK",
+    "lat": 35.179,
+    "lon": 128.938,
+    "elev": 3.0,
+    "country": "KR"
+  },
+  {
+    "id": "KDAL",
+    "lat": 32.83836,
+    "lon": -96.83584,
+    "elev": 148.0,
+    "country": "US"
+  },
+  {
+    "id": "VILK",
+    "lat": 26.761,
+    "lon": 80.889,
+    "elev": 121.0,
+    "country": "IN"
+  },
+  {
+    "id": "MMMX",
+    "lat": 19.436,
+    "lon": -99.072,
+    "elev": 2224.0,
+    "country": "MX"
+  },
+  {
+    "id": "MPMG",
+    "lat": 8.967,
+    "lon": -79.555,
+    "elev": 6.0,
+    "country": "PA"
+  }
+]
