@@ -1,0 +1,10 @@
+{
+  "n_events": 50,
+  "model_path": "/Users/opipsy/Desktop/poly/detect_temperature 2/artifacts/models/gbm.joblib",
+  "calibration_path": "/Users/opipsy/Desktop/poly/detect_temperature 2/data/station_calibration.csv",
+  "metrics": {
+    "baseline_mae_c": 1.226,
+    "gbm_mae_c": 1.2,
+    "corrected_mae_c": 1.2018
+  }
+}
