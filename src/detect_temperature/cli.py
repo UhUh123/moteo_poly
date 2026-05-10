@@ -16,6 +16,7 @@ from .pipeline import (
     open_strategy_paper_trades,
     predict_baseline,
     predict_gbm,
+    refresh_open_positions,
     run_strategy_lab,
     scan_polymarket_weather,
     settle_paper_trades,
@@ -234,6 +235,18 @@ def main(argv: list[str] | None = None) -> int:
         default=[],
         help="Paper state JSON path to inspect for drawdown. Repeat for fallback order.",
     )
+
+    refresh_open_parser = subparsers.add_parser("refresh-open-positions")
+    refresh_open_parser.add_argument("--portfolio", default="artifacts/paper_portfolio.csv")
+    refresh_open_parser.add_argument("--state", default="artifacts/paper_portfolio.json")
+    refresh_open_parser.add_argument("--dashboard", default="artifacts/paper_dashboard.html")
+    refresh_open_parser.add_argument("--stations", default="data/stations.cache.json")
+    refresh_open_parser.add_argument("--manual-stations", default="data/manual_stations.csv")
+    refresh_open_parser.add_argument("--calibration", default="data/station_calibration.csv")
+    refresh_open_parser.add_argument("--default-sigma-c", type=float, default=2.5)
+    refresh_open_parser.add_argument("--at-risk-edge", type=float, default=0.0)
+    refresh_open_parser.add_argument("--resolve-threshold", type=float, default=0.02)
+    refresh_open_parser.add_argument("--bankroll-usdc", type=float, default=100.0)
 
     serve_paper_parser = subparsers.add_parser("serve-paper-dashboard")
     serve_paper_parser.add_argument("--host", default="127.0.0.1")
@@ -567,6 +580,32 @@ def main(argv: list[str] | None = None) -> int:
             root=args.root,
             bankroll_usdc=args.bankroll_usdc,
             finalization_lag_days=args.finalization_lag_days,
+        )
+        return 0
+
+    if args.command == "refresh-open-positions":
+        payload = refresh_open_positions(
+            portfolio_path=args.portfolio,
+            state_path=args.state,
+            dashboard_path=args.dashboard,
+            stations_path=args.stations,
+            manual_stations_path=args.manual_stations,
+            calibration_path=args.calibration,
+            default_sigma_c=args.default_sigma_c,
+            at_risk_edge=args.at_risk_edge,
+            resolve_threshold=args.resolve_threshold,
+            bankroll_usdc=args.bankroll_usdc,
+        )
+        summary = payload["summary"]
+        stats = summary.get("refresh_stats", {})
+        print(
+            "refreshed open positions -> "
+            f"refreshed={stats.get('refreshed', 0)}, "
+            f"resolved_won={stats.get('resolved_won', 0)}, "
+            f"resolved_lost={stats.get('resolved_lost', 0)}, "
+            f"at_risk={stats.get('at_risk', 0)}, "
+            f"skipped={stats.get('skipped', 0)}, "
+            f"errors={stats.get('errors', 0)} -> {args.dashboard}"
         )
         return 0
 

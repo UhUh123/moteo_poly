@@ -13,7 +13,7 @@ from .signals import fee_per_share as market_fee_per_share
 from .units import celsius_to_fahrenheit
 
 
-OPEN_STATUSES = {"open", "pending_actual"}
+OPEN_STATUSES = {"open", "pending_actual", "at_risk"}
 SETTLED_STATUSES = {"won", "lost"}
 
 
@@ -545,6 +545,9 @@ def render_paper_dashboard(payload: dict[str, Any], path: str | Path) -> None:
       overflow: hidden;
     }}
     .chip {{ display: inline-flex; align-items: center; min-height: 22px; border-radius: 999px; padding: 2px 8px; background: var(--chip); font-size: 12px; }}
+    .chip.at_risk {{ background: var(--warn-bg); color: #7c2d12; border: 1px solid var(--warn-line); }}
+    .chip.won {{ background: #dcfce7; color: var(--good); }}
+    .chip.lost {{ background: #fee2e2; color: var(--bad); }}
     .buy_yes {{ color: var(--accent); }}
     .buy_no {{ color: var(--accent-2); }}
     .won {{ color: var(--good); }}
@@ -569,6 +572,7 @@ def render_paper_dashboard(payload: dict[str, Any], path: str | Path) -> None:
     <div class="header-actions">
       <button id="dryRunButton">Проверить рынок</button>
       <button id="openTradesButton">Открыть сделки</button>
+      <button id="refreshOpenButton">Мониторить позиции</button>
       <button class="primary" id="refreshButton">Обновить actuals & PnL</button>
       <div id="refreshStatus">Кнопки работают через локальный dashboard server.</div>
     </div>
@@ -617,6 +621,7 @@ def render_paper_dashboard(payload: dict[str, Any], path: str | Path) -> None:
     const refreshButton = document.getElementById('refreshButton');
     const openTradesButton = document.getElementById('openTradesButton');
     const dryRunButton = document.getElementById('dryRunButton');
+    const refreshOpenButton = document.getElementById('refreshOpenButton');
     const refreshStatus = document.getElementById('refreshStatus');
     const tooltip = document.getElementById('floatingTooltip');
     function applyFilter() {{
@@ -724,6 +729,31 @@ def render_paper_dashboard(payload: dict[str, Any], path: str | Path) -> None:
 
     openTradesButton.addEventListener('click', () => callPipeline('/api/open-trades', 'Открыть сделки', openTradesButton));
     dryRunButton.addEventListener('click', () => callPipeline('/api/dry-run', 'Проверка рынка', dryRunButton));
+
+    refreshOpenButton.addEventListener('click', async () => {{
+      if (window.location.protocol === 'file:') {{
+        refreshStatus.textContent = 'Сначала открой через локальный сервер: python3 scripts/serve_paper_dashboard.py';
+        return;
+      }}
+      refreshOpenButton.disabled = true;
+      refreshStatus.textContent = 'Проверяю observed max/min и пересчитываю открытые позиции...';
+      try {{
+        const response = await fetch('/api/refresh-open', {{ method: 'POST' }});
+        const data = await response.json();
+        if (!response.ok) {{
+          throw new Error(data.error || 'refresh-open failed');
+        }}
+        const stats = (data.summary && data.summary.refresh_stats) || {{}};
+        refreshStatus.textContent =
+          `Готово: обновлено ${{stats.refreshed || 0}}, resolved won ${{stats.resolved_won || 0}}, ` +
+          `resolved lost ${{stats.resolved_lost || 0}}, at_risk ${{stats.at_risk || 0}}. Перезагружаю...`;
+        setTimeout(() => window.location.reload(), 1100);
+      }} catch (error) {{
+        refreshStatus.textContent = `Не удалось обновить позиции: ${{error.message}}`;
+      }} finally {{
+        refreshOpenButton.disabled = false;
+      }}
+    }});
   </script>
 </body>
 </html>

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import csv
 import json
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 import pandas as pd
@@ -19,6 +19,12 @@ from .markets import (
 )
 from .models.baseline import ExtremeTemperatureBaseline
 from .models.gbm import BiasCorrectedGBM, select_available_feature_columns
+from .near_close import (
+    NearCloseInput,
+    fetch_intraday_max_min,
+    hours_remaining_until,
+    refined_bucket_probability,
+)
 from .paper import open_paper_portfolio, open_strategy_paper_portfolio, settle_paper_portfolio
 from .polymarket import (
     PolymarketClobClient,
@@ -31,8 +37,11 @@ from .polymarket import (
 from .resolved_eval import evaluate_resolved_predictions
 from .schema import MarketTarget
 from .signals import build_market_signals as build_market_signals_file
+from .signals import fee_per_share, load_station_calibrations, sigma_for_station
 from .sources.actuals import collect_actual_for_target, error_actual_for_target
-from .sources.base import ForecastProvider, ObservationProvider, StationCatalog
+from .sources.base import ForecastProvider, ObservationProvider, StationCatalog, StationMetadata
+from .sources.aviation_weather import AviationWeatherStationCatalog
+from .sources.manual import ManualStationCatalog
 from .strategy_lab import run_strategy_lab as run_strategy_lab_file
 from .units import celsius_to_fahrenheit
 
@@ -527,6 +536,330 @@ def run_strategy_lab(
 def read_records_csv(path: str | Path) -> list[dict]:
     with Path(path).open("r", newline="", encoding="utf-8") as fh:
         return list(csv.DictReader(fh))
+
+
+def refresh_open_positions(
+    portfolio_path: str | Path = "artifacts/paper_portfolio.csv",
+    state_path: str | Path | None = "artifacts/paper_portfolio.json",
+    dashboard_path: str | Path | None = "artifacts/paper_dashboard.html",
+    stations_path: str | Path = "data/stations.cache.json",
+    manual_stations_path: str | Path = "data/manual_stations.csv",
+    calibration_path: str | Path = "data/station_calibration.csv",
+    targets_path: str | Path = "data/targets.csv",
+    default_sigma_c: float = 2.5,
+    at_risk_edge: float = 0.0,
+    resolve_threshold: float = 0.02,
+    bankroll_usdc: float = 100.0,
+    now_utc: datetime | None = None,
+) -> dict:
+    """For each open paper position, re-price the bucket probability using
+    today's observed max/min and remaining forecast uncertainty.
+
+    - resolved_early: refined_fair <= resolve_threshold (definitely lost) or
+      >= 1 - resolve_threshold (definitely won). PnL is booked on the spot.
+    - at_risk: refined_edge < at_risk_edge but not yet decided.
+    - still_open: edge intact.
+
+    No orders are placed. In paper we cannot exit at an unknown future price,
+    so at_risk positions just get an annotation; only mathematically resolved
+    buckets get realized PnL.
+    """
+    from .paper import (
+        render_paper_dashboard,
+        summarize_portfolio,
+        OPEN_STATUSES,
+        SETTLED_STATUSES,
+    )
+
+    portfolio_path = Path(portfolio_path)
+    if not portfolio_path.exists():
+        raise FileNotFoundError(f"paper portfolio missing: {portfolio_path}")
+
+    positions = read_records_csv(portfolio_path)
+    calibrations = load_station_calibrations(calibration_path)
+    station_catalog = _station_catalog_from_paths(stations_path, manual_stations_path)
+    targets_by_slug = _load_targets_by_slug(targets_path)
+    refreshed_at = (now_utc or datetime.now(timezone.utc)).isoformat(timespec="seconds")
+
+    # Group open positions by (station_id, target_date) to batch API calls
+    open_rows = [p for p in positions if p.get("status") in OPEN_STATUSES]
+    fetch_cache: dict[tuple[str, str], dict] = {}
+
+    stats = {"refreshed": 0, "resolved_won": 0, "resolved_lost": 0, "at_risk": 0, "skipped": 0, "errors": 0}
+
+    for position in positions:
+        if position.get("status") not in OPEN_STATUSES:
+            continue
+        target = _derive_target_for_position(position, targets_by_slug)
+        if target is None:
+            stats["skipped"] += 1
+            position["refresh_reason"] = "no target_date on position"
+            continue
+        station = station_catalog.lookup(target.station_id) if station_catalog else None
+        if station is None or station.latitude is None or station.longitude is None:
+            stats["skipped"] += 1
+            position["refresh_reason"] = f"no coords for station {target.station_id}"
+            continue
+
+        key = (target.station_id, target.target_date.isoformat())
+        try:
+            observation = fetch_cache.get(key)
+            if observation is None:
+                obs = fetch_intraday_max_min(
+                    latitude=station.latitude,
+                    longitude=station.longitude,
+                    target_date=target.target_date,
+                    station_id=target.station_id,
+                    now_utc=now_utc,
+                )
+                observation = {
+                    "observed_max_c": obs.observed_max_c,
+                    "observed_min_c": obs.observed_min_c,
+                    "samples": obs.samples,
+                }
+                fetch_cache[key] = observation
+        except Exception as exc:
+            stats["errors"] += 1
+            position["refresh_reason"] = f"intraday fetch failed: {exc}"
+            continue
+
+        _annotate_refreshed_position(
+            position=position,
+            target=target,
+            observation=observation,
+            calibrations=calibrations,
+            default_sigma_c=default_sigma_c,
+            now_utc=now_utc,
+            stats=stats,
+            at_risk_edge=at_risk_edge,
+            resolve_threshold=resolve_threshold,
+        )
+        position["refreshed_at"] = refreshed_at
+
+    write_records_csv(positions, portfolio_path)
+    summary = summarize_portfolio(positions, bankroll_usdc=bankroll_usdc, generated_at=refreshed_at)
+    summary["refresh_stats"] = stats
+    payload = {"summary": summary, "positions": positions}
+    if state_path:
+        Path(state_path).parent.mkdir(parents=True, exist_ok=True)
+        with Path(state_path).open("w", encoding="utf-8") as fh:
+            json.dump(payload, fh, indent=2, ensure_ascii=False)
+            fh.write("\n")
+    if dashboard_path:
+        render_paper_dashboard(payload, dashboard_path)
+    return payload
+
+
+def _station_catalog_from_paths(
+    stations_path: str | Path, manual_stations_path: str | Path
+) -> object | None:
+    from .sources.base import CompositeStationCatalog
+
+    catalogs = []
+    if Path(manual_stations_path).exists():
+        catalogs.append(ManualStationCatalog(manual_stations_path))
+    if Path(stations_path).exists():
+        catalogs.append(AviationWeatherStationCatalog(cache_path=stations_path))
+    return CompositeStationCatalog(catalogs) if catalogs else None
+
+
+def _load_targets_by_slug(targets_path: str | Path) -> dict[str, MarketTarget]:
+    path = Path(targets_path)
+    if not path.exists():
+        return {}
+    return {t.slug: t for t in read_targets_csv(path)}
+
+
+def _derive_target_for_position(
+    position: dict,
+    targets_by_slug: dict[str, MarketTarget] | None = None,
+) -> MarketTarget | None:
+    """Build a lightweight MarketTarget from a paper row.
+
+    Prefers the canonical targets_by_slug when the row's event_slug matches;
+    that gives us station_id and target_date for free. Falls back to parsing
+    fields embedded in the paper row.
+    """
+    slug = str(position.get("event_slug") or "")
+    if targets_by_slug and slug in targets_by_slug:
+        ref = targets_by_slug[slug]
+        if ref.target_date and ref.target_extreme in {"max", "min"} and ref.station_id:
+            return ref
+
+    extreme = _extreme_from_position(position)
+    if extreme not in {"max", "min"}:
+        return None
+    end_date_raw = position.get("end_date") or ""
+    target_date = _parse_date(end_date_raw) or _parse_date(position.get("target_date") or "")
+    station_id = str(position.get("station_id") or "").strip()
+    if not target_date or not station_id:
+        return None
+    return MarketTarget(
+        title=str(position.get("event_title") or ""),
+        slug=slug,
+        city=str(position.get("city") or ""),
+        location_name="",
+        target_date=target_date,
+        target_extreme=extreme,
+        target_unit=str(position.get("interval_unit") or "celsius"),
+        station_id=station_id,
+        resolution_source_url="",
+        source_domain="",
+        description="",
+    )
+
+
+def _extreme_from_position(position: dict) -> str:
+    slug = str(position.get("event_slug") or "").lower()
+    if "highest-temperature" in slug:
+        return "max"
+    if "lowest-temperature" in slug:
+        return "min"
+    title = str(position.get("event_title") or "").lower()
+    if "highest" in title:
+        return "max"
+    if "lowest" in title:
+        return "min"
+    return ""
+
+
+def _parse_date(value: str) -> date | None:
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00")).date()
+    except ValueError:
+        pass
+    try:
+        return date.fromisoformat(value[:10])
+    except ValueError:
+        return None
+
+
+def _annotate_refreshed_position(
+    position: dict,
+    target: MarketTarget,
+    observation: dict,
+    calibrations: dict[str, float],
+    default_sigma_c: float,
+    now_utc: datetime | None,
+    stats: dict[str, int],
+    at_risk_edge: float,
+    resolve_threshold: float,
+) -> None:
+    """Compute refined_fair, refined_edge, decide resolved_early/at_risk."""
+    mean_c = _float_or_none(position.get("prediction_c"))
+    if mean_c is None:
+        stats["skipped"] += 1
+        position["refresh_reason"] = "no prediction_c on position"
+        return
+
+    sigma_base = sigma_for_station(target.station_id, calibrations, default_sigma_c)
+    interval_unit = str(position.get("interval_unit") or "celsius").lower()
+    lower = _float_or_none(position.get("interval_lower"))
+    upper = _float_or_none(position.get("interval_upper"))
+    if interval_unit == "fahrenheit":
+        mean_c_for_calc = (mean_c - 32.0) * 5.0 / 9.0 if mean_c > 60 else mean_c  # interval in F, but mean_c stored in C
+    else:
+        mean_c_for_calc = mean_c
+    # Work fully in market-native units:
+    mean_calc = celsius_to_fahrenheit(mean_c) if interval_unit == "fahrenheit" else mean_c
+    sigma_calc = sigma_base * 9.0 / 5.0 if interval_unit == "fahrenheit" else sigma_base
+
+    obs_c = observation.get("observed_max_c") if target.target_extreme == "max" else observation.get("observed_min_c")
+    observed_native = None
+    if obs_c is not None:
+        observed_native = celsius_to_fahrenheit(obs_c) if interval_unit == "fahrenheit" else obs_c
+
+    hours_remaining = 24.0
+    end_date = _parse_datetime(position.get("end_date") or "")
+    if end_date is not None:
+        hours_remaining = hours_remaining_until(end_date, now_utc=now_utc)
+
+    spec = NearCloseInput(
+        target_extreme=target.target_extreme,
+        mean_c=mean_calc,
+        sigma_c=sigma_calc,
+        lower_c=lower,
+        upper_c=upper,
+        observed_so_far_c=observed_native,
+        hours_remaining=hours_remaining,
+    )
+    fair_yes_refined = refined_bucket_probability(spec)
+    fair_no_refined = 1.0 - fair_yes_refined
+
+    side = position.get("side")
+    refined_fair = fair_yes_refined if side == "BUY_YES" else fair_no_refined
+    entry_price = _float_or_none(position.get("price")) or 0.0
+    entry_fee = _float_or_none(position.get("fee_per_share")) or 0.0
+    refined_edge = refined_fair - entry_price - entry_fee
+
+    position["refined_fair_probability"] = round(refined_fair, 6)
+    position["refined_edge"] = round(refined_edge, 6)
+    position["observed_so_far_c"] = obs_c if obs_c is not None else ""
+    position["observed_samples"] = observation.get("samples", 0)
+    position["hours_remaining"] = round(hours_remaining, 3)
+    position["refresh_reason"] = "refreshed"
+    stats["refreshed"] += 1
+
+    stake = _float_or_none(position.get("stake_usdc")) or 0.0
+    shares = _float_or_none(position.get("shares")) or 0.0
+
+    # Hard resolve: probability near 0 (we lose) or near 1 (we win)
+    if refined_fair <= resolve_threshold:
+        position["status"] = "lost"
+        position["settled_at"] = (now_utc or datetime.now(timezone.utc)).isoformat(timespec="seconds")
+        position["won"] = 0
+        position["payout_usdc"] = 0.0
+        position["pnl_usdc"] = round(-stake, 4)
+        position["roi_pct"] = round(-100.0, 2) if stake else None
+        position["actual_status"] = "resolved_early_by_observation"
+        stats["resolved_lost"] += 1
+        position["refresh_reason"] = (
+            f"resolved_early (lost): refined_fair={refined_fair:.4f} <= {resolve_threshold}"
+        )
+    elif refined_fair >= 1.0 - resolve_threshold:
+        payout = shares  # $1/share on a winning Polymarket outcome
+        pnl = payout - stake
+        position["status"] = "won"
+        position["settled_at"] = (now_utc or datetime.now(timezone.utc)).isoformat(timespec="seconds")
+        position["won"] = 1
+        position["payout_usdc"] = round(payout, 4)
+        position["pnl_usdc"] = round(pnl, 4)
+        position["roi_pct"] = round((pnl / stake) * 100.0, 2) if stake else None
+        position["actual_status"] = "resolved_early_by_observation"
+        stats["resolved_won"] += 1
+        position["refresh_reason"] = (
+            f"resolved_early (won): refined_fair={refined_fair:.4f} >= {1 - resolve_threshold}"
+        )
+    elif refined_edge < at_risk_edge:
+        position["status"] = "at_risk"
+        stats["at_risk"] += 1
+        position["refresh_reason"] = (
+            f"at_risk: refined_edge={refined_edge:.4f} below {at_risk_edge}"
+        )
+    # else: leave status as-is (still_open)
+
+
+def _float_or_none(value) -> float | None:
+    if value in {None, ""}:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _parse_datetime(value: str) -> datetime | None:
+    if not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed
 
 
 def write_records_csv(records: list[dict], path: str | Path) -> None:

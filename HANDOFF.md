@@ -200,16 +200,16 @@ settle-paper-trades     ──►  artifacts/paper_portfolio.csv (updated with w
 
 Windows collector работает сам — проверять логи раз в 2–3 дня.
 
-### Фаза 2 (неделя 3–6) — в основном готово
+### Фаза 3 — near-close re-pricing ✅ (MVP)
 
-- [x] **2a. Реальная модель.** 124K Open-Meteo пар, MAE 0.45°C vs 0.73°C у синтетической.
-- [x] **2b. Per-station rolling MAE.** `data/station_calibration.csv` + sigma-per-station в signals.
-- [x] **2c. Применить rolling_bias в predict-gbm.** Wired; MAE 0.414 → 0.404 на holdout; старая модель вредила, новая — нет.
-- [x] **2d. Авто-обновление calibration раз в неделю.** `scripts/refresh_calibration.py` + `scripts/register_calibration_refresh.ps1`. Windows Task `PolymarketCalibrationRefresh`: Mondays 04:17 local, `--window-days 180`. Каждую неделю тянет свежие Open-Meteo пары, мерджит в training_real, переобучает GBM, пересобирает calibration, обновляет predictions и signals.
-- [ ] **2e. Когда `data/actuals.csv` соберёт ≥ 500 реальных resolved — переобучить с включением этих пар.**
+- [near_close.py](src/detect_temperature/near_close.py): `refined_bucket_probability` пересчитывает вероятность bucket'а с учётом (а) observed max/min до текущего часа, (б) shrink sigma по `sqrt(T_remaining/24)` с флором `0.25 × sigma`. Bucket математически резолвится, если observed max уже превысил `upper` (lose) или observed min ушёл ниже `lower` (lose), либо все оставшиеся часы почти наверняка не сдвинут исход (win).
+- `fetch_intraday_max_min`: один вызов Open-Meteo forecast (hourly temperature за today), агрегирует max/min по прошедшим часам (strictly `< now_utc`).
+- `pipeline.refresh_open_positions`: для каждой open paper-позиции тянет intraday, пересчитывает `refined_fair` и `refined_edge`, автоматически закрывает позицию с `resolved_early_by_observation` если `refined_fair ≤ 0.02` или `≥ 0.98`. Иначе если `refined_edge < 0` — status становится `at_risk`.
+- CLI `refresh-open-positions` + HTTP `POST /api/refresh-open` + кнопка **«Мониторить позиции»** в dashboard.
+- Dashboard: чип `at_risk` визуально отличается (янтарный), резолвнутые рано получают `actual_status=resolved_early_by_observation`.
+- 8 новых тестов в [tests/test_near_close.py](tests/test_near_close.py). Полный suite: 54 passed.
 
-Критерии успеха фазы 2: MAE на Polymarket resolved ≤ 1.3 °C, BUY_NO win rate ≥ 75 %.
-Текущее: MAE 1.08 °C на 50 событиях (✅). Win rate — ждём forward-данные.
+**Когда запускать:** вручную через кнопку либо CLI в последние 2-6 часов до close, когда у большинства станций observed max/min уже отчётливо сформировался. Автоматизация (ещё один Windows task) — по желанию позднее.
 
 ### Фаза 3 (неделя 6–10)
 

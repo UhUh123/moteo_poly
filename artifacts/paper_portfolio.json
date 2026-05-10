@@ -1,6 +1,6 @@
 {
   "summary": {
-    "generated_at": "2026-05-10T19:02:56+00:00",
+    "generated_at": "2026-05-10T22:36:04+00:00",
     "bankroll_usdc": 100.0,
     "positions": 14,
     "open_positions": 14,
@@ -22,8 +22,14 @@
     "maker_preferred_positions": 0,
     "depth_checked_positions": 14,
     "fillable_positions": 14,
-    "source_portfolio_path": "/Users/opipsy/Desktop/poly/detect_temperature 2/artifacts/paper_portfolio.csv",
-    "source_actuals_path": "/Users/opipsy/Desktop/poly/detect_temperature 2/data/actuals.csv"
+    "refresh_stats": {
+      "refreshed": 14,
+      "resolved_won": 0,
+      "resolved_lost": 0,
+      "at_risk": 0,
+      "skipped": 0,
+      "errors": 0
+    }
   },
   "positions": [
     {
@@ -86,7 +92,14 @@
       "payout_usdc": "",
       "pnl_usdc": "",
       "roi_pct": "",
-      "trade_id": "dea8c8514bed4c11"
+      "trade_id": "dea8c8514bed4c11",
+      "refined_fair_probability": 0.956622,
+      "refined_edge": 0.354527,
+      "observed_so_far_c": "",
+      "observed_samples": 0,
+      "hours_remaining": 24.0,
+      "refresh_reason": "refreshed",
+      "refreshed_at": "2026-05-10T22:36:04+00:00"
     },
     {
       "opened_at": "2026-05-10T19:02:52+00:00",
@@ -148,7 +161,14 @@
       "payout_usdc": "",
       "pnl_usdc": "",
       "roi_pct": "",
-      "trade_id": "fd096921d18d8ee2"
+      "trade_id": "fd096921d18d8ee2",
+      "refined_fair_probability": 0.744763,
+      "refined_edge": 0.108044,
+      "observed_so_far_c": "",
+      "observed_samples": 0,
+      "hours_remaining": 24.0,
+      "refresh_reason": "refreshed",
+      "refreshed_at": "2026-05-10T22:36:04+00:00"
     },
     {
       "opened_at": "2026-05-10T19:02:52+00:00",
@@ -210,7 +230,14 @@
       "payout_usdc": "",
       "pnl_usdc": "",
       "roi_pct": "",
-      "trade_id": "5548a70a404643a6"
+      "trade_id": "5548a70a404643a6",
+      "refined_fair_probability": 0.940244,
+      "refined_edge": 0.313405,
+      "observed_so_far_c": "",
+      "observed_samples": 0,
+      "hours_remaining": 24.0,
+      "refresh_reason": "refreshed",
+      "refreshed_at": "2026-05-10T22:36:04+00:00"
     },
     {
       "opened_at": "2026-05-10T19:02:52+00:00",
@@ -272,7 +299,14 @@
       "payout_usdc": "",
       "pnl_usdc": "",
       "roi_pct": "",
-      "trade_id": "a70bc1f591f7c2cf"
+      "trade_id": "a70bc1f591f7c2cf",
+      "refined_fair_probability": 0.90873,
+      "refined_edge": 0.25721,
+      "observed_so_far_c": "",
+      "observed_samples": 0,
+      "hours_remaining": 24.0,
+      "refresh_reason": "refreshed",
+      "refreshed_at": "2026-05-10T22:36:04+00:00"
     },
     {
       "opened_at": "2026-05-10T19:02:52+00:00",
@@ -334,7 +368,14 @@
       "payout_usdc": "",
       "pnl_usdc": "",
       "roi_pct": "",
-      "trade_id": "145abf34d02807a0"
+      "trade_id": "145abf34d02807a0",
+      "refined_fair_probability": 0.788524,
+      "refined_edge": 0.107469,
+      "observed_so_far_c": "",
+      "observed_samples": 0,
+      "hours_remaining": 24.0,
+      "refresh_reason": "refreshed",
+      "refreshed_at": "2026-05-10T22:36:04+00:00"
     },
     {
       "opened_at": "2026-05-10T19:02:52+00:00",
@@ -396,7 +437,14 @@
       "payout_usdc": "",
       "pnl_usdc": "",
       "roi_pct": "",
-      "trade_id": "79909e02fefeb8b6"
+      "trade_id": "79909e02fefeb8b6",
+      "refined_fair_probability": 0.881634,
+      "refined_edge": 0.215335,
+      "observed_so_far_c": "",
+      "observed_samples": 0,
+      "hours_remaining": 24.0,
+      "refresh_reason": "refreshed",
+      "refreshed_at": "2026-05-10T22:36:04+00:00"
     },
     {
       "opened_at": "2026-05-10T19:02:52+00:00",
@@ -458,7 +506,14 @@
       "payout_usdc": "",
       "pnl_usdc": "",
       "roi_pct": "",
-      "trade_id": "f9a21a0e7eb7755b"
+      "trade_id": "f9a21a0e7eb7755b",
+      "refined_fair_probability": 0.912498,
+      "refined_edge": 0.231443,
+      "observed_so_far_c": "",
+      "observed_samples": 0,
+      "hours_remaining": 24.0,
+      "refresh_reason": "refreshed",
+      "refreshed_at": "2026-05-10T22:36:04+00:00"
     },
     {
       "opened_at": "2026-05-10T19:02:52+00:00",
@@ -520,7 +575,14 @@
       "payout_usdc": "",
       "pnl_usdc": "",
       "roi_pct": "",
-      "trade_id": "f6c06a75740d7f85"
+      "trade_id": "f6c06a75740d7f85",
+      "refined_fair_probability": 0.960616,
+      "refined_edge": 0.259921,
+      "observed_so_far_c": "",
+      "observed_samples": 0,
+      "hours_remaining": 24.0,
+      "refresh_reason": "refreshed",
+      "refreshed_at": "2026-05-10T22:36:04+00:00"
     },
     {
       "opened_at": "2026-05-10T19:02:52+00:00",
@@ -582,7 +644,14 @@
       "payout_usdc": "",
       "pnl_usdc": "",
       "roi_pct": "",
-      "trade_id": "d6289444f4a68424"
+      "trade_id": "d6289444f4a68424",
+      "refined_fair_probability": 0.88142,
+      "refined_edge": 0.185631,
+      "observed_so_far_c": "",
+      "observed_samples": 0,
+      "hours_remaining": 24.0,
+      "refresh_reason": "refreshed",
+      "refreshed_at": "2026-05-10T22:36:04+00:00"
     },
     {
       "opened_at": "2026-05-10T19:02:52+00:00",
@@ -644,7 +713,14 @@
       "payout_usdc": "",
       "pnl_usdc": "",
       "roi_pct": "",
-      "trade_id": "060310536dd7bae1"
+      "trade_id": "060310536dd7bae1",
+      "refined_fair_probability": 0.824353,
+      "refined_edge": 0.113853,
+      "observed_so_far_c": "",
+      "observed_samples": 0,
+      "hours_remaining": 24.0,
+      "refresh_reason": "refreshed",
+      "refreshed_at": "2026-05-10T22:36:04+00:00"
     },
     {
       "opened_at": "2026-05-10T19:02:52+00:00",
@@ -706,7 +782,14 @@
       "payout_usdc": "",
       "pnl_usdc": "",
       "roi_pct": "",
-      "trade_id": "e55a841ef2242cc7"
+      "trade_id": "e55a841ef2242cc7",
+      "refined_fair_probability": 0.909185,
+      "refined_edge": 0.22813,
+      "observed_so_far_c": "",
+      "observed_samples": 0,
+      "hours_remaining": 24.0,
+      "refresh_reason": "refreshed",
+      "refreshed_at": "2026-05-10T22:36:04+00:00"
     },
     {
       "opened_at": "2026-05-10T19:02:52+00:00",
@@ -768,7 +851,14 @@
       "payout_usdc": "",
       "pnl_usdc": "",
       "roi_pct": "",
-      "trade_id": "c50a64823e3c2fd3"
+      "trade_id": "c50a64823e3c2fd3",
+      "refined_fair_probability": 0.970027,
+      "refined_edge": 0.249732,
+      "observed_so_far_c": "",
+      "observed_samples": 0,
+      "hours_remaining": 24.0,
+      "refresh_reason": "refreshed",
+      "refreshed_at": "2026-05-10T22:36:04+00:00"
     },
     {
       "opened_at": "2026-05-10T19:02:52+00:00",
@@ -830,7 +920,14 @@
       "payout_usdc": "",
       "pnl_usdc": "",
       "roi_pct": "",
-      "trade_id": "8a2b6e71c9544a40"
+      "trade_id": "8a2b6e71c9544a40",
+      "refined_fair_probability": 0.909687,
+      "refined_edge": 0.189392,
+      "observed_so_far_c": "",
+      "observed_samples": 0,
+      "hours_remaining": 24.0,
+      "refresh_reason": "refreshed",
+      "refreshed_at": "2026-05-10T22:36:04+00:00"
     },
     {
       "opened_at": "2026-05-10T19:02:52+00:00",
@@ -892,13 +989,14 @@
       "payout_usdc": "",
       "pnl_usdc": "",
       "roi_pct": "",
-      "trade_id": "78e3fd6ed0f7743e"
+      "trade_id": "78e3fd6ed0f7743e",
+      "refined_fair_probability": 0.883145,
+      "refined_edge": 0.172645,
+      "observed_so_far_c": "",
+      "observed_samples": 0,
+      "hours_remaining": 24.0,
+      "refresh_reason": "refreshed",
+      "refreshed_at": "2026-05-10T22:36:04+00:00"
     }
-  ],
-  "actuals": {
-    "ok": 0,
-    "pending": 174,
-    "error": 0,
-    "path": "/Users/opipsy/Desktop/poly/detect_temperature 2/data/actuals.csv"
-  }
+  ]
 }

@@ -18,6 +18,7 @@ from .pipeline import (
     fetch_clob_orderbooks,
     open_strategy_paper_trades,
     predict_gbm,
+    refresh_open_positions,
     run_strategy_lab,
     scan_polymarket_weather,
     settle_paper_trades,
@@ -356,6 +357,7 @@ def _make_handler(project_root: Path, bankroll_usdc: float, finalization_lag_day
                 "/api/refresh-paper": self._handle_refresh,
                 "/api/open-trades": self._handle_open_trades,
                 "/api/dry-run": self._handle_dry_run,
+                "/api/refresh-open": self._handle_refresh_open,
             }
             handler = handlers.get(self.path)
             if handler is None:
@@ -401,6 +403,26 @@ def _make_handler(project_root: Path, bankroll_usdc: float, finalization_lag_day
                     risk_profile="bankroll_100",
                     bankroll_usdc=100.0,
                 )
+            except Exception as exc:
+                self._send_json({"error": str(exc)}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
+                return
+            self._send_json(payload)
+
+        def _handle_refresh_open(self) -> None:
+            try:
+                payload = refresh_open_positions(
+                    portfolio_path=project_root / "artifacts" / "paper_portfolio.csv",
+                    state_path=project_root / "artifacts" / "paper_portfolio.json",
+                    dashboard_path=project_root / "artifacts" / "paper_dashboard.html",
+                    stations_path=project_root / "data" / "stations.cache.json",
+                    manual_stations_path=project_root / "data" / "manual_stations.csv",
+                    calibration_path=project_root / "data" / "station_calibration.csv",
+                    targets_path=project_root / "data" / "targets.csv",
+                    bankroll_usdc=bankroll_usdc,
+                )
+            except FileNotFoundError as exc:
+                self._send_json({"error": str(exc)}, status=HTTPStatus.NOT_FOUND)
+                return
             except Exception as exc:
                 self._send_json({"error": str(exc)}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
                 return
