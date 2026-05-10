@@ -2,6 +2,8 @@
 
 Документ для новой AI-сессии или нового разработчика. Цель: за 10 минут понять, что происходит в проекте, что уже сделано, что делать дальше, без необходимости перечитывать всю историю переписки.
 
+> Для быстрого ответа на вопрос "что происходит прямо сейчас?" читай [docs/ORCHESTRATION.md](docs/ORCHESTRATION.md) + `status/health.json` на Windows ПК. Автоматизация там покрывает весь daily-цикл.
+
 Язык общения с пользователем — русский.
 
 ---
@@ -177,6 +179,23 @@ settle-paper-trades     ──►  artifacts/paper_portfolio.csv (updated with w
 - `PolymarketCollectorHot`: каждую минуту, проверяет close-within-60-min, агрессивно снимает orderbooks только для закрывающихся рынков.
 - Логи: `C:\poly\detect-temperature\logs\collector.log`.
 - LastTaskResult=0 на всех прогонах, 848 рынков в snapshot.
+
+### Автоматизация полного daily-цикла — готова ✅
+
+Теперь Windows делает всё сам; human intervention не требуется для normal daily цикла. Подробный документ-карта: [docs/ORCHESTRATION.md](docs/ORCHESTRATION.md). Статус в реальном времени: `C:\poly\detect-temperature\status\health.json`.
+
+Шесть Windows Task Scheduler задач:
+
+| Задача | Когда | Что делает |
+|---|---|---|
+| `PolymarketCollectorRegular` | каждые 5 мин | scan + books + snapshot в history |
+| `PolymarketCollectorHot` | каждую мин | books для рынков закрывающихся <60 мин |
+| `PolymarketDailyOpenTrades` | 22:00 UTC | full pipeline + open paper (bankroll_100, drawdown guard) |
+| `PolymarketNearCloseRefresh` | 01:00–04:30 UTC, каждые 30 мин | refresh_open_positions: resolve by observation, flag at_risk |
+| `PolymarketDailySettle` | 06:00 UTC | collect-actuals + settle-paper-trades |
+| `PolymarketCalibrationRefresh` | пн 04:17 | retrain GBM + rebuild calibration |
+
+Каждая пишет свою секцию в `status/health.json` — это единственный файл, который нужно прочитать, чтобы узнать состояние системы.
 
 ### Верифицировано
 

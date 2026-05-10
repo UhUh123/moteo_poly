@@ -35,12 +35,14 @@ from detect_temperature.polymarket import (
     token_ids_from_market_records,
     write_json,
 )
+from detect_temperature.status import update_task
 
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data"
 LOG_DIR = ROOT / "logs"
 HISTORY_DIR = DATA_DIR / "history"
+HEALTH_PATH = ROOT / "status" / "health.json"
 
 REGULAR_SNAPSHOT_FILES = (
     "polymarket_weather_markets.csv",
@@ -133,20 +135,34 @@ def do_regular(logger: logging.Logger, now: datetime) -> int:
         )
     except Exception as exc:
         logger.error(f"scan failed: {exc}")
+        update_task("collector_regular", {"code": 2, "error": str(exc)}, path=HEALTH_PATH)
         return 2
     active = sum(1 for r in scan_rows if str(r.get("active")) in {"1", "True", "true"})
     logger.info(f"scan ok: {len(scan_rows)} markets, active={active}")
 
+    orderbook_error: str | None = None
     try:
         fetch_clob_orderbooks(
             markets_path=DATA_DIR / "polymarket_weather_markets.csv",
             output_path=DATA_DIR / "polymarket_orderbooks.json",
         )
     except Exception as exc:
+        orderbook_error = str(exc)
         logger.error(f"orderbook fetch failed: {exc}")
 
     copied = _archive_regular(snapshot_dir)
     logger.info(f"regular snapshot stored: {len(copied)} files")
+    update_task(
+        "collector_regular",
+        {
+            "code": 0,
+            "markets_scanned": len(scan_rows),
+            "active_markets": active,
+            "snapshot_dir": str(snapshot_dir),
+            "orderbook_error": orderbook_error or "",
+        },
+        path=HEALTH_PATH,
+    )
     return 0
 
 
@@ -155,6 +171,11 @@ def do_hot(logger: logging.Logger, now: datetime, window_min: int) -> int:
     watch = _active_close_watch(markets_csv, window_min=window_min)
     if not watch:
         logger.info(f"hot skip: no markets closing within {window_min} min")
+        update_task(
+            "collector_hot",
+            {"code": 0, "markets_watched": 0, "outcome": "skip_no_closing"},
+            path=HEALTH_PATH,
+        )
         return 0
 
     records_for_tokens = [
@@ -164,6 +185,11 @@ def do_hot(logger: logging.Logger, now: datetime, window_min: int) -> int:
     token_ids = token_ids_from_market_records(records_for_tokens, include_no=True)
     if not token_ids:
         logger.info("hot skip: no token ids on closing markets")
+        update_task(
+            "collector_hot",
+            {"code": 0, "markets_watched": len(watch), "outcome": "skip_no_tokens"},
+            path=HEALTH_PATH,
+        )
         return 0
 
     logger.info(f"hot refresh: {len(watch)} markets / {len(token_ids)} token_ids")
@@ -172,6 +198,11 @@ def do_hot(logger: logging.Logger, now: datetime, window_min: int) -> int:
         books = client.fetch_order_books(token_ids)
     except Exception as exc:
         logger.error(f"hot orderbook fetch failed: {exc}")
+        update_task(
+            "collector_hot",
+            {"code": 2, "markets_watched": len(watch), "error": str(exc)},
+            path=HEALTH_PATH,
+        )
         return 2
 
     snapshot_dir = _snapshot_dir("hot", now)
@@ -184,6 +215,17 @@ def do_hot(logger: logging.Logger, now: datetime, window_min: int) -> int:
     }
     write_json(payload, snapshot_dir / "polymarket_orderbooks.json")
     logger.info(f"hot snapshot stored: {snapshot_dir}")
+    update_task(
+        "collector_hot",
+        {
+            "code": 0,
+            "markets_watched": len(watch),
+            "token_ids_requested": len(token_ids),
+            "snapshot_dir": str(snapshot_dir),
+            "outcome": "snapshot",
+        },
+        path=HEALTH_PATH,
+    )
     return 0
 
 

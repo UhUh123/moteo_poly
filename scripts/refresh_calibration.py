@@ -111,6 +111,38 @@ def main(argv: list[str] | None = None) -> int:
             "--output", str(ROOT / "artifacts" / "market_signals.csv"),
         ])
 
+    # Summarise calibration for the health file so the dashboard can
+    # quickly show which stations are most / least predictable.
+    try:
+        cal_df = pd.read_csv(args.calibration)
+        training_rows = int(pd.read_csv(args.training, usecols=[0]).shape[0])
+        stations_calibrated = int(cal_df.shape[0])
+        median_mae = float(cal_df["rolling_mae_c"].median()) if stations_calibrated else None
+        worst_mae = float(cal_df["rolling_mae_c"].max()) if stations_calibrated else None
+        from detect_temperature.status import update_task
+        update_task(
+            "calibration_refresh",
+            {
+                "code": 0,
+                "training_rows": training_rows,
+                "stations_calibrated": stations_calibrated,
+                "window_days": args.window_days,
+                "window_start": start.isoformat(),
+                "window_end": end.isoformat(),
+                "median_station_mae_c": round(median_mae, 4) if median_mae is not None else None,
+                "worst_station_mae_c": round(worst_mae, 4) if worst_mae is not None else None,
+            },
+            path=ROOT / "status" / "health.json",
+            alert=(
+                f"refreshed; median station MAE={median_mae:.3f}C, "
+                f"worst={worst_mae:.3f}C on {stations_calibrated} stations"
+                if median_mae is not None
+                else "refreshed"
+            ),
+        )
+    except Exception as exc:
+        print(f"WARN: failed to update health after refresh: {exc}")
+
     print("\nrefresh complete. Model, calibration, predictions and signals are up to date.")
     return 0
 
