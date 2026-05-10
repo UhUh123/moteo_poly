@@ -211,14 +211,11 @@ Windows collector работает сам — проверять логи раз
 
 **Когда запускать:** вручную через кнопку либо CLI в последние 2-6 часов до close, когда у большинства станций observed max/min уже отчётливо сформировался. Автоматизация (ещё один Windows task) — по желанию позднее.
 
-### Фаза 3 (неделя 6–10)
+### Что осталось для фазы 3
 
-**Near-close re-pricing.**
-
-1. Использовать hot collector для мониторинга цен в последние 60 мин до close.
-2. Добавить команду `refresh-open-positions`: для каждой open position пересчитать fair_yes с последним METAR + satellite nowcast, закрыть если edge пропал.
-3. Логика edge disappeared: `abs(new_fair - old_fair) > 0.15` или `new_fair < 0.55` для BUY_NO.
-4. **Метрика успеха:** снижение realized volatility на 30%, меньше катастрофических промахов.
+- [ ] Авто-запуск `refresh-open-positions` каждые 30 минут в последние 6 часов до close (отдельный Windows task).
+- [ ] Использовать реальный CLOB-price snapshot (а не только наш entry price) для пересчёта edge «рынок уже передвинулся».
+- [ ] Метрики: через 100 settled событий измерить, **уменьшил ли near-close re-pricing realized volatility** по сравнению с прогоном без него.
 
 ### Фаза 4 (3–6 мес)
 
