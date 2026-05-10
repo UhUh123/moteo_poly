@@ -150,13 +150,25 @@ settle-paper-trades     ──►  artifacts/paper_portfolio.csv (updated with w
 - После переключения на новые sigma: сигналов `bankroll_100` стало 57 BUY_NO кандидатов (с 35 при sigma=2.5 для всех). Ужесточение для noisy станций + смягчение для tropical.
 - Тесты: **46 passed** (добавлено 3 новых теста на sigma_for_station, load_station_calibrations, build_market_signal use of station sigma).
 
-### Что осталось в фазе 2
+### Фаза 2c — rolling bias correction ✅
 
-- [ ] **2c. Rolling bias correction в модели.** `bias` из calibration пока **не применяется**. Следующий шаг — в `predict_gbm` добавить `corrected -= rolling_bias`. Сейчас bias небольшой (≤0.4°C), но исправить стоит.
-- [ ] **2d. Обновление calibration еженедельно.** Нужен cron/Task Scheduler, который пересчитывает `data/station_calibration.csv` по последним N дням training_real + actuals.
-- [ ] **2e. Включение реальных Polymarket actuals в training.** Когда `data/actuals.csv` соберёт ≥500 строк — объединить с training_real и переобучить.
-
-Критерии успеха фазы 2: MAE на Polymarket resolved ≤ 1.3 °C, BUY_NO win rate ≥ 75 %.
+- [pipeline.predict_gbm](src/detect_temperature/pipeline.py): добавлен параметр `station_calibration_path` (default `data/station_calibration.csv`). Для каждой строки вычитается `rolling_bias_c`:
+  - `gbm_prediction_c` — raw output модели
+  - `station_bias_c` — вычтенный bias
+  - `corrected_prediction_c = gbm_prediction_c - station_bias_c` — то, что идёт в signals
+  - `bias_correction_applied` — флаг 0/1
+- CLI: `--station-calibration` флаг, пустая строка выключает.
+- **Бэктест на том же holdout (2025-10-30..2026-04-30):**
+  - MAE 0.4136 → **0.4045** (-2.2%)
+  - within-1°C 85.7% → 86.3%
+  - High-bias station: EHAM -0.040, EPWA -0.055, KBKF -0.032 в MAE.
+  - Предупреждение: holdout == calibration → небольшой leakage. На fresh forward data прирост будет меньше.
+- **Замер на 50 реальных Polymarket resolved событиях (2026-05-04/05):**
+  - baseline (raw Open-Meteo): MAE 1.070°C, within-1C 58%, within-2C 88%
+  - старая synthetic GBM: MAE 1.313°C (**вредила** baseline)
+  - new real GBM + bias: MAE **1.079°C**, within-1C 58%, within-2C 88%
+  - Вывод: мы **убрали вред**, но forward improvement ещё не видно на 50 событиях. Нужны свежие forward прогоны.
+- 46 тестов зелёные (мак + Windows).
 
 ### Windows collector — работает
 
@@ -188,15 +200,16 @@ settle-paper-trades     ──►  artifacts/paper_portfolio.csv (updated with w
 
 Windows collector работает сам — проверять логи раз в 2–3 дня.
 
-### Фаза 2 (неделя 3–6) — частично готово
+### Фаза 2 (неделя 3–6) — в основном готово
 
-- [x] **2a. Реальная модель.** Обучено на 124K Open-Meteo пар 2023–2026. Production model теперь даёт MAE 0.45°C на реальных данных вместо 0.73°C у синтетической.
-- [x] **2b. Per-station rolling MAE + bias.** `data/station_calibration.csv` + sigma-per-station в signals.py. 46 тестов зелёные.
-- [ ] **2c. Применить rolling_bias в predict-gbm.** Сейчас bias сохраняется, но не вычитается из прогноза.
-- [ ] **2d. Авто-обновление calibration раз в неделю.**
+- [x] **2a. Реальная модель.** 124K Open-Meteo пар, MAE 0.45°C vs 0.73°C у синтетической.
+- [x] **2b. Per-station rolling MAE.** `data/station_calibration.csv` + sigma-per-station в signals.
+- [x] **2c. Применить rolling_bias в predict-gbm.** Wired; MAE 0.414 → 0.404 на holdout; старая модель вредила, новая — нет.
+- [ ] **2d. Авто-обновление calibration раз в неделю** (Task Scheduler на Windows).
 - [ ] **2e. Когда `data/actuals.csv` соберёт ≥ 500 реальных resolved — переобучить с включением этих пар.**
 
 Критерии успеха фазы 2: MAE на Polymarket resolved ≤ 1.3 °C, BUY_NO win rate ≥ 75 %.
+Текущее: MAE 1.08 °C на 50 событиях (✅). Win rate — ждём forward-данные.
 
 ### Фаза 3 (неделя 6–10)
 
