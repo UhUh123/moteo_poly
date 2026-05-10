@@ -238,13 +238,26 @@ def predict_gbm(
     features_path: str | Path,
     model_path: str | Path,
     output_path: str | Path,
+    station_calibration_path: str | Path | None = "data/station_calibration.csv",
 ) -> list[dict]:
     frame = pd.read_csv(features_path)
     model = BiasCorrectedGBM.load(model_path)
     created_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
 
     frame["baseline_prediction_c"] = _baseline_predictions(frame)
-    frame["corrected_prediction_c"] = model.predict(frame)
+    frame["gbm_prediction_c"] = model.predict(frame)
+
+    bias_map = _load_bias_map(station_calibration_path)
+    if bias_map and "station_id" in frame.columns:
+        bias_series = frame["station_id"].map(bias_map).fillna(0.0)
+        frame["station_bias_c"] = bias_series
+        frame["corrected_prediction_c"] = frame["gbm_prediction_c"] - bias_series
+        frame["bias_correction_applied"] = (bias_series != 0).astype(int)
+    else:
+        frame["station_bias_c"] = 0.0
+        frame["corrected_prediction_c"] = frame["gbm_prediction_c"]
+        frame["bias_correction_applied"] = 0
+
     frame["corrected_prediction_f"] = frame["corrected_prediction_c"].map(
         lambda value: celsius_to_fahrenheit(value) if pd.notna(value) else None
     )
@@ -260,6 +273,27 @@ def predict_gbm(
     records = _records_from_frame(frame)
     write_records_csv(records, output_path)
     return records
+
+
+def _load_bias_map(path: str | Path | None) -> dict[str, float]:
+    """Return {station_id -> rolling_bias_c} from calibration CSV or {}."""
+    if not path:
+        return {}
+    file_path = Path(path)
+    if not file_path.exists():
+        return {}
+    with file_path.open("r", newline="", encoding="utf-8") as fh:
+        reader = csv.DictReader(fh)
+        out: dict[str, float] = {}
+        for row in reader:
+            station_id = (row.get("station_id") or "").strip().upper()
+            try:
+                bias = float(row.get("rolling_bias_c") or "")
+            except ValueError:
+                continue
+            if station_id:
+                out[station_id] = bias
+        return out
 
 
 def scan_polymarket_weather(

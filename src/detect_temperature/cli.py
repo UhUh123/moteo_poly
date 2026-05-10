@@ -85,6 +85,11 @@ def main(argv: list[str] | None = None) -> int:
     predict_gbm_parser.add_argument("--features", default="data/features.csv")
     predict_gbm_parser.add_argument("--model", default="artifacts/models/gbm.joblib")
     predict_gbm_parser.add_argument("--output", default="artifacts/predictions_gbm.csv")
+    predict_gbm_parser.add_argument(
+        "--station-calibration",
+        default="data/station_calibration.csv",
+        help="Per-station rolling_bias_c CSV; empty string disables bias correction.",
+    )
 
     scan_poly_parser = subparsers.add_parser("scan-polymarket-weather")
     scan_poly_parser.add_argument("--output", default="data/polymarket_weather_markets.csv")
@@ -334,9 +339,18 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.command == "predict-gbm":
-        rows = predict_gbm(features_path=args.features, model_path=args.model, output_path=args.output)
+        rows = predict_gbm(
+            features_path=args.features,
+            model_path=args.model,
+            output_path=args.output,
+            station_calibration_path=args.station_calibration or None,
+        )
         available = sum(1 for row in rows if row.get("corrected_prediction_c") not in {"", None})
-        print(f"wrote {len(rows)} rows, {available} with corrected predictions -> {args.output}")
+        bias_applied = sum(1 for row in rows if str(row.get("bias_correction_applied") or "0") == "1")
+        print(
+            f"wrote {len(rows)} rows, {available} with corrected predictions, "
+            f"{bias_applied} with station bias applied -> {args.output}"
+        )
         return 0
 
     if args.command == "scan-polymarket-weather":
