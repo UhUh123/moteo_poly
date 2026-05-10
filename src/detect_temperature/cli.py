@@ -607,6 +607,36 @@ def main(argv: list[str] | None = None) -> int:
             f"skipped={stats.get('skipped', 0)}, "
             f"errors={stats.get('errors', 0)} -> {args.dashboard}"
         )
+        try:
+            from .status import update_task
+            update_task(
+                "near_close_refresh",
+                {
+                    "code": 0,
+                    "refreshed": stats.get("refreshed", 0),
+                    "resolved_won": stats.get("resolved_won", 0),
+                    "resolved_lost": stats.get("resolved_lost", 0),
+                    "at_risk": stats.get("at_risk", 0),
+                    "skipped": stats.get("skipped", 0),
+                    "errors": stats.get("errors", 0),
+                },
+                portfolio={
+                    "bankroll_usdc": summary.get("bankroll_usdc", args.bankroll_usdc),
+                    "open_positions": summary.get("open_positions", 0),
+                    "settled_positions": summary.get("settled_positions", 0),
+                    "win_rate_pct": summary.get("win_rate_pct"),
+                    "realized_pnl_usdc": summary.get("realized_pnl_usdc", 0.0),
+                    "drawdown_triggered": (summary.get("realized_pnl_usdc", 0.0) or 0.0) <= -10.0,
+                },
+                alert=(
+                    f"refresh: refreshed={stats.get('refreshed', 0)} "
+                    f"resolved_won={stats.get('resolved_won', 0)} "
+                    f"resolved_lost={stats.get('resolved_lost', 0)} "
+                    f"at_risk={stats.get('at_risk', 0)}"
+                ),
+            )
+        except Exception as exc:
+            print(f"warn: failed to update status/health.json: {exc}")
         return 0
 
     parser.error(f"Unknown command: {args.command}")

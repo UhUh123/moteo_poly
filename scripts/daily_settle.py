@@ -88,6 +88,7 @@ def main() -> int:
         {
             "code": 0,
             "outcome": "ok",
+            "error": "",
             "actuals_ok": actuals.get("ok", 0),
             "actuals_pending": actuals.get("pending", 0),
             "actuals_error": actuals.get("error", 0),

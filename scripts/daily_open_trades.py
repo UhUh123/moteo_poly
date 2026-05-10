@@ -107,6 +107,7 @@ def main() -> int:
         {
             "code": 0,
             "outcome": "opened" if positions else "no_positions",
+            "error": "",
             "candidates": candidates,
             "robust": robust,
             "selected": selected,
