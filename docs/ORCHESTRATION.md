@@ -265,13 +265,25 @@ Both "AC power index" and "DC power index" should read `0x00000000`.
 1. Copy the repo to `C:\poly\detect-temperature`
 2. `python -m venv .venv && .venv\Scripts\python -m pip install -e . pytest`
 3. Apply the "Keep the PC awake" section above
-4. Run the four registration scripts (admin PowerShell):
+4. **Re-train the GBM on the target machine**:
+   ```
+   .venv\Scripts\python -m detect_temperature.cli train-gbm ^
+     --training C:\poly\detect-temperature\data\training_real.csv ^
+     --model C:\poly\detect-temperature\artifacts\models\gbm.joblib
+   ```
+   The repo-shipped `gbm.joblib` was pickled with the developer's scikit-learn
+   version; loading it under a different minor (e.g. 1.7 vs 1.8) silently
+   breaks with `AttributeError: 'SimpleImputer' object has no attribute '_fill_dtype'`.
+   The weekly `PolymarketCalibrationRefresh` task would heal this on the
+   next Monday anyway, but retraining once at install time avoids a day of
+   failing `daily_open_trades` runs.
+5. Run the four registration scripts (admin PowerShell):
    - `scripts\register_windows_scheduler.ps1` (collector regular + hot)
    - `scripts\register_daily_tasks.ps1` (daily open + near-close + daily settle)
    - `scripts\register_calibration_refresh.ps1` (weekly retrain)
    - `scripts\register_dashboard_server.ps1` (long-running HTTP server + firewall rule)
-5. `Start-ScheduledTask` each one to verify
-6. `type status\health.json` — every section should have `last_run`
+6. `Start-ScheduledTask` each one to verify
+7. `type status\health.json` — every section should have `last_run`
 
 ---
 
