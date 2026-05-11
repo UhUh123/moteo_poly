@@ -203,17 +203,75 @@ definitions in-place.
 
 ---
 
+## Keep the PC awake
+
+A laptop default power scheme lets Windows enter Modern Standby after idle,
+which silently skips some Task Scheduler firings. Observed in our logs:
+hourly snapshot count dropped from 12/h to 5–10/h between 03:00 and 10:00,
+even though the PC was never fully suspended.
+
+Apply once, admin PowerShell:
+
+```powershell
+# never sleep / hibernate / monitor-off on AC and DC
+powercfg /change standby-timeout-ac 0
+powercfg /change standby-timeout-dc 0
+powercfg /change hibernate-timeout-ac 0
+powercfg /change hibernate-timeout-dc 0
+powercfg /change monitor-timeout-ac 0
+
+# lid close does nothing (do not suspend when closing the lid)
+powercfg /setacvalueindex SCHEME_CURRENT SUB_BUTTONS LIDACTION 0
+powercfg /setdcvalueindex SCHEME_CURRENT SUB_BUTTONS LIDACTION 0
+powercfg /setactive SCHEME_CURRENT
+
+# disable hibernation file entirely
+powercfg /hibernate off
+
+# allow Task Scheduler to wake the machine if Modern Standby still kicks in
+powercfg /setacvalueindex SCHEME_CURRENT SUB_SLEEP RTCWAKE 1
+powercfg /setdcvalueindex SCHEME_CURRENT SUB_SLEEP RTCWAKE 1
+powercfg /setactive SCHEME_CURRENT
+```
+
+Then mark each Polymarket task as `WakeToRun=True` and allow battery:
+
+```powershell
+foreach ($t in @('PolymarketCollectorRegular','PolymarketCollectorHot',
+                 'PolymarketDailyOpenTrades','PolymarketNearCloseRefresh',
+                 'PolymarketDailySettle','PolymarketCalibrationRefresh',
+                 'PolymarketDashboardServer')) {
+  $task = Get-ScheduledTask -TaskName $t
+  $s = $task.Settings
+  $s.WakeToRun = $true
+  $s.DisallowStartIfOnBatteries = $false
+  $s.StopIfGoingOnBatteries = $false
+  Set-ScheduledTask -TaskName $t -Settings $s | Out-Null
+}
+```
+
+Verify:
+
+```powershell
+powercfg /q SCHEME_CURRENT SUB_SLEEP STANDBYIDLE
+```
+
+Both "AC power index" and "DC power index" should read `0x00000000`.
+
+---
+
 ## Reinstall checklist (e.g. new PC)
 
 1. Copy the repo to `C:\poly\detect-temperature`
 2. `python -m venv .venv && .venv\Scripts\python -m pip install -e . pytest`
+3. Apply the "Keep the PC awake" section above
 4. Run the four registration scripts (admin PowerShell):
    - `scripts\register_windows_scheduler.ps1` (collector regular + hot)
    - `scripts\register_daily_tasks.ps1` (daily open + near-close + daily settle)
    - `scripts\register_calibration_refresh.ps1` (weekly retrain)
    - `scripts\register_dashboard_server.ps1` (long-running HTTP server + firewall rule)
-4. `Start-ScheduledTask` each one to verify
-5. `type status\health.json` — every section should have `last_run`
+5. `Start-ScheduledTask` each one to verify
+6. `type status\health.json` — every section should have `last_run`
 
 ---
 
