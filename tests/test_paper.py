@@ -3,7 +3,13 @@ from __future__ import annotations
 import csv
 import json
 
-from detect_temperature.paper import open_paper_portfolio, open_strategy_paper_portfolio, settle_paper_portfolio
+from detect_temperature.paper import (
+    OPEN_STATUSES,
+    SETTLED_STATUSES,
+    open_paper_portfolio,
+    open_strategy_paper_portfolio,
+    settle_paper_portfolio,
+)
 
 
 def test_open_paper_portfolio_respects_budget_and_writes_dashboard(tmp_path) -> None:
@@ -275,3 +281,75 @@ def _write_actuals(path) -> None:
         writer = csv.DictWriter(fh, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
+
+
+def test_open_strategy_paper_portfolio_preserves_prior_open_positions(tmp_path) -> None:
+    strategy_path = tmp_path / "strategy.csv"
+    _write_strategy_portfolio(strategy_path)
+    output_path = tmp_path / "portfolio.csv"
+
+    first = open_strategy_paper_portfolio(
+        strategy_portfolio_path=strategy_path,
+        output_path=output_path,
+        bankroll_usdc=100.0,
+    )
+    assert first["summary"]["positions"] == 2
+    assert first["summary"]["carried_positions"] == 0
+    assert first["summary"]["new_positions_added"] == 2
+
+    # Simulate one of the two positions getting settled overnight
+    import csv as _csv
+    rows = list(_csv.DictReader(output_path.open(newline="", encoding="utf-8")))
+    rows[0]["status"] = "won"
+    rows[0]["won"] = "1"
+    rows[0]["pnl_usdc"] = "3.5"
+    fieldnames = list(rows[0].keys())
+    with output_path.open("w", newline="", encoding="utf-8") as fh:
+        w = _csv.DictWriter(fh, fieldnames=fieldnames)
+        w.writeheader()
+        w.writerows(rows)
+
+    # Second run with the SAME strategy portfolio: should NOT re-open the same
+    # (event, side) positions, and must keep the settled history.
+    second = open_strategy_paper_portfolio(
+        strategy_portfolio_path=strategy_path,
+        output_path=output_path,
+        bankroll_usdc=100.0,
+    )
+    assert second["summary"]["carried_positions"] == 2
+    assert second["summary"]["new_positions_added"] == 0
+    assert second["summary"]["positions"] == 2
+
+    final_rows = list(_csv.DictReader(output_path.open(newline="", encoding="utf-8")))
+    statuses = {row["status"] for row in final_rows}
+    assert "won" in statuses  # settled row preserved
+    assert sum(1 for r in final_rows if r["status"] == "open") == 1  # the other stayed open
+
+
+def test_open_strategy_paper_portfolio_preserve_open_false_restores_old_behaviour(tmp_path) -> None:
+    strategy_path = tmp_path / "strategy.csv"
+    _write_strategy_portfolio(strategy_path)
+    output_path = tmp_path / "portfolio.csv"
+    open_strategy_paper_portfolio(
+        strategy_portfolio_path=strategy_path,
+        output_path=output_path,
+        bankroll_usdc=100.0,
+    )
+    # With preserve_open=False the function should wipe and rewrite from scratch.
+    payload = open_strategy_paper_portfolio(
+        strategy_portfolio_path=strategy_path,
+        output_path=output_path,
+        bankroll_usdc=100.0,
+        preserve_open=False,
+    )
+    assert payload["summary"]["carried_positions"] == 0
+    assert payload["summary"]["new_positions_added"] == 2
+
+
+def test_open_and_settled_status_constants() -> None:
+    # Protect the invariant the pipeline relies on: at_risk is open, won/lost
+    # are settled. The refresh_open_positions path writes these statuses.
+    assert "at_risk" in OPEN_STATUSES
+    assert "open" in OPEN_STATUSES
+    assert "won" in SETTLED_STATUSES
+    assert "lost" in SETTLED_STATUSES

@@ -153,9 +153,26 @@ def collect_actuals(
     station_catalog: StationCatalog | None = None,
     finalization_lag_days: int = 1,
 ) -> list[dict]:
+    """Collect resolved temperatures for every target we currently know.
+
+    Merges into any pre-existing `output_path` rather than overwriting:
+      - ok rows in the existing file survive unless the target is re-fetched
+        and returns fresh ok data.
+      - pending/error rows get replaced when we successfully fetch.
+      - rows for slugs that are no longer in targets_path are preserved as-is
+        (so rotating targets.csv daily doesn't wipe historical actuals).
+    """
+    output_path = Path(output_path)
+    existing: dict[str, dict] = {}
+    if output_path.exists():
+        try:
+            existing = {row.get("slug", ""): row for row in read_records_csv(output_path)}
+        except Exception:
+            existing = {}
+
     targets = read_targets_csv(targets_path)
-    station_cache = {}
-    records = []
+    station_cache: dict[str, Any] = {}
+    fresh_records: list[dict] = []
     for target in targets:
         station = None
         if station_catalog:
@@ -169,12 +186,31 @@ def collect_actuals(
                 finalization_lag_days=finalization_lag_days,
             )
         except Exception as exc:
-            records.append(error_actual_for_target(target, str(exc)).to_record())
+            fresh_records.append(error_actual_for_target(target, str(exc)).to_record())
             continue
-        records.append(actual.to_record())
+        fresh_records.append(actual.to_record())
 
-    write_records_csv(records, output_path)
-    return records
+    # Merge: fresh rows win only when the existing row is not already ok, or
+    # when the fresh row itself is ok. This protects accidentally wiping a
+    # resolved temperature if a later refresh returns "pending" for the same
+    # slug (e.g. upstream API briefly unavailable).
+    merged_by_slug: dict[str, dict] = dict(existing)
+    for row in fresh_records:
+        slug = row.get("slug", "")
+        if not slug:
+            continue
+        old = merged_by_slug.get(slug)
+        if old is None:
+            merged_by_slug[slug] = row
+            continue
+        fresh_ok = row.get("status") == "ok"
+        old_ok = old.get("status") == "ok"
+        if fresh_ok or not old_ok:
+            merged_by_slug[slug] = row
+
+    merged_records = list(merged_by_slug.values())
+    write_records_csv(merged_records, output_path)
+    return merged_records
 
 
 def train_gbm_model(

@@ -268,9 +268,37 @@ def run_open_trades_pipeline(
     bankroll_usdc: float = 100.0,
     finalization_lag_days: int = 1,
 ) -> dict[str, Any]:
-    """Full pipeline + open paper portfolio. Archives previous run first."""
+    """Full pipeline + open paper portfolio.
+
+    Order matters:
+      1) Archive the current portfolio into paper_runs/ so nothing is lost.
+      2) Settle yesterday's positions against fresh actuals — any row that
+         can be resolved becomes status=won/lost with realized PnL.
+      3) Drawdown kill-switch reads the freshly-settled realized_pnl_usdc.
+      4) Refresh market / predictions / signals / strategy lab.
+      5) open_strategy_paper_portfolio carries over the just-settled
+         portfolio and appends today's new candidates.
+
+    This preserves history end-to-end: yesterday's opens end today as
+    won/lost rows alongside today's new open rows in a single CSV.
+    """
     archive_dir = _archive_current_run(project_root, label="pre-open")
 
+    # Step 2: settle whatever can be resolved before we add anything new.
+    # Failures are non-fatal (no actuals yet, no portfolio yet) and we log
+    # them into health.json via the standard refresh_paper_state path.
+    settle_error: str | None = None
+    try:
+        refresh_paper_state(
+            project_root,
+            bankroll_usdc=bankroll_usdc,
+            finalization_lag_days=finalization_lag_days,
+        )
+    except Exception as exc:  # noqa: BLE001
+        settle_error = str(exc)
+
+    # Step 3: now that settle has run, drawdown is measured against the
+    # latest realized PnL, not yesterday's stale state.
     drawdown_limit = _profile_flag(
         risk_profile, "open-strategy-paper-trades", "drawdown_abort_usdc", None
     )
@@ -300,19 +328,11 @@ def run_open_trades_pipeline(
         maker_fee_rate=float(open_profile.get("maker_fee_rate", 0.0)),
     )
 
-    try:
-        refresh_paper_state(
-            project_root,
-            bankroll_usdc=bankroll_usdc,
-            finalization_lag_days=finalization_lag_days,
-        )
-    except Exception:
-        pass
-
     return {
         "archive_dir": str(archive_dir),
         "market_pipeline": market_result,
         "paper_summary": paper_payload["summary"],
+        "settle_error": settle_error,
     }
 
 

@@ -101,12 +101,38 @@ def open_strategy_paper_portfolio(
     execution_mode: str = "taker",
     weather_fee_rate: float = 0.05,
     maker_fee_rate: float = 0.0,
+    preserve_open: bool = True,
 ) -> dict[str, Any]:
     rows = _read_csv(strategy_portfolio_path)
     opened_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    positions = []
+
+    # Load existing portfolio so previous runs are preserved, not overwritten.
+    # Open rows (still awaiting actuals), settled rows (won/lost with realised
+    # PnL), and at_risk rows (flagged by near_close but not yet resolved) all
+    # survive so the dashboard keeps the full history and settle can still
+    # land them tomorrow morning.
+    carried_positions: list[dict[str, Any]] = []
+    carried_keys: set[tuple[str, str]] = set()
+    if preserve_open:
+        try:
+            carried_positions = _read_csv(output_path)
+        except FileNotFoundError:
+            carried_positions = []
+        for existing in carried_positions:
+            status = str(existing.get("status") or "").lower()
+            if status not in OPEN_STATUSES and status not in SETTLED_STATUSES:
+                continue
+            carried_keys.add(
+                (
+                    str(existing.get("event_slug") or ""),
+                    str(existing.get("side") or ""),
+                )
+            )
+
+    positions: list[dict[str, Any]] = [dict(p) for p in carried_positions]
+    new_opened = 0
     for row in rows:
-        if len(positions) >= max_positions:
+        if new_opened >= max_positions:
             break
         if row.get("selected", "1") not in {"", "1", 1, True}:
             continue
@@ -117,19 +143,33 @@ def open_strategy_paper_portfolio(
             weather_fee_rate=weather_fee_rate,
             maker_fee_rate=maker_fee_rate,
         )
-        if position:
-            positions.append(position)
+        if not position:
+            continue
+        dedupe_key = (
+            str(position.get("event_slug") or ""),
+            str(position.get("side") or ""),
+        )
+        if dedupe_key in carried_keys:
+            # Already have an open or settled position for this (event, side).
+            # Don't double-enter.
+            continue
+        carried_keys.add(dedupe_key)
+        positions.append(position)
+        new_opened += 1
 
     summary = summarize_portfolio(positions, bankroll_usdc=bankroll_usdc, generated_at=opened_at)
     summary.update(
         {
             "source_strategy_portfolio_path": str(strategy_portfolio_path),
             "paper_source": "strategy_lab",
+            "carried_positions": len(carried_positions),
+            "new_positions_added": new_opened,
             "selection": {
                 "max_positions": max_positions,
                 "execution_mode": execution_mode,
                 "weather_fee_rate": weather_fee_rate,
                 "maker_fee_rate": maker_fee_rate,
+                "preserve_open": preserve_open,
             },
         }
     )
