@@ -250,6 +250,14 @@ Windows collector работает сам — проверять логи раз
 
 ### Dashboard на маке
 
+Dashboard теперь живёт на Windows (задача `PolymarketDashboardServer`) и доступен по Tailscale с любой машины:
+
+**http://100.105.99.20:8765/**
+
+Ничего запускать на маке не нужно. Если сервер на Windows упал — он сам перезапустится через Task Scheduler (RestartInterval 1 мин, RestartCount 999). Статус видно в `status/health.json` → `dashboard_server` (heartbeat каждые 5 минут).
+
+Если нужно поднять локально для разработки:
+
 ```bash
 cd "/Users/opipsy/Desktop/poly/detect_temperature 2"
 PYTHONPATH=src python3 scripts/serve_paper_dashboard.py --host 127.0.0.1 --port 8765 --bankroll-usdc 100

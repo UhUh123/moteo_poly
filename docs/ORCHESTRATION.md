@@ -12,8 +12,8 @@ The mac is only the development / dashboard host.
 
 ## TL;DR
 
-Six scheduled tasks cover the full paper-trading loop. The mac does not
-need to be online for any of them.
+Six scheduled tasks cover the full paper-trading loop plus one long-running
+dashboard server. The mac does not need to be online for any of them.
 
 ```
              ┌────────────────────────────────────────────────────┐
@@ -28,7 +28,12 @@ every 1 min ┃ PolymarketCollectorHot         → books for markets closing <60
             ┃ (30-min interval, 8 firings)
 06:00 daily ┃ PolymarketDailySettle          → collect actuals + settle PnL
 Mon  04:17  ┃ PolymarketCalibrationRefresh   → retrain GBM + recalibrate
+
+always      ┃ PolymarketDashboardServer      → http://100.105.99.20:8765/
 ```
+
+The dashboard is reachable from the mac at **http://100.105.99.20:8765/**
+over Tailscale. No local server required on mac.
 
 Each task writes one section of `status/health.json` at the end of its
 run. That JSON is the answer to "how is it going?".
@@ -56,6 +61,7 @@ run. That JSON is the answer to "how is it going?".
 | `artifacts\paper_portfolio.csv` / `.json` | Open + settled paper positions. |
 | `artifacts\paper_dashboard.html` | Dashboard HTML (what the mac serves). |
 | `artifacts\paper_runs\<ts>-<label>\` | Archive of each run so we can compare yesterday vs today. |
+| `logs\dashboard_server.log` | Long-running dashboard server log. |
 | `logs\collector.log` | Append-only log for both regular and hot collector. |
 | `logs\daily_open_trades.log` | Daily open cycle log. |
 | `logs\daily_settle.log` | Daily settle log. |
@@ -79,7 +85,8 @@ run. That JSON is the answer to "how is it going?".
     "daily_settle":       { "last_run", "code", "actuals_ok", "settled_positions",
                             "open_positions", "realized_pnl_usdc" },
     "calibration_refresh":{ "last_run", "code", "training_rows",
-                            "stations_calibrated", "median_station_mae_c" }
+                            "stations_calibrated", "median_station_mae_c" },
+    "dashboard_server":   { "last_run", "code", "host", "port", "uptime_s" }
   },
   "portfolio": {
     "bankroll_usdc": 100.0,
@@ -200,10 +207,11 @@ definitions in-place.
 
 1. Copy the repo to `C:\poly\detect-temperature`
 2. `python -m venv .venv && .venv\Scripts\python -m pip install -e . pytest`
-3. Run the three registration scripts (admin PowerShell):
+4. Run the four registration scripts (admin PowerShell):
    - `scripts\register_windows_scheduler.ps1` (collector regular + hot)
    - `scripts\register_daily_tasks.ps1` (daily open + near-close + daily settle)
    - `scripts\register_calibration_refresh.ps1` (weekly retrain)
+   - `scripts\register_dashboard_server.ps1` (long-running HTTP server + firewall rule)
 4. `Start-ScheduledTask` each one to verify
 5. `type status\health.json` — every section should have `last_run`
 
