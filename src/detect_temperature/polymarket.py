@@ -4,6 +4,7 @@ import csv
 import html
 import json
 import re
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -14,6 +15,55 @@ POLYMARKET_WEATHER_URL = "https://polymarket.com/weather"
 POLYMARKET_GEOBLOCK_URL = "https://polymarket.com/api/geoblock"
 CLOB_BOOKS_URL = "https://clob.polymarket.com/books"
 USER_AGENT = "detect-temperature/0.1"
+
+# Retry policy for the public endpoints. polymarket.com sees occasional SSL
+# EOFs / 5xx / timeouts from CDNs; CLOB is more stable but worth covering.
+DEFAULT_RETRIES = 3
+DEFAULT_BACKOFF_S = 2.0
+
+
+def _request_with_retries(
+    method: str,
+    url: str,
+    *,
+    timeout: int,
+    headers: dict[str, str] | None = None,
+    json_body: Any = None,
+    verify: bool = True,
+    retries: int = DEFAULT_RETRIES,
+    backoff_s: float = DEFAULT_BACKOFF_S,
+) -> requests.Response:
+    """GET/POST with retry on SSL/connection/5xx errors and exponential backoff.
+
+    Raises the last exception only if every retry has failed.
+    """
+    last_exc: Exception | None = None
+    for attempt in range(retries + 1):
+        try:
+            response = requests.request(
+                method,
+                url,
+                headers=headers,
+                json=json_body,
+                timeout=timeout,
+                verify=verify,
+            )
+            # Retry on transient server errors but not on 4xx (those are real)
+            if 500 <= response.status_code < 600:
+                last_exc = requests.HTTPError(
+                    f"{response.status_code} server error", response=response
+                )
+            else:
+                return response
+        except (requests.exceptions.SSLError,
+                requests.exceptions.ConnectionError,
+                requests.exceptions.Timeout) as exc:
+            last_exc = exc
+        if attempt < retries:
+            time.sleep(backoff_s * (2 ** attempt))
+    if last_exc is None:
+        last_exc = RuntimeError(f"unreachable retry path for {url}")
+    raise last_exc
 
 
 @dataclass(frozen=True)
@@ -84,7 +134,8 @@ class PolymarketWeatherClient:
         self.timeout_s = timeout_s
 
     def fetch_weather_events(self) -> list[dict[str, Any]]:
-        response = requests.get(
+        response = _request_with_retries(
+            "GET",
             self.weather_url,
             headers={"User-Agent": USER_AGENT},
             timeout=self.timeout_s,
@@ -93,7 +144,8 @@ class PolymarketWeatherClient:
         return extract_weather_events_from_html(response.text)
 
     def fetch_geoblock(self) -> dict[str, Any]:
-        response = requests.get(
+        response = _request_with_retries(
+            "GET",
             self.geoblock_url,
             headers={"User-Agent": USER_AGENT},
             timeout=self.timeout_s,
@@ -119,9 +171,10 @@ class PolymarketClobClient:
         unique_token_ids = [token_id for token_id in dict.fromkeys(token_ids) if token_id]
         for start in range(0, len(unique_token_ids), batch_size):
             batch = unique_token_ids[start:start + batch_size]
-            response = requests.post(
+            response = _request_with_retries(
+                "POST",
                 self.books_url,
-                json=[{"token_id": token_id} for token_id in batch],
+                json_body=[{"token_id": token_id} for token_id in batch],
                 headers={"User-Agent": USER_AGENT, "Accept": "application/json"},
                 timeout=self.timeout_s,
                 verify=self.verify_tls,
