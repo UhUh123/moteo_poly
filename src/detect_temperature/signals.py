@@ -219,6 +219,14 @@ def build_market_signal(
     yes_edge = fair_yes - yes_buy_price - (yes_fee or 0.0) if yes_buy_price is not None else None
     no_edge = fair_no - no_buy_price - (no_fee or 0.0) if no_buy_price is not None else None
 
+    # Kelly fraction is annotation only - it does NOT drive sizing today.
+    # Strategy lab still picks a flat stake (suggested_max_stake_usdc) per
+    # bankroll_100 risk profile. We expose Kelly so the chapter-4 diagnostic
+    # script (and human eyes) can see what the math thinks the stake should
+    # be for each row, without changing live behavior.
+    yes_kelly = kelly_fraction(yes_edge, yes_buy_price)
+    no_kelly = kelly_fraction(no_edge, no_buy_price)
+
     base.update(
         {
             "fair_yes_probability": round(fair_yes, 6),
@@ -229,6 +237,8 @@ def build_market_signal(
             "no_fee_per_share": _round_or_none(no_fee),
             "yes_net_edge": _round_or_none(yes_edge),
             "no_net_edge": _round_or_none(no_edge),
+            "yes_kelly_fraction": _round_or_none(yes_kelly),
+            "no_kelly_fraction": _round_or_none(no_kelly),
         }
     )
 
@@ -325,6 +335,25 @@ def normal_interval_probability(
 
 def fee_per_share(price: float, fee_rate: float) -> float:
     return fee_rate * price * (1.0 - price)
+
+
+def kelly_fraction(edge: float | None, price: float | None) -> float | None:
+    """Full Kelly fraction for a Polymarket-style binary contract.
+
+    f* = (q - p) / (1 - p), where the edge passed in is already (q - p)
+    after fees if available. We do NOT clamp to [0, 1] here - a negative
+    return value means "no edge, do not bet" and the caller decides; a
+    value above some sane cap should also be handled by the caller, not
+    silently smoothed here.
+
+    Returns None if inputs are missing or the price is at the boundary.
+    """
+    if edge is None or price is None:
+        return None
+    denom = 1.0 - price
+    if denom <= 0:
+        return None
+    return edge / denom
 
 
 def _apply_event_context(

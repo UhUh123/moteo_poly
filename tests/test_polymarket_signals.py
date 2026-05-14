@@ -9,6 +9,7 @@ from detect_temperature.polymarket import extract_weather_events_from_html, flat
 from detect_temperature.signals import (
     build_market_signal,
     build_market_signals,
+    kelly_fraction,
     normal_interval_probability,
     parse_temperature_interval,
 )
@@ -162,3 +163,38 @@ def _write_rows(path, rows) -> None:
         writer = csv.DictWriter(fh, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
+
+
+def test_kelly_fraction_chapter4_examples() -> None:
+    # Seoul example from chapter 4 §5: p=0.38, q=0.42, edge=0.04
+    # f* = 0.04 / (1 - 0.38) = 0.0645... (chapter quotes ~0.065)
+    assert kelly_fraction(0.04, 0.38) == pytest.approx(0.06451, abs=1e-4)
+    # Cheap tail from §6: p=0.10, q=0.20, edge=0.10 -> f* = 0.111
+    assert kelly_fraction(0.10, 0.10) == pytest.approx(0.11111, abs=1e-4)
+    # No edge -> 0, do not bet
+    assert kelly_fraction(0.0, 0.5) == 0.0
+    # Negative edge -> negative fraction (caller must reject)
+    assert kelly_fraction(-0.05, 0.5) == pytest.approx(-0.10, abs=1e-9)
+    # Boundary cases must not blow up
+    assert kelly_fraction(0.05, 1.0) is None
+    assert kelly_fraction(None, 0.5) is None
+    assert kelly_fraction(0.05, None) is None
+
+
+def test_build_market_signal_emits_kelly_columns() -> None:
+    market_row = flatten_temperature_markets([_event_fixture()])[0].to_record()
+    market_row["best_ask"] = "0.20"
+    market_row["best_bid"] = "0.18"
+    prediction = {
+        "slug": "highest-temperature-in-test-on-may-5-2026",
+        "corrected_prediction_c": "17.0",
+        "model_name": "test-model",
+    }
+
+    signal = build_market_signal(market=market_row, prediction=prediction, sigma_c=1.0, min_edge=0.03)
+
+    assert "yes_kelly_fraction" in signal
+    assert "no_kelly_fraction" in signal
+    # YES side has positive edge in this fixture, so Kelly must be a positive number
+    assert signal["yes_kelly_fraction"] is not None
+    assert signal["yes_kelly_fraction"] > 0
