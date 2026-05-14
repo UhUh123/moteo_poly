@@ -51,7 +51,15 @@ def _configure_logging() -> logging.Logger:
 
 
 def _heartbeat_loop(logger: logging.Logger, started_at: float) -> None:
-    """Background thread that refreshes the health timestamp every 5 min."""
+    """Background thread that refreshes the health timestamp every 5 min.
+
+    Note: status.update_task does a shallow merge, not an overwrite, so we
+    must explicitly set status="running" here. Earlier versions only set
+    "starting" in the one-shot init below; the periodic heartbeat skipped
+    the field, and that left a multi-day-old "starting" stuck in the JSON
+    even though the server was clearly up. Chapter 7 §10.3 of the learning
+    guide flagged this. Fix is one line.
+    """
     from detect_temperature.status import update_task
 
     hostname = socket.gethostname()
@@ -61,6 +69,7 @@ def _heartbeat_loop(logger: logging.Logger, started_at: float) -> None:
                 "dashboard_server",
                 {
                     "code": 0,
+                    "status": "running",
                     "host": HOST,
                     "port": PORT,
                     "hostname": hostname,
