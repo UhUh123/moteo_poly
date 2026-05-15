@@ -246,10 +246,77 @@ def do_hot(logger: logging.Logger, now: datetime, window_min: int) -> int:
     return 0
 
 
+def do_metar(logger: logging.Logger, now: datetime, stations_path: Path) -> int:
+    """Bulk-fetch latest METAR for every station in `stations_path` and
+    append to data/metar_history/<UTC-day>.csv with deduplication.
+
+    Why we do this in collector and not in near_close: METAR feed is
+    the resolve source for Polymarket weather markets and the only way
+    to honestly answer "what was the temperature at 14:30 UTC". We
+    must persist it ourselves; aviationweather.gov does not host an
+    archive we can replay later. See chapter 6 of the learning guide.
+    """
+    from detect_temperature.sources.metar_collector import (
+        collect_metar_snapshot,
+        load_station_ids,
+    )
+
+    station_ids = load_station_ids(stations_path)
+    if not station_ids:
+        logger.info(f"metar skip: no stations in {stations_path}")
+        update_task(
+            "collector_metar",
+            {"code": 0, "error": "", "outcome": "skip_no_stations"},
+            path=HEALTH_PATH,
+        )
+        return 0
+
+    history_root = DATA_DIR / "metar_history"
+    try:
+        summary = collect_metar_snapshot(
+            station_ids,
+            history_root=history_root,
+            now_utc=now,
+        )
+    except Exception as exc:
+        logger.error(f"metar fetch failed: {exc}")
+        update_task(
+            "collector_metar",
+            {"code": 2, "error": str(exc)},
+            path=HEALTH_PATH,
+        )
+        return 2
+
+    logger.info(
+        f"metar ok: requested={summary['requested']} received={summary['received']} "
+        f"appended={summary['appended']} days={summary.get('days_touched', [])}"
+    )
+    update_task(
+        "collector_metar",
+        {
+            "code": 0,
+            "error": "",
+            "stations_requested": summary["requested"],
+            "reports_received": summary["received"],
+            "rows_appended": summary["appended"],
+            "days_touched": summary.get("days_touched", []),
+            "outcome": "snapshot" if summary["appended"] > 0 else "no_new_obs",
+        },
+        path=HEALTH_PATH,
+    )
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="windows_collector")
-    parser.add_argument("--mode", choices=("regular", "hot"), required=True)
+    parser.add_argument("--mode", choices=("regular", "hot", "metar"), required=True)
     parser.add_argument("--hot-window-min", type=int, default=60)
+    parser.add_argument(
+        "--stations-path",
+        type=Path,
+        default=DATA_DIR / "training_stations.json",
+        help="Inventory of station ICAO codes (default: data/training_stations.json).",
+    )
     args = parser.parse_args(argv)
 
     logger = _configure_logging()
@@ -259,8 +326,13 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.mode == "regular":
         code = do_regular(logger, now)
-    else:
+    elif args.mode == "hot":
         code = do_hot(logger, now, window_min=args.hot_window_min)
+    elif args.mode == "metar":
+        code = do_metar(logger, now, stations_path=args.stations_path)
+    else:
+        logger.error(f"unknown mode: {args.mode}")
+        code = 2
 
     elapsed = time.time() - started
     logger.info(f"collector end code={code} elapsed={elapsed:.2f}s")

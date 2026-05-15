@@ -53,6 +53,7 @@ run. That JSON is the answer to "how is it going?".
 | `data\station_calibration.csv` | Per-station rolling MAE + bias. Drives sigma in signals. |
 | `data\training_real.csv` | Canonical training set (124k rows, 51 stations). Grows with weekly refresh. |
 | `data\actuals.csv` | Resolved temperatures from Wunderground/HKO/Synoptic. |
+| `data\metar_history\YYYY-MM-DD.csv` | Raw METAR observations (temp, dew, wind, pressure, raw text) for every station in `training_stations.json`. Append-only, deduplicated on (station_id, observed_at). Polled every 10 min by `PolymarketCollectorMetar`. This is our independent ground-truth feed for what the temperature actually was at any past minute — both for backtests and for cross-checking the Wunderground-based settle. |
 | `data\history\YYYY-MM-DD\HHMMSS-{regular,hot}\` | Every collector snapshot, forever. This is the real dataset we build. |
 | `data\history\_state\<sha12>\<filename>` | Content-addressed pool of model state files (predictions / signals / calibration) at the time of each snapshot. Each `regular` snapshot writes a `state_manifest.json` mapping logical name -> sha. Used by walk-forward backtests. See `src/detect_temperature/state_archive.py`. |
 | `artifacts\models\gbm.joblib` | Current production model. |
