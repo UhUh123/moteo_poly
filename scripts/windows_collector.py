@@ -90,6 +90,21 @@ def _archive_regular(snapshot_dir: Path) -> list[str]:
             continue
         shutil.copy2(src, snapshot_dir / name)
         copied.append(name)
+    # Also persist the model state (predictions, signals, station
+    # calibration) at the moment of this snapshot. We do this through a
+    # content-addressed pool, not full file copies — see
+    # detect_temperature.state_archive for the rationale and the disk
+    # math (~200x cheaper than naive copies). The pool lives at
+    # data/history/_state/<sha>/<filename>.
+    try:
+        from detect_temperature.state_archive import archive_model_state
+        manifest = archive_model_state(snapshot_dir, ROOT)
+        if manifest:
+            copied.append("state_manifest.json")
+    except Exception as exc:
+        logging.getLogger("windows_collector").warning(
+            f"state archive failed: {exc}"
+        )
     return copied
 
 

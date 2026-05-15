@@ -54,6 +54,7 @@ run. That JSON is the answer to "how is it going?".
 | `data\training_real.csv` | Canonical training set (124k rows, 51 stations). Grows with weekly refresh. |
 | `data\actuals.csv` | Resolved temperatures from Wunderground/HKO/Synoptic. |
 | `data\history\YYYY-MM-DD\HHMMSS-{regular,hot}\` | Every collector snapshot, forever. This is the real dataset we build. |
+| `data\history\_state\<sha12>\<filename>` | Content-addressed pool of model state files (predictions / signals / calibration) at the time of each snapshot. Each `regular` snapshot writes a `state_manifest.json` mapping logical name -> sha. Used by walk-forward backtests. See `src/detect_temperature/state_archive.py`. |
 | `artifacts\models\gbm.joblib` | Current production model. |
 | `artifacts\predictions_gbm.csv` | Today's corrected predictions for today's markets. |
 | `artifacts\market_signals.csv` | Per-bucket signals (paper_side = BUY_YES / BUY_NO / NO_TRADE). |
