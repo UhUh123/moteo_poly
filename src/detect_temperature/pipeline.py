@@ -152,6 +152,8 @@ def collect_actuals(
     output_path: str | Path,
     station_catalog: StationCatalog | None = None,
     finalization_lag_days: int = 1,
+    portfolio_path: str | Path | None = None,
+    paper_runs_root: str | Path | None = None,
 ) -> list[dict]:
     """Collect resolved temperatures for every target we currently know.
 
@@ -161,6 +163,16 @@ def collect_actuals(
       - pending/error rows get replaced when we successfully fetch.
       - rows for slugs that are no longer in targets_path are preserved as-is
         (so rotating targets.csv daily doesn't wipe historical actuals).
+
+    Stuck-open recovery (added 2026-05-16):
+      Paper positions that are still 'open' / 'at_risk' / 'pending_actual'
+      after their target_date passed must keep getting their actuals fetched,
+      even though their slug rotated out of `targets_path` days ago. We
+      reconstruct minimal MarketTarget objects for those slugs by parsing
+      the slug for date + extreme, taking the unit from the portfolio row,
+      and looking up the station_id in archived targets.csv files under
+      `paper_runs_root`. Defaults locate paper_portfolio.csv under
+      artifacts/ and the archive root under artifacts/paper_runs/.
     """
     output_path = Path(output_path)
     existing: dict[str, dict] = {}
@@ -170,7 +182,17 @@ def collect_actuals(
         except Exception:
             existing = {}
 
-    targets = read_targets_csv(targets_path)
+    targets = list(read_targets_csv(targets_path))
+    known_slugs = {target.slug for target in targets}
+    stuck = _stuck_paper_targets(
+        portfolio_path=portfolio_path,
+        archive_root=paper_runs_root,
+        already_queued=known_slugs,
+        targets_path=Path(targets_path),
+    )
+    if stuck:
+        targets.extend(stuck)
+
     station_cache: dict[str, Any] = {}
     fresh_records: list[dict] = []
     for target in targets:
@@ -211,6 +233,126 @@ def collect_actuals(
     merged_records = list(merged_by_slug.values())
     write_records_csv(merged_records, output_path)
     return merged_records
+
+
+_STUCK_OPEN_STATUSES = frozenset({"open", "pending_actual", "at_risk"})
+
+_MONTHS_LOWER = {
+    "jan": 1, "january": 1, "feb": 2, "february": 2, "mar": 3, "march": 3,
+    "apr": 4, "april": 4, "may": 5, "jun": 6, "june": 6, "jul": 7, "july": 7,
+    "aug": 8, "august": 8, "sep": 9, "september": 9, "oct": 10, "october": 10,
+    "nov": 11, "november": 11, "dec": 12, "december": 12,
+}
+
+
+def _stuck_paper_targets(
+    portfolio_path: str | Path | None,
+    archive_root: str | Path | None,
+    already_queued: set[str],
+    targets_path: Path,
+) -> list[MarketTarget]:
+    """Build MarketTarget objects for paper positions still 'open' whose
+    slug is no longer in the current targets.csv."""
+    import re
+    from datetime import date
+
+    project_root = targets_path.parent.parent if targets_path.parent.name == "data" else None
+
+    if portfolio_path is None and project_root is not None:
+        portfolio_path = project_root / "artifacts" / "paper_portfolio.csv"
+    if archive_root is None and project_root is not None:
+        archive_root = project_root / "artifacts" / "paper_runs"
+
+    portfolio_path = Path(portfolio_path) if portfolio_path else None
+    archive_root = Path(archive_root) if archive_root else None
+    if portfolio_path is None or not portfolio_path.exists():
+        return []
+
+    # Build slug -> station_id lookup from every archived targets.csv.
+    # Current rotation already wins via `already_queued` short-circuit.
+    archived_station: dict[str, str] = {}
+    archived_unit: dict[str, str] = {}
+    if archive_root and archive_root.exists():
+        for archived in sorted(archive_root.glob("*/targets.csv")):
+            try:
+                for row in read_records_csv(archived):
+                    slug = row.get("slug", "")
+                    if not slug:
+                        continue
+                    if slug not in archived_station and row.get("station_id"):
+                        archived_station[slug] = row["station_id"]
+                    if slug not in archived_unit and row.get("target_unit"):
+                        archived_unit[slug] = row["target_unit"]
+            except Exception:
+                continue
+
+    recovered: list[MarketTarget] = []
+    seen: set[str] = set()
+    try:
+        portfolio = read_records_csv(portfolio_path)
+    except Exception:
+        return []
+
+    for row in portfolio:
+        status = (row.get("status") or "").strip().lower()
+        if status not in _STUCK_OPEN_STATUSES:
+            continue
+        slug = (row.get("event_slug") or "").strip()
+        if not slug or slug in already_queued or slug in seen:
+            continue
+
+        slug_match = re.search(r"on-([a-z]+)-(\d{1,2})-(\d{4})", slug)
+        if not slug_match:
+            continue
+        month_name, day, year = slug_match.groups()
+        month = _MONTHS_LOWER.get(month_name.lower())
+        if month is None:
+            continue
+        try:
+            target_date = date(int(year), month, int(day))
+        except ValueError:
+            continue
+
+        if "highest-temperature" in slug:
+            extreme = "max"
+        elif "lowest-temperature" in slug:
+            extreme = "min"
+        else:
+            continue
+
+        station_id = archived_station.get(slug, "") or (row.get("station_id") or "").strip()
+        if not station_id:
+            continue
+        unit = (
+            archived_unit.get(slug)
+            or (row.get("interval_unit") or "").strip()
+            or "celsius"
+        )
+        if station_id == "HKO":
+            domain = "weather.gov.hk"
+            url = "https://www.weather.gov.hk/"
+            description = "Hong Kong Observatory"
+        else:
+            domain = "wunderground.com"
+            url = f"https://www.wunderground.com/weather/{station_id}"
+            description = ""
+
+        recovered.append(MarketTarget(
+            title=row.get("event_title") or slug,
+            slug=slug,
+            city="",
+            location_name="",
+            target_date=target_date,
+            target_extreme=extreme,
+            target_unit=unit,
+            station_id=station_id,
+            resolution_source_url=url,
+            source_domain=domain,
+            description=description,
+        ))
+        seen.add(slug)
+
+    return recovered
 
 
 def train_gbm_model(
