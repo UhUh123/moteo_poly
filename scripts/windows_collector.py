@@ -156,6 +156,7 @@ def do_regular(logger: logging.Logger, now: datetime) -> int:
         "collector_regular",
         {
             "code": 0,
+            "error": "",
             "markets_scanned": len(scan_rows),
             "active_markets": active,
             "snapshot_dir": str(snapshot_dir),
@@ -173,7 +174,7 @@ def do_hot(logger: logging.Logger, now: datetime, window_min: int) -> int:
         logger.info(f"hot skip: no markets closing within {window_min} min")
         update_task(
             "collector_hot",
-            {"code": 0, "markets_watched": 0, "outcome": "skip_no_closing"},
+            {"code": 0, "error": "", "markets_watched": 0, "outcome": "skip_no_closing"},
             path=HEALTH_PATH,
         )
         return 0
@@ -187,7 +188,7 @@ def do_hot(logger: logging.Logger, now: datetime, window_min: int) -> int:
         logger.info("hot skip: no token ids on closing markets")
         update_task(
             "collector_hot",
-            {"code": 0, "markets_watched": len(watch), "outcome": "skip_no_tokens"},
+            {"code": 0, "error": "", "markets_watched": len(watch), "outcome": "skip_no_tokens"},
             path=HEALTH_PATH,
         )
         return 0
@@ -219,6 +220,7 @@ def do_hot(logger: logging.Logger, now: datetime, window_min: int) -> int:
         "collector_hot",
         {
             "code": 0,
+            "error": "",
             "markets_watched": len(watch),
             "token_ids_requested": len(token_ids),
             "snapshot_dir": str(snapshot_dir),
