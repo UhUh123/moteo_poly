@@ -63,6 +63,36 @@ def main() -> int:
             known_station[row.get("slug", "")] = row.get("station_id", "")
             known_unit[row.get("slug", "")] = row.get("target_unit", "celsius")
 
+    # Fallback: walk archived targets.csv files in artifacts/paper_runs/.
+    # The current targets.csv only has tomorrow's slugs after the daily
+    # rotation, so any paper position older than ~24h whose slug fell out
+    # of targets.csv will look like "no station_id" and be skipped. Each
+    # paper_runs/<ts>-pre-open/targets.csv is an archive from when that
+    # day's open trade fired - they together cover every slug we ever
+    # opened a position on.
+    paper_runs = ROOT / "artifacts" / "paper_runs"
+    archived = sorted(paper_runs.glob("*/targets.csv")) if paper_runs.exists() else []
+    for archived_targets in archived:
+        try:
+            for row in read_records_csv(archived_targets):
+                slug = row.get("slug", "")
+                if not slug:
+                    continue
+                # Don't overwrite info from current targets.csv - it's freshest
+                if slug not in known_station:
+                    sid = row.get("station_id", "")
+                    if sid:
+                        known_station[slug] = sid
+                if slug not in known_unit:
+                    unit = row.get("target_unit", "")
+                    if unit:
+                        known_unit[slug] = unit
+        except Exception as exc:
+            print(f"  WARN: failed to read {archived_targets}: {exc}")
+
+    print(f"  loaded {len(known_station)} slug -> station_id mappings "
+          f"({len([1 for v in known_station.values() if v])} non-empty)")
+
     catalog = CompositeStationCatalog([
         ManualStationCatalog(ROOT / "data" / "manual_stations.csv"),
         AviationWeatherStationCatalog(cache_path=ROOT / "data" / "stations.cache.json"),
