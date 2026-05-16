@@ -189,19 +189,44 @@ def settle_paper_portfolio(
     state_path: str | Path | None = None,
     dashboard_path: str | Path | None = None,
     bankroll_usdc: float = 1000.0,
+    cross_check_polymarket: bool = True,
 ) -> dict[str, Any]:
     positions = _read_csv(portfolio_path)
     actuals = {row.get("slug", ""): row for row in _read_csv(actuals_path)}
     settled_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+    # Best-effort independent cross-check against the on-chain Polymarket
+    # resolution. Our actuals.csv is the source of truth for paper PnL —
+    # this only annotates each position with what Polymarket itself
+    # decided so we can audit divergence later.
+    polymarket_resolutions = (
+        _fetch_polymarket_resolutions(positions, actuals)
+        if cross_check_polymarket
+        else {}
+    )
+
     updated_positions = []
+    cross_check_stats = {"agree": 0, "disagree": 0, "pending": 0, "no_data": 0}
     for position in positions:
-        updated_positions.append(_settle_position(position, actuals.get(position.get("event_slug", "")), settled_at))
+        market_slug = position.get("market_slug", "")
+        market_resolution = polymarket_resolutions.get(market_slug)
+        updated = _settle_position(
+            position,
+            actuals.get(position.get("event_slug", "")),
+            settled_at,
+            polymarket_resolution=market_resolution,
+        )
+        agreement = updated.get("settle_agreement", "")
+        if agreement in cross_check_stats:
+            cross_check_stats[agreement] += 1
+        updated_positions.append(updated)
 
     summary = summarize_portfolio(updated_positions, bankroll_usdc=bankroll_usdc, generated_at=settled_at)
     summary.update(
         {
             "source_portfolio_path": str(portfolio_path),
             "source_actuals_path": str(actuals_path),
+            "polymarket_cross_check": cross_check_stats if cross_check_polymarket else None,
         }
     )
     _write_csv(updated_positions, output_path)
@@ -211,6 +236,153 @@ def settle_paper_portfolio(
     if dashboard_path:
         render_paper_dashboard(payload, dashboard_path)
     return payload
+
+
+def _fetch_polymarket_resolutions(
+    positions: list[dict[str, Any]],
+    actuals: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """For every event_slug that has at least one position eligible to
+    settle (status open/at_risk/pending_actual AND its actual is ready),
+    hit the Polymarket gamma API once and merge the per-market
+    resolutions into a single market_slug -> MarketResolution map.
+
+    Best-effort: any network or parse failure is logged and skipped.
+    The settle still runs without cross-check data.
+    """
+    from .polymarket_resolution import fetch_event_resolution
+
+    eligible_event_slugs: set[str] = set()
+    for pos in positions:
+        event_slug = pos.get("event_slug") or ""
+        if not event_slug:
+            continue
+        if pos.get("status") in SETTLED_STATUSES:
+            # Backfill: only fetch if cross-check fields are missing,
+            # so we don't hammer the API on every daily run.
+            if not pos.get("settle_agreement"):
+                eligible_event_slugs.add(event_slug)
+            continue
+        # Newly-settling row: must also have a usable actual on disk
+        actual = actuals.get(event_slug)
+        if actual is None or actual.get("status") != "ok":
+            continue
+        eligible_event_slugs.add(event_slug)
+
+    merged: dict[str, Any] = {}
+    for event_slug in sorted(eligible_event_slugs):
+        try:
+            event_markets = fetch_event_resolution(event_slug)
+        except Exception:
+            # Network error / 5xx / DNS hiccup. Best-effort — leave the
+            # affected positions without cross-check annotation rather
+            # than blow up the whole settle pass.
+            continue
+        merged.update(event_markets)
+    return merged
+
+
+def _settle_position(
+    position: dict[str, Any],
+    actual: dict[str, Any] | None,
+    settled_at: str,
+    polymarket_resolution: Any | None = None,
+) -> dict[str, Any]:
+    """Decide won/lost for a single open position.
+
+    `polymarket_resolution` is an optional MarketResolution for the
+    same market, fetched from the Polymarket gamma API by the caller.
+    It is recorded for audit only — paper PnL is always driven by
+    `actuals.csv` (Wunderground / HKO / Synoptic), which has been our
+    source of truth from day one. We just want to know how often
+    Polymarket's on-chain answer agrees with us.
+    """
+    from .polymarket_resolution import settle_agreement as _settle_agreement
+
+    updated = dict(position)
+
+    # Already-settled rows: we don't recompute won/lost (PnL is final),
+    # but we DO backfill the cross-check columns when they are missing
+    # so that newly-introduced cross-check audit catches up on history.
+    if updated.get("status") in SETTLED_STATUSES:
+        if not updated.get("settle_agreement"):
+            our_yes_won_int = updated.get("won")
+            try:
+                our_yes_won_bool = bool(int(our_yes_won_int))
+            except (TypeError, ValueError):
+                our_yes_won_bool = updated.get("status") == "won"
+            # In our model, paper.side BUY_YES and won=1 implies yes_won=True;
+            # BUY_NO and won=1 implies yes_won=False. Use that mapping.
+            side = updated.get("side")
+            if side == "BUY_NO":
+                our_yes_won_bool = not our_yes_won_bool
+            _annotate_polymarket(updated, polymarket_resolution, our_yes_won_bool)
+        return updated
+
+    if actual is None:
+        updated["status"] = updated.get("status") or "open"
+        updated["actual_status"] = "missing"
+        return updated
+    actual_status = actual.get("status", "")
+    updated["actual_status"] = actual_status
+    if actual_status != "ok":
+        updated["status"] = updated.get("status") or "open"
+        return updated
+
+    actual_c = _as_float(actual.get("observed_temp_c"))
+    if actual_c is None:
+        updated["status"] = updated.get("status") or "open"
+        return updated
+    interval_unit = updated.get("interval_unit", "celsius")
+    actual_value = celsius_to_fahrenheit(actual_c) if interval_unit == "fahrenheit" else actual_c
+    yes_won = _contains_interval(
+        actual_value,
+        lower=_as_optional_float(updated.get("interval_lower")),
+        upper=_as_optional_float(updated.get("interval_upper")),
+    )
+    side = updated.get("side")
+    won = yes_won if side == "BUY_YES" else not yes_won
+    shares = _as_float(updated.get("shares"))
+    stake = _as_float(updated.get("stake_usdc"))
+    payout = shares if won else 0.0
+    pnl = payout - stake
+    updated["status"] = "won" if won else "lost"
+    updated["settled_at"] = settled_at
+    updated["actual_value"] = round(actual_value, 4)
+    updated["won"] = int(won)
+    updated["payout_usdc"] = round(payout, 4)
+    updated["pnl_usdc"] = round(pnl, 4)
+    updated["roi_pct"] = round((pnl / stake) * 100.0, 2) if stake else None
+
+    _annotate_polymarket(updated, polymarket_resolution, our_yes_won=yes_won)
+    return updated
+
+
+def _annotate_polymarket(
+    row: dict[str, Any],
+    polymarket_resolution: Any | None,
+    our_yes_won: bool,
+) -> None:
+    """Add four cross-check columns to a settled row in-place. PnL is
+    untouched — this is audit only."""
+    from .polymarket_resolution import settle_agreement as _settle_agreement
+
+    if polymarket_resolution is None:
+        pm_yes_won_int: int | str = ""
+        pm_uma_status = ""
+        pm_outcome_prices = ""
+    else:
+        pm_yes = polymarket_resolution.yes_won
+        pm_yes_won_int = "" if pm_yes is None else int(pm_yes)
+        pm_uma_status = polymarket_resolution.uma_status
+        pm_outcome_prices = polymarket_resolution.outcome_prices_raw
+    row["polymarket_yes_won"] = pm_yes_won_int
+    row["polymarket_uma_status"] = pm_uma_status
+    row["polymarket_outcome_prices"] = pm_outcome_prices
+    row["settle_agreement"] = _settle_agreement(
+        our_yes_won=our_yes_won,
+        polymarket_resolution=polymarket_resolution,
+    )
 
 
 def summarize_portfolio(
@@ -973,47 +1145,6 @@ def _strategy_entry_mode(row: dict[str, Any], execution_mode: str) -> str | None
 def _strategy_expected_roi(row: dict[str, Any], entry_mode: str) -> float | None:
     key = "maker_fill_adjusted_expected_roi" if entry_mode == "maker" else "execution_expected_roi"
     return _as_optional_float(row.get(key))
-
-
-def _settle_position(position: dict[str, Any], actual: dict[str, Any] | None, settled_at: str) -> dict[str, Any]:
-    updated = dict(position)
-    if updated.get("status") in SETTLED_STATUSES:
-        return updated
-    if actual is None:
-        updated["status"] = updated.get("status") or "open"
-        updated["actual_status"] = "missing"
-        return updated
-    actual_status = actual.get("status", "")
-    updated["actual_status"] = actual_status
-    if actual_status != "ok":
-        updated["status"] = updated.get("status") or "open"
-        return updated
-
-    actual_c = _as_float(actual.get("observed_temp_c"))
-    if actual_c is None:
-        updated["status"] = updated.get("status") or "open"
-        return updated
-    interval_unit = updated.get("interval_unit", "celsius")
-    actual_value = celsius_to_fahrenheit(actual_c) if interval_unit == "fahrenheit" else actual_c
-    yes_won = _contains_interval(
-        actual_value,
-        lower=_as_optional_float(updated.get("interval_lower")),
-        upper=_as_optional_float(updated.get("interval_upper")),
-    )
-    side = updated.get("side")
-    won = yes_won if side == "BUY_YES" else not yes_won
-    shares = _as_float(updated.get("shares"))
-    stake = _as_float(updated.get("stake_usdc"))
-    payout = shares if won else 0.0
-    pnl = payout - stake
-    updated["status"] = "won" if won else "lost"
-    updated["settled_at"] = settled_at
-    updated["actual_value"] = round(actual_value, 4)
-    updated["won"] = int(won)
-    updated["payout_usdc"] = round(payout, 4)
-    updated["pnl_usdc"] = round(pnl, 4)
-    updated["roi_pct"] = round((pnl / stake) * 100.0, 2) if stake else None
-    return updated
 
 
 def _position_row_html(position: dict[str, Any]) -> str:

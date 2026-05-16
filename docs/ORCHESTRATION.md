@@ -60,7 +60,7 @@ run. That JSON is the answer to "how is it going?".
 | `artifacts\predictions_gbm.csv` | Today's corrected predictions for today's markets. |
 | `artifacts\market_signals.csv` | Per-bucket signals (paper_side = BUY_YES / BUY_NO / NO_TRADE). |
 | `artifacts\strategy_portfolio_v2.csv` | Robust-filtered portfolio candidates from Strategy Lab. |
-| `artifacts\paper_portfolio.csv` / `.json` | Open + settled paper positions. |
+| `artifacts\paper_portfolio.csv` / `.json` | Open + settled paper positions. Settled rows now also carry four cross-check columns from the Polymarket gamma API: `polymarket_yes_won`, `polymarket_uma_status`, `polymarket_outcome_prices`, `settle_agreement`. Our PnL is still computed from `actuals.csv` — the Polymarket fields are audit-only. `settle_agreement` is `agree` / `disagree` / `pending` / `no_data`; a non-zero `disagree` count flags positions where our Wunderground-based verdict differs from the on-chain resolution. |
 | `artifacts\paper_dashboard.html` | Dashboard HTML (what the mac serves). |
 | `artifacts\paper_runs\<ts>-<label>\` | Archive of each run so we can compare yesterday vs today. |
 | `logs\dashboard_server.log` | Long-running dashboard server log. |

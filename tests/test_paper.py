@@ -64,6 +64,7 @@ def test_settle_paper_portfolio_marks_wins_and_losses(tmp_path) -> None:
         output_path=settled_path,
         state_path=state_path,
         bankroll_usdc=100.0,
+        cross_check_polymarket=False,
     )
 
     rows = list(csv.DictReader(settled_path.open(newline="", encoding="utf-8")))
@@ -353,3 +354,280 @@ def test_open_and_settled_status_constants() -> None:
     assert "open" in OPEN_STATUSES
     assert "won" in SETTLED_STATUSES
     assert "lost" in SETTLED_STATUSES
+
+
+# ---------- Polymarket cross-check tests --------------------------------------
+
+import pytest
+
+
+def _write_signals_for_cross_check(path) -> None:
+    """A minimal signals CSV with one BUY_NO position we can later settle."""
+    fieldnames = [
+        "event_slug",
+        "event_title",
+        "market_slug",
+        "question",
+        "group_item_title",
+        "paper_side",
+        "paper_price",
+        "paper_fair_probability",
+        "paper_net_edge",
+        "suggested_max_stake_usdc",
+        "yes_fee_per_share",
+        "no_fee_per_share",
+        "prediction_c",
+        "interval_lower",
+        "interval_upper",
+        "interval_unit",
+        "end_date",
+        "market_has_ended",
+    ]
+    rows = [{
+        "event_slug": "highest-temperature-in-test-on-may-5-2026",
+        "event_title": "Highest temperature in Test on May 5?",
+        "market_slug": "highest-temperature-in-test-on-may-5-2026-17c",
+        "question": "Will the highest temperature in Test be 17°C on May 5?",
+        "group_item_title": "17°C",
+        "paper_side": "BUY_NO",
+        "paper_price": "0.6",
+        "paper_fair_probability": "0.7",
+        "paper_net_edge": "0.05",
+        "suggested_max_stake_usdc": "1",
+        "yes_fee_per_share": "0.005",
+        "no_fee_per_share": "0.005",
+        "prediction_c": "20",
+        "interval_lower": "16.5",
+        "interval_upper": "17.5",
+        "interval_unit": "celsius",
+        "end_date": "2099-05-05T12:00:00Z",
+        "market_has_ended": "0",
+    }]
+    with path.open("w", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=fieldnames)
+        w.writeheader()
+        w.writerows(rows)
+
+
+def _write_actual_temp_outside_bucket(path) -> None:
+    """Actual is 22°C, the bucket was 17°C. So our verdict: BUY_NO won."""
+    rows = [{
+        "slug": "highest-temperature-in-test-on-may-5-2026",
+        "status": "ok",
+        "observed_temp_c": "22.0",
+    }]
+    with path.open("w", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=["slug", "status", "observed_temp_c"])
+        w.writeheader()
+        w.writerows(rows)
+
+
+def _open_one_position(tmp_path):
+    """Helper: build a paper portfolio with exactly one BUY_NO position."""
+    signals = tmp_path / "signals.csv"
+    _write_signals_for_cross_check(signals)
+    portfolio = tmp_path / "portfolio.csv"
+    open_paper_portfolio(
+        signals_path=signals,
+        output_path=portfolio,
+        bankroll_usdc=100.0,
+        max_positions=1,
+        max_stake_usdc=5.0,
+        max_total_exposure_pct=0.2,
+        min_price=0.01,
+    )
+    actuals = tmp_path / "actuals.csv"
+    _write_actual_temp_outside_bucket(actuals)
+    return portfolio, actuals
+
+
+def test_settle_records_polymarket_agree_when_both_say_no_won(tmp_path, monkeypatch) -> None:
+    """Both we and Polymarket think NO won -> settle_agreement='agree'."""
+    portfolio, actuals = _open_one_position(tmp_path)
+
+    from detect_temperature.polymarket_resolution import MarketResolution
+
+    fake_resolution = MarketResolution(
+        market_slug="highest-temperature-in-test-on-may-5-2026-17c",
+        closed=True,
+        yes_outcome_price=0.0,
+        no_outcome_price=1.0,
+        outcome_prices_raw='["0", "1"]',
+        uma_status="resolved",
+        resolution_source="https://wunderground.com/...",
+    )
+
+    def fake_fetch(event_slug):
+        assert event_slug == "highest-temperature-in-test-on-may-5-2026"
+        return {"highest-temperature-in-test-on-may-5-2026-17c": fake_resolution}
+
+    monkeypatch.setattr(
+        "detect_temperature.paper.fetch_event_resolution",
+        fake_fetch,
+        raising=False,
+    )
+    # We patch via the polymarket_resolution module so the import inside
+    # _fetch_polymarket_resolutions resolves to fake_fetch. Two equally
+    # valid call sites — patch both to avoid a second fetch attempt.
+    monkeypatch.setattr(
+        "detect_temperature.polymarket_resolution.fetch_event_resolution",
+        fake_fetch,
+    )
+
+    settled_csv = tmp_path / "settled.csv"
+    payload = settle_paper_portfolio(
+        portfolio_path=portfolio,
+        actuals_path=actuals,
+        output_path=settled_csv,
+        bankroll_usdc=100.0,
+    )
+
+    rows = list(csv.DictReader(settled_csv.open(newline="", encoding="utf-8")))
+    assert len(rows) == 1
+    row = rows[0]
+    assert row["status"] == "won"  # actual=22 outside [16.5,17.5] -> NO won
+    assert row["polymarket_yes_won"] == "0"
+    assert row["polymarket_uma_status"] == "resolved"
+    assert row["settle_agreement"] == "agree"
+
+    stats = payload["summary"]["polymarket_cross_check"]
+    assert stats == {"agree": 1, "disagree": 0, "pending": 0, "no_data": 0}
+
+
+def test_settle_records_polymarket_disagree(tmp_path, monkeypatch) -> None:
+    """We say NO won (actual 22 > 17.5), Polymarket says YES won. The PnL
+    must STILL follow our verdict — Polymarket is audit only."""
+    portfolio, actuals = _open_one_position(tmp_path)
+
+    from detect_temperature.polymarket_resolution import MarketResolution
+
+    fake_resolution = MarketResolution(
+        market_slug="highest-temperature-in-test-on-may-5-2026-17c",
+        closed=True,
+        yes_outcome_price=1.0,
+        no_outcome_price=0.0,
+        outcome_prices_raw='["1", "0"]',
+        uma_status="resolved",
+        resolution_source="https://wunderground.com/...",
+    )
+
+    monkeypatch.setattr(
+        "detect_temperature.polymarket_resolution.fetch_event_resolution",
+        lambda slug: {"highest-temperature-in-test-on-may-5-2026-17c": fake_resolution},
+    )
+
+    settled_csv = tmp_path / "settled.csv"
+    payload = settle_paper_portfolio(
+        portfolio_path=portfolio,
+        actuals_path=actuals,
+        output_path=settled_csv,
+        bankroll_usdc=100.0,
+    )
+
+    rows = list(csv.DictReader(settled_csv.open(newline="", encoding="utf-8")))
+    row = rows[0]
+    # Our verdict still wins: PnL is from won status, NOT from polymarket
+    assert row["status"] == "won", "our PnL must come from actuals.csv, not from polymarket"
+    assert float(row["pnl_usdc"]) > 0
+    # But cross-check column flags the disagreement
+    assert row["polymarket_yes_won"] == "1"
+    assert row["settle_agreement"] == "disagree"
+
+    stats = payload["summary"]["polymarket_cross_check"]
+    assert stats["disagree"] == 1
+
+
+def test_settle_handles_polymarket_fetch_failure_gracefully(tmp_path, monkeypatch) -> None:
+    """Network blowup must not break settle — PnL still computes from
+    actuals, and the cross-check column reports 'no_data'."""
+    portfolio, actuals = _open_one_position(tmp_path)
+
+    def boom(slug):
+        raise RuntimeError("simulated network outage")
+
+    monkeypatch.setattr(
+        "detect_temperature.polymarket_resolution.fetch_event_resolution",
+        boom,
+    )
+
+    settled_csv = tmp_path / "settled.csv"
+    payload = settle_paper_portfolio(
+        portfolio_path=portfolio,
+        actuals_path=actuals,
+        output_path=settled_csv,
+        bankroll_usdc=100.0,
+    )
+
+    rows = list(csv.DictReader(settled_csv.open(newline="", encoding="utf-8")))
+    row = rows[0]
+    assert row["status"] == "won"  # PnL still works
+    assert row["settle_agreement"] == "no_data"
+    assert payload["summary"]["polymarket_cross_check"]["no_data"] == 1
+
+
+def test_settle_records_pending_when_market_not_resolved_yet(tmp_path, monkeypatch) -> None:
+    """Polymarket sometimes returns closed=True but with mid-prices while
+    UMA is still proposing. We must record 'pending', not invent a
+    verdict on flickering numbers."""
+    portfolio, actuals = _open_one_position(tmp_path)
+
+    from detect_temperature.polymarket_resolution import MarketResolution
+
+    in_progress = MarketResolution(
+        market_slug="highest-temperature-in-test-on-may-5-2026-17c",
+        closed=True,
+        yes_outcome_price=0.5,
+        no_outcome_price=0.5,
+        outcome_prices_raw='["0.5", "0.5"]',
+        uma_status="proposed",
+        resolution_source="",
+    )
+
+    monkeypatch.setattr(
+        "detect_temperature.polymarket_resolution.fetch_event_resolution",
+        lambda slug: {"highest-temperature-in-test-on-may-5-2026-17c": in_progress},
+    )
+
+    settled_csv = tmp_path / "settled.csv"
+    settle_paper_portfolio(
+        portfolio_path=portfolio,
+        actuals_path=actuals,
+        output_path=settled_csv,
+        bankroll_usdc=100.0,
+    )
+
+    rows = list(csv.DictReader(settled_csv.open(newline="", encoding="utf-8")))
+    row = rows[0]
+    # Our PnL is final — we don't wait for polymarket
+    assert row["status"] == "won"
+    # But the cross-check explicitly marks the market as not yet final
+    assert row["settle_agreement"] == "pending"
+    assert row["polymarket_uma_status"] == "proposed"
+
+
+def test_settle_cross_check_disabled_skips_network_completely(tmp_path, monkeypatch) -> None:
+    """cross_check_polymarket=False must NOT make any network calls.
+    This is the path used by tests and any environment where the
+    Polymarket API is unreachable."""
+    portfolio, actuals = _open_one_position(tmp_path)
+
+    calls = []
+    def fake(slug):
+        calls.append(slug)
+        return {}
+    monkeypatch.setattr(
+        "detect_temperature.polymarket_resolution.fetch_event_resolution",
+        fake,
+    )
+
+    settled_csv = tmp_path / "settled.csv"
+    payload = settle_paper_portfolio(
+        portfolio_path=portfolio,
+        actuals_path=actuals,
+        output_path=settled_csv,
+        bankroll_usdc=100.0,
+        cross_check_polymarket=False,
+    )
+
+    assert calls == []
+    assert payload["summary"]["polymarket_cross_check"] is None
