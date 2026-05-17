@@ -207,6 +207,8 @@ def settle_paper_portfolio(
 
     updated_positions = []
     cross_check_stats = {"agree": 0, "disagree": 0, "pending": 0, "no_data": 0}
+    authority_counts = {"polymarket_resolved": 0, "actuals_preliminary": 0}
+    total_correction = 0.0
     for position in positions:
         market_slug = position.get("market_slug", "")
         market_resolution = polymarket_resolutions.get(market_slug)
@@ -219,6 +221,13 @@ def settle_paper_portfolio(
         agreement = updated.get("settle_agreement", "")
         if agreement in cross_check_stats:
             cross_check_stats[agreement] += 1
+        if updated.get("status") in SETTLED_STATUSES:
+            auth = updated.get("settle_authority", "")
+            if auth in authority_counts:
+                authority_counts[auth] += 1
+        correction = _as_float(updated.get("settle_correction_usdc"))
+        if correction:
+            total_correction += correction
         updated_positions.append(updated)
 
     summary = summarize_portfolio(updated_positions, bankroll_usdc=bankroll_usdc, generated_at=settled_at)
@@ -227,6 +236,8 @@ def settle_paper_portfolio(
             "source_portfolio_path": str(portfolio_path),
             "source_actuals_path": str(actuals_path),
             "polymarket_cross_check": cross_check_stats if cross_check_polymarket else None,
+            "settle_authority_counts": authority_counts if cross_check_polymarket else None,
+            "total_settle_correction_usdc": round(total_correction, 4),
         }
     )
     _write_csv(updated_positions, output_path)
@@ -258,14 +269,19 @@ def _fetch_polymarket_resolutions(
         if not event_slug:
             continue
         if pos.get("status") in SETTLED_STATUSES:
-            # Backfill: only fetch if cross-check fields are missing,
-            # so we don't hammer the API on every daily run.
-            if not pos.get("settle_agreement"):
-                eligible_event_slugs.add(event_slug)
+            authority = pos.get("settle_authority", "")
+            if authority == "polymarket_resolved":
+                # Frozen final answer; no need to re-query.
+                continue
+            # Either we never cross-checked, or the verdict is still
+            # only 'actuals_preliminary' and may need reconciling.
+            eligible_event_slugs.add(event_slug)
             continue
         # Newly-settling row: must also have a usable actual on disk
         actual = actuals.get(event_slug)
         if actual is None or actual.get("status") != "ok":
+            # PM might still be authoritative even with no actuals yet
+            eligible_event_slugs.add(event_slug)
             continue
         eligible_event_slugs.add(event_slug)
 
@@ -288,62 +304,136 @@ def _settle_position(
     settled_at: str,
     polymarket_resolution: Any | None = None,
 ) -> dict[str, Any]:
-    """Decide won/lost for a single open position.
+    """Decide won/lost for a single open position, with on-chain
+    Polymarket resolution treated as the authoritative truth.
 
-    `polymarket_resolution` is an optional MarketResolution for the
-    same market, fetched from the Polymarket gamma API by the caller.
-    It is recorded for audit only — paper PnL is always driven by
-    `actuals.csv` (Wunderground / HKO / Synoptic), which has been our
-    source of truth from day one. We just want to know how often
-    Polymarket's on-chain answer agrees with us.
+    Source priority:
+      1. polymarket_resolution.is_resolved   -> authoritative final.
+      2. actual ok in actuals.csv            -> 'actuals_preliminary'.
+      3. neither                             -> stay open / pending.
+
+    Reconciliation rule. A previously-settled row with
+    settle_authority="actuals_preliminary" gets re-evaluated when
+    Polymarket eventually resolves. If the on-chain answer matches our
+    preliminary, we just promote the row to "polymarket_resolved".
+    If it disagrees, we REVERSE the verdict, recompute payout / pnl,
+    and record the difference in settle_correction_usdc so PnL drift
+    is auditable. Rows that were already "polymarket_resolved" are
+    frozen and never edited.
     """
-    from .polymarket_resolution import settle_agreement as _settle_agreement
-
     updated = dict(position)
+    side = updated.get("side")
+    interval_unit = updated.get("interval_unit", "celsius")
+    interval_lower = _as_optional_float(updated.get("interval_lower"))
+    interval_upper = _as_optional_float(updated.get("interval_upper"))
+    shares = _as_float(updated.get("shares"))
+    stake = _as_float(updated.get("stake_usdc"))
 
-    # Already-settled rows: we don't recompute won/lost (PnL is final),
-    # but we DO backfill the cross-check columns when they are missing
-    # so that newly-introduced cross-check audit catches up on history.
-    if updated.get("status") in SETTLED_STATUSES:
-        if not updated.get("settle_agreement"):
-            our_yes_won_int = updated.get("won")
-            try:
-                our_yes_won_bool = bool(int(our_yes_won_int))
-            except (TypeError, ValueError):
-                our_yes_won_bool = updated.get("status") == "won"
-            # In our model, paper.side BUY_YES and won=1 implies yes_won=True;
-            # BUY_NO and won=1 implies yes_won=False. Use that mapping.
-            side = updated.get("side")
-            if side == "BUY_NO":
-                our_yes_won_bool = not our_yes_won_bool
-            _annotate_polymarket(updated, polymarket_resolution, our_yes_won_bool)
+    # ---- pick authoritative source ----------------------------------------
+    pm_authoritative = polymarket_resolution is not None and polymarket_resolution.is_resolved
+    actual_value, actual_status_label = _interpret_actual(actual, interval_unit)
+
+    # Compute YES-side verdicts from each source separately so we can
+    # compare them and decide reconciliation.
+    pm_yes_won: bool | None = polymarket_resolution.yes_won if pm_authoritative else None
+    actuals_yes_won: bool | None = None
+    if actual_value is not None:
+        actuals_yes_won = _contains_interval(actual_value, interval_lower, interval_upper)
+
+    # ---- handle already-settled rows --------------------------------------
+    prior_status = updated.get("status")
+    if prior_status in SETTLED_STATUSES:
+        prior_authority = updated.get("settle_authority", "")
+        # For agreement audit we always compare what *actuals.csv* would say
+        # against on-chain Polymarket, regardless of which source set the
+        # final verdict. If we don't have a fresh actuals reading anymore,
+        # fall back to the row's prior implied yes_won so old data still
+        # carries an audit value.
+        our_yes_won_for_audit = (
+            actuals_yes_won
+            if actuals_yes_won is not None
+            else _settled_row_yes_won(updated)
+        )
+        if prior_authority == "polymarket_resolved":
+            # Frozen. Only backfill cross-check audit columns and exit.
+            _annotate_polymarket(
+                updated,
+                polymarket_resolution,
+                our_yes_won=our_yes_won_for_audit,
+            )
+            return updated
+
+        if pm_authoritative:
+            # We have a final on-chain answer. Promote to authoritative.
+            new_won_yes_perspective = pm_yes_won
+            new_won = (
+                new_won_yes_perspective if side == "BUY_YES" else not new_won_yes_perspective
+            )
+            old_won = _settled_row_yes_won(updated)
+            old_pnl = _as_float(updated.get("pnl_usdc"))
+            verdict_changed = old_won != new_won_yes_perspective
+            new_payout = (shares if new_won else 0.0)
+            new_pnl = new_payout - stake
+            updated["settle_authority"] = "polymarket_resolved"
+            updated["settled_at"] = settled_at
+            updated["status"] = "won" if new_won else "lost"
+            updated["won"] = int(new_won)
+            updated["payout_usdc"] = round(new_payout, 4)
+            updated["pnl_usdc"] = round(new_pnl, 4)
+            updated["roi_pct"] = round((new_pnl / stake) * 100.0, 2) if stake else None
+            updated["settle_correction_usdc"] = (
+                round(new_pnl - old_pnl, 4) if verdict_changed else 0.0
+            )
+            _annotate_polymarket(updated, polymarket_resolution, our_yes_won=our_yes_won_for_audit)
+            return updated
+
+        # No authoritative PM yet, keep the prior verdict as-is and just
+        # backfill cross-check columns so health/dashboard stay current.
+        _annotate_polymarket(
+            updated,
+            polymarket_resolution,
+            our_yes_won=our_yes_won_for_audit,
+        )
+        if "settle_authority" not in updated or not updated["settle_authority"]:
+            updated["settle_authority"] = "actuals_preliminary"
         return updated
 
+    # ---- open / unsettled rows --------------------------------------------
+    # Audit is always 'what would actuals alone have said' vs PM, even when
+    # PM is the authority for the actual verdict.
+    audit_yes_won = actuals_yes_won
+
+    if pm_authoritative:
+        verdict_yes_won = pm_yes_won
+        won = (verdict_yes_won if side == "BUY_YES" else not verdict_yes_won)
+        payout = shares if won else 0.0
+        pnl = payout - stake
+        updated["status"] = "won" if won else "lost"
+        updated["settled_at"] = settled_at
+        updated["actual_value"] = (
+            round(actual_value, 4) if actual_value is not None else updated.get("actual_value", "")
+        )
+        updated["actual_status"] = actual_status_label
+        updated["won"] = int(won)
+        updated["payout_usdc"] = round(payout, 4)
+        updated["pnl_usdc"] = round(pnl, 4)
+        updated["roi_pct"] = round((pnl / stake) * 100.0, 2) if stake else None
+        updated["settle_authority"] = "polymarket_resolved"
+        updated["settle_correction_usdc"] = 0.0
+        _annotate_polymarket(updated, polymarket_resolution, our_yes_won=audit_yes_won)
+        return updated
+
+    # No PM resolution. Fall back to actuals.
     if actual is None:
         updated["status"] = updated.get("status") or "open"
         updated["actual_status"] = "missing"
         return updated
-    actual_status = actual.get("status", "")
-    updated["actual_status"] = actual_status
-    if actual_status != "ok":
+    updated["actual_status"] = actual_status_label
+    if actual_status_label != "ok" or actuals_yes_won is None:
         updated["status"] = updated.get("status") or "open"
         return updated
 
-    actual_c = _as_float(actual.get("observed_temp_c"))
-    if actual_c is None:
-        updated["status"] = updated.get("status") or "open"
-        return updated
-    interval_unit = updated.get("interval_unit", "celsius")
-    actual_value = celsius_to_fahrenheit(actual_c) if interval_unit == "fahrenheit" else actual_c
-    yes_won = _contains_interval(
-        actual_value,
-        lower=_as_optional_float(updated.get("interval_lower")),
-        upper=_as_optional_float(updated.get("interval_upper")),
-    )
-    side = updated.get("side")
-    won = yes_won if side == "BUY_YES" else not yes_won
-    shares = _as_float(updated.get("shares"))
-    stake = _as_float(updated.get("stake_usdc"))
+    won = actuals_yes_won if side == "BUY_YES" else not actuals_yes_won
     payout = shares if won else 0.0
     pnl = payout - stake
     updated["status"] = "won" if won else "lost"
@@ -353,9 +443,47 @@ def _settle_position(
     updated["payout_usdc"] = round(payout, 4)
     updated["pnl_usdc"] = round(pnl, 4)
     updated["roi_pct"] = round((pnl / stake) * 100.0, 2) if stake else None
-
-    _annotate_polymarket(updated, polymarket_resolution, our_yes_won=yes_won)
+    updated["settle_authority"] = "actuals_preliminary"
+    updated["settle_correction_usdc"] = 0.0
+    _annotate_polymarket(updated, polymarket_resolution, our_yes_won=audit_yes_won)
     return updated
+
+
+def _interpret_actual(
+    actual: dict[str, Any] | None, interval_unit: str
+) -> tuple[float | None, str]:
+    """Translate an actuals.csv row into (value-in-bucket-unit, status_label).
+
+    status_label is what gets written to the position's `actual_status`
+    column: 'ok', 'missing', or whatever upstream reported (pending/error).
+    """
+    if actual is None:
+        return None, "missing"
+    label = actual.get("status", "") or ""
+    if label != "ok":
+        return None, label
+    obs_c = _as_float(actual.get("observed_temp_c"))
+    if obs_c is None:
+        return None, label
+    value = celsius_to_fahrenheit(obs_c) if interval_unit == "fahrenheit" else obs_c
+    return value, "ok"
+
+
+def _settled_row_yes_won(row: dict[str, Any]) -> bool:
+    """Reverse-engineer YES-side verdict from a previously-written row.
+
+    BUY_YES + won=1 -> yes_won=True; BUY_NO + won=1 -> yes_won=False; etc.
+    Falls back to status if `won` is missing.
+    """
+    raw = row.get("won")
+    try:
+        our_won_bool = bool(int(raw))
+    except (TypeError, ValueError):
+        our_won_bool = row.get("status") == "won"
+    side = row.get("side")
+    if side == "BUY_NO":
+        return not our_won_bool
+    return our_won_bool
 
 
 def _annotate_polymarket(

@@ -526,11 +526,15 @@ def test_settle_records_polymarket_disagree(tmp_path, monkeypatch) -> None:
 
     rows = list(csv.DictReader(settled_csv.open(newline="", encoding="utf-8")))
     row = rows[0]
-    # Our verdict still wins: PnL is from won status, NOT from polymarket
-    assert row["status"] == "won", "our PnL must come from actuals.csv, not from polymarket"
-    assert float(row["pnl_usdc"]) > 0
-    # But cross-check column flags the disagreement
+    # Polymarket is authoritative when resolved. PM says YES won, so a
+    # BUY_NO position must be marked lost - even though our actuals.csv
+    # alone would have said NO won (actual=22 outside bucket [16.5,17.5]).
+    assert row["status"] == "lost"
+    assert float(row["pnl_usdc"]) < 0
+    assert row["settle_authority"] == "polymarket_resolved"
     assert row["polymarket_yes_won"] == "1"
+    # Cross-check still records 'disagree' to highlight that our actuals
+    # disagreed with the on-chain answer; this is the audit signal.
     assert row["settle_agreement"] == "disagree"
 
     stats = payload["summary"]["polymarket_cross_check"]
@@ -631,3 +635,135 @@ def test_settle_cross_check_disabled_skips_network_completely(tmp_path, monkeypa
 
     assert calls == []
     assert payload["summary"]["polymarket_cross_check"] is None
+
+
+def test_settle_reconciles_when_polymarket_resolves_after_preliminary(tmp_path, monkeypatch) -> None:
+    """The Phase-N+1 case that motivated this whole subsystem.
+
+    Day 1: actuals come in pending or stale, settle writes a preliminary
+           verdict (we say BUY_NO won).
+    Day 2: Polymarket finalises on-chain with the OPPOSITE verdict (YES
+           won). Settle must:
+           - flip status from won -> lost
+           - reverse PnL (was +profit, becomes -stake)
+           - record settle_correction_usdc as the delta
+           - mark settle_authority = polymarket_resolved
+           - never mutate this row again on subsequent runs
+    """
+    portfolio, actuals = _open_one_position(tmp_path)
+
+    # Day 1: no PM data yet
+    settled_csv = tmp_path / "settled.csv"
+    monkeypatch.setattr(
+        "detect_temperature.polymarket_resolution.fetch_event_resolution",
+        lambda slug: {},
+    )
+    settle_paper_portfolio(
+        portfolio_path=portfolio,
+        actuals_path=actuals,
+        output_path=settled_csv,
+        bankroll_usdc=100.0,
+    )
+    day1 = list(csv.DictReader(settled_csv.open(newline="", encoding="utf-8")))[0]
+    assert day1["status"] == "won"
+    assert day1["settle_authority"] == "actuals_preliminary"
+    day1_pnl = float(day1["pnl_usdc"])
+    assert day1_pnl > 0
+    # Crucially: no settle_correction_usdc recorded yet on the preliminary
+    assert float(day1["settle_correction_usdc"]) == 0.0
+
+    # Day 2: polymarket finalises with YES won (opposite of our preliminary)
+    from detect_temperature.polymarket_resolution import MarketResolution
+    pm_yes_won = MarketResolution(
+        market_slug="highest-temperature-in-test-on-may-5-2026-17c",
+        closed=True,
+        yes_outcome_price=1.0,
+        no_outcome_price=0.0,
+        outcome_prices_raw='["1", "0"]',
+        uma_status="resolved",
+        resolution_source="https://wunderground.com/...",
+    )
+    monkeypatch.setattr(
+        "detect_temperature.polymarket_resolution.fetch_event_resolution",
+        lambda slug: {"highest-temperature-in-test-on-may-5-2026-17c": pm_yes_won},
+    )
+    payload = settle_paper_portfolio(
+        portfolio_path=settled_csv,    # feed yesterday's output back in
+        actuals_path=actuals,
+        output_path=settled_csv,
+        bankroll_usdc=100.0,
+    )
+    day2 = list(csv.DictReader(settled_csv.open(newline="", encoding="utf-8")))[0]
+
+    # Verdict must have been reversed
+    assert day2["status"] == "lost"
+    assert day2["settle_authority"] == "polymarket_resolved"
+    day2_pnl = float(day2["pnl_usdc"])
+    assert day2_pnl < 0
+    # The correction equals the swing between yesterday's preliminary
+    # and today's authoritative verdict.
+    correction = float(day2["settle_correction_usdc"])
+    assert abs(correction - (day2_pnl - day1_pnl)) < 1e-6
+    # And the summary surfaces it for the dashboard / health.json.
+    assert payload["summary"]["total_settle_correction_usdc"] == round(correction, 4)
+    assert payload["summary"]["settle_authority_counts"]["polymarket_resolved"] == 1
+
+    # Day 3: PM is still resolved. The row must NOT be mutated further.
+    payload3 = settle_paper_portfolio(
+        portfolio_path=settled_csv,
+        actuals_path=actuals,
+        output_path=settled_csv,
+        bankroll_usdc=100.0,
+    )
+    day3 = list(csv.DictReader(settled_csv.open(newline="", encoding="utf-8")))[0]
+    assert day3["status"] == day2["status"]
+    assert day3["pnl_usdc"] == day2["pnl_usdc"]
+    # No further correction on a frozen row
+    assert float(day3["settle_correction_usdc"]) == correction
+
+
+def test_settle_promotes_preliminary_to_authoritative_without_changing_verdict(tmp_path, monkeypatch) -> None:
+    """When PM eventually resolves and AGREES with our preliminary, the
+    row gets promoted to polymarket_resolved with zero correction. This
+    is the happy path."""
+    portfolio, actuals = _open_one_position(tmp_path)
+
+    # Day 1: preliminary
+    settled_csv = tmp_path / "settled.csv"
+    monkeypatch.setattr(
+        "detect_temperature.polymarket_resolution.fetch_event_resolution",
+        lambda slug: {},
+    )
+    settle_paper_portfolio(
+        portfolio_path=portfolio, actuals_path=actuals,
+        output_path=settled_csv, bankroll_usdc=100.0,
+    )
+    day1 = list(csv.DictReader(settled_csv.open(newline="", encoding="utf-8")))[0]
+    assert day1["status"] == "won"
+    assert day1["settle_authority"] == "actuals_preliminary"
+    day1_pnl = float(day1["pnl_usdc"])
+
+    # Day 2: PM agrees (NO won)
+    from detect_temperature.polymarket_resolution import MarketResolution
+    pm_no_won = MarketResolution(
+        market_slug="highest-temperature-in-test-on-may-5-2026-17c",
+        closed=True,
+        yes_outcome_price=0.0, no_outcome_price=1.0,
+        outcome_prices_raw='["0", "1"]', uma_status="resolved",
+        resolution_source="",
+    )
+    monkeypatch.setattr(
+        "detect_temperature.polymarket_resolution.fetch_event_resolution",
+        lambda slug: {"highest-temperature-in-test-on-may-5-2026-17c": pm_no_won},
+    )
+    settle_paper_portfolio(
+        portfolio_path=settled_csv, actuals_path=actuals,
+        output_path=settled_csv, bankroll_usdc=100.0,
+    )
+    day2 = list(csv.DictReader(settled_csv.open(newline="", encoding="utf-8")))[0]
+
+    assert day2["status"] == "won"
+    assert day2["settle_authority"] == "polymarket_resolved"
+    assert float(day2["pnl_usdc"]) == day1_pnl    # PnL unchanged
+    assert float(day2["settle_correction_usdc"]) == 0.0
+    assert day2["settle_agreement"] == "agree"
