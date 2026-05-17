@@ -154,6 +154,7 @@ def collect_actuals(
     finalization_lag_days: int = 1,
     portfolio_path: str | Path | None = None,
     paper_runs_root: str | Path | None = None,
+    metar_history_root: str | Path | None = None,
 ) -> list[dict]:
     """Collect resolved temperatures for every target we currently know.
 
@@ -173,6 +174,16 @@ def collect_actuals(
       and looking up the station_id in archived targets.csv files under
       `paper_runs_root`. Defaults locate paper_portfolio.csv under
       artifacts/ and the archive root under artifacts/paper_runs/.
+
+    METAR fallback (added 2026-05-17):
+      `metar_history_root` is forwarded to `collect_actual_for_target` so
+      that primary `error` rows can be recovered from the local METAR
+      archive. When the caller does not pass an explicit path, we derive
+      `<project_root>/data/metar_history` from `targets_path` exactly the
+      same way `portfolio_path` and `paper_runs_root` are derived. This
+      makes the fallback robust to cwd: a manual run from $HOME would
+      otherwise resolve the relative default `data/metar_history` against
+      the wrong directory and silently skip the archive.
     """
     output_path = Path(output_path)
     existing: dict[str, dict] = {}
@@ -182,13 +193,21 @@ def collect_actuals(
         except Exception:
             existing = {}
 
+    targets_path_p = Path(targets_path)
+    project_root = (
+        targets_path_p.parent.parent if targets_path_p.parent.name == "data" else None
+    )
+    if metar_history_root is None and project_root is not None:
+        metar_history_root = project_root / "data" / "metar_history"
+    metar_history_root = Path(metar_history_root) if metar_history_root else None
+
     targets = list(read_targets_csv(targets_path))
     known_slugs = {target.slug for target in targets}
     stuck = _stuck_paper_targets(
         portfolio_path=portfolio_path,
         archive_root=paper_runs_root,
         already_queued=known_slugs,
-        targets_path=Path(targets_path),
+        targets_path=targets_path_p,
     )
     if stuck:
         targets.extend(stuck)
@@ -206,6 +225,7 @@ def collect_actuals(
                 target=target,
                 station=station,
                 finalization_lag_days=finalization_lag_days,
+                metar_history_root=metar_history_root,
             )
         except Exception as exc:
             fresh_records.append(error_actual_for_target(target, str(exc)).to_record())

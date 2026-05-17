@@ -85,7 +85,7 @@ def test_collect_actuals_merges_instead_of_overwriting(tmp_path, monkeypatch) ->
     targets_path = tmp_path / "targets.csv"
     _write_targets(targets_path, ["today-ny"])
 
-    def fake_collect(target, station, finalization_lag_days=1):
+    def fake_collect(target, station, finalization_lag_days=1, **kwargs):
         return ActualTemperature(
             slug=target.slug, station_id=target.station_id,
             target_date=target.target_date, target_extreme=target.target_extreme,
@@ -118,7 +118,7 @@ def test_collect_actuals_promotes_pending_to_ok(tmp_path, monkeypatch) -> None:
     targets_path = tmp_path / "targets.csv"
     _write_targets(targets_path, ["market-a"])
 
-    def fake_collect(target, station, finalization_lag_days=1):
+    def fake_collect(target, station, finalization_lag_days=1, **kwargs):
         return ActualTemperature(
             slug=target.slug, station_id=target.station_id,
             target_date=target.target_date, target_extreme=target.target_extreme,
@@ -146,7 +146,7 @@ def test_collect_actuals_does_not_downgrade_ok_to_pending(tmp_path, monkeypatch)
     targets_path = tmp_path / "targets.csv"
     _write_targets(targets_path, ["market-b"])
 
-    def fake_collect(target, station, finalization_lag_days=1):
+    def fake_collect(target, station, finalization_lag_days=1, **kwargs):
         return ActualTemperature(
             slug=target.slug, station_id=target.station_id,
             target_date=target.target_date, target_extreme=target.target_extreme,
@@ -203,7 +203,7 @@ def test_collect_actuals_recovers_stuck_open_paper_positions(tmp_path, monkeypat
 
     fetched_slugs: list[str] = []
 
-    def fake_collect(target, station, finalization_lag_days=1):
+    def fake_collect(target, station, finalization_lag_days=1, **kwargs):
         fetched_slugs.append(target.slug)
         return ActualTemperature(
             slug=target.slug, station_id=target.station_id,
@@ -254,7 +254,7 @@ def test_collect_actuals_skips_already_settled_paper_rows(tmp_path, monkeypatch)
         w.writerow({"status": "open", "event_slug": "highest-temperature-in-paris-on-may-12-2026", "interval_unit": "celsius"})
 
     fetched: list[str] = []
-    def fake_collect(target, station, finalization_lag_days=1):
+    def fake_collect(target, station, finalization_lag_days=1, **kwargs):
         fetched.append(target.slug)
         return ActualTemperature(
             slug=target.slug, station_id=target.station_id,
@@ -276,3 +276,83 @@ def test_collect_actuals_skips_already_settled_paper_rows(tmp_path, monkeypatch)
 
     assert "highest-temperature-in-paris-on-may-12-2026" in fetched, "open position should be retried"
     assert "highest-temperature-in-london-on-may-12-2026" not in fetched, "settled position must not be retried"
+
+
+def test_collect_actuals_forwards_metar_history_root_derived_from_targets(
+    tmp_path, monkeypatch
+) -> None:
+    """Pipeline must pass an absolute metar_history_root to the per-row
+    fetcher derived from the targets.csv project root.
+
+    Without this, the relative default `data/metar_history` resolves
+    against the caller's cwd (e.g. $HOME for a manual run) and the
+    METAR fallback silently degrades to 'pending — root missing'."""
+    targets_path = tmp_path / "data" / "targets.csv"
+    targets_path.parent.mkdir(parents=True)
+    _write_targets(targets_path, ["highest-temperature-in-rome-on-may-12-2026"])
+    actuals_path = tmp_path / "actuals.csv"
+    metar_root = tmp_path / "data" / "metar_history"
+    metar_root.mkdir(parents=True)  # exists, so pipeline must point at it
+
+    captured: list[Path | None] = []
+
+    def fake_collect(target, station, finalization_lag_days=1, **kwargs):
+        captured.append(kwargs.get("metar_history_root"))
+        return ActualTemperature(
+            slug=target.slug, station_id=target.station_id,
+            target_date=target.target_date, target_extreme=target.target_extreme,
+            resolution_unit="celsius", observed_temp_c=20.0, observed_temp_f=68.0,
+            observed_resolution_value=20.0, provider="test", status="ok",
+            sample_count=24, source_url="",
+        )
+
+    monkeypatch.setattr("detect_temperature.pipeline.collect_actual_for_target", fake_collect)
+
+    collect_actuals(
+        targets_path=targets_path,
+        output_path=actuals_path,
+        station_catalog=None,
+        finalization_lag_days=1,
+    )
+
+    assert len(captured) == 1
+    forwarded = captured[0]
+    assert forwarded is not None
+    assert Path(forwarded).is_absolute()
+    assert Path(forwarded) == metar_root
+
+
+def test_collect_actuals_respects_explicit_metar_history_root(
+    tmp_path, monkeypatch
+) -> None:
+    """An explicit caller-provided path must override the auto-derived one."""
+    targets_path = tmp_path / "data" / "targets.csv"
+    targets_path.parent.mkdir(parents=True)
+    _write_targets(targets_path, ["highest-temperature-in-naples-on-may-12-2026"])
+    actuals_path = tmp_path / "actuals.csv"
+    custom_root = tmp_path / "elsewhere"
+    custom_root.mkdir()
+
+    captured: list[Path | None] = []
+
+    def fake_collect(target, station, finalization_lag_days=1, **kwargs):
+        captured.append(kwargs.get("metar_history_root"))
+        return ActualTemperature(
+            slug=target.slug, station_id=target.station_id,
+            target_date=target.target_date, target_extreme=target.target_extreme,
+            resolution_unit="celsius", observed_temp_c=20.0, observed_temp_f=68.0,
+            observed_resolution_value=20.0, provider="test", status="ok",
+            sample_count=24, source_url="",
+        )
+
+    monkeypatch.setattr("detect_temperature.pipeline.collect_actual_for_target", fake_collect)
+
+    collect_actuals(
+        targets_path=targets_path,
+        output_path=actuals_path,
+        station_catalog=None,
+        finalization_lag_days=1,
+        metar_history_root=custom_root,
+    )
+
+    assert captured == [custom_root]
