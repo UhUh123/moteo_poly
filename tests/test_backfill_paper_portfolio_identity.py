@@ -335,3 +335,92 @@ def test_main_returns_2_for_missing_portfolio(tmp_path: Path, backfill_mod) -> N
         "--apply",
     ])
     assert rc == 2
+
+
+def test_merge_current_targets_fills_open_positions_not_in_archive(
+    tmp_path: Path, backfill_mod
+) -> None:
+    """Open paper positions for FUTURE dates aren't in any archive yet
+    (paper_runs/<run> snapshots are only created at the moment of a
+    pre-open settle, and the position lives forward of every existing
+    run). Their slug IS in the active data/targets.csv. Backfill must
+    use it as a lower-priority fallback so these positions get an
+    accurate station_id, target_unit, and source_domain."""
+    portfolio = tmp_path / "paper_portfolio.csv"
+    _write_portfolio(portfolio, [
+        {"event_slug": "highest-temperature-in-tokyo-on-may-12-2026",
+         "status": "won", "side": "BUY_YES", "stake_usdc": "0.25"},
+        {"event_slug": "highest-temperature-in-miami-on-may-18-2026",
+         "status": "open", "side": "BUY_NO", "stake_usdc": "0.25"},
+    ])
+
+    archive_root = tmp_path / "paper_runs"
+    _write_archived_targets(
+        archive_root / "20260511T190000Z" / "targets.csv",
+        [{"slug": "highest-temperature-in-tokyo-on-may-12-2026",
+          "station_id": "RJTT", "target_unit": "celsius",
+          "source_domain": "wunderground.com"}],
+    )
+
+    current_targets = tmp_path / "data" / "targets.csv"
+    _write_archived_targets(
+        current_targets,
+        [{"slug": "highest-temperature-in-miami-on-may-18-2026",
+          "station_id": "KMIA", "target_unit": "fahrenheit",
+          "source_domain": "wunderground.com"}],
+    )
+
+    rc = backfill_mod.main([
+        "--portfolio", str(portfolio),
+        "--archive-root", str(archive_root),
+        "--current-targets", str(current_targets),
+        "--apply",
+    ])
+    assert rc == 0
+
+    rows = list(csv.DictReader(portfolio.open(newline="", encoding="utf-8")))
+    by_slug = {r["event_slug"]: r for r in rows}
+    assert by_slug["highest-temperature-in-tokyo-on-may-12-2026"]["station_id"] == "RJTT"
+    miami = by_slug["highest-temperature-in-miami-on-may-18-2026"]
+    assert miami["station_id"] == "KMIA"
+    assert miami["target_unit"] == "fahrenheit"
+    assert miami["source_domain"] == "wunderground.com"
+
+
+def test_archive_takes_priority_over_current_targets(tmp_path: Path, backfill_mod) -> None:
+    """If a slug appears in both the archive and the current targets.csv
+    with different station_ids, the archive wins. Running the backfill
+    must not silently rewrite the historic record from a fresh
+    targets.csv that may have rotated stations.
+    """
+    portfolio = tmp_path / "paper_portfolio.csv"
+    _write_portfolio(portfolio, [{
+        "event_slug": "highest-temperature-in-paris-on-may-12-2026",
+        "status": "won", "side": "BUY_NO", "stake_usdc": "0.25",
+    }])
+
+    archive_root = tmp_path / "paper_runs"
+    _write_archived_targets(
+        archive_root / "20260511T190000Z" / "targets.csv",
+        [{"slug": "highest-temperature-in-paris-on-may-12-2026",
+          "station_id": "LFPB", "target_unit": "celsius",
+          "source_domain": "wunderground.com"}],
+    )
+
+    current_targets = tmp_path / "data" / "targets.csv"
+    _write_archived_targets(
+        current_targets,
+        [{"slug": "highest-temperature-in-paris-on-may-12-2026",
+          "station_id": "LFPG",  # different from archive
+          "target_unit": "celsius",
+          "source_domain": "wunderground.com"}],
+    )
+
+    backfill_mod.main([
+        "--portfolio", str(portfolio),
+        "--archive-root", str(archive_root),
+        "--current-targets", str(current_targets),
+        "--apply",
+    ])
+    rows = list(csv.DictReader(portfolio.open(newline="", encoding="utf-8")))
+    assert rows[0]["station_id"] == "LFPB", "archive must beat current targets"

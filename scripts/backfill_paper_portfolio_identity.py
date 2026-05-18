@@ -48,6 +48,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PORTFOLIO_PATH = ROOT / "artifacts" / "paper_portfolio.csv"
 ARCHIVE_ROOT = ROOT / "artifacts" / "paper_runs"
+CURRENT_TARGETS_PATH = ROOT / "data" / "targets.csv"
 
 IDENTITY_COLUMNS = ("target_date", "station_id", "target_extreme",
                     "city", "target_unit", "source_domain")
@@ -98,24 +99,41 @@ def load_archive_lookup(archive_root: Path) -> dict[str, dict[str, str]]:
     if not archive_root.exists():
         return lookup
     for path in sorted(archive_root.glob("*/targets.csv")):
-        try:
-            with path.open("r", newline="", encoding="utf-8") as fh:
-                for row in csv.DictReader(fh):
-                    slug = (row.get("slug") or "").strip()
-                    if not slug or slug in lookup:
-                        continue
-                    station = (row.get("station_id") or "").strip().upper()
-                    unit = (row.get("target_unit") or "").strip().lower()
-                    domain = (row.get("source_domain") or "").strip().lower()
-                    if station or unit or domain:
-                        lookup[slug] = {
-                            "station_id": station,
-                            "target_unit": unit,
-                            "source_domain": domain,
-                        }
-        except OSError:
-            continue
+        _merge_targets_file(path, lookup)
     return lookup
+
+
+def merge_current_targets(lookup: dict[str, dict[str, str]], targets_path: Path) -> None:
+    """Augment an existing archive-derived lookup with rows from the
+    current data/targets.csv. Open paper positions for future dates
+    don't appear in any archive yet (they were just opened today and
+    settle hasn't created a paper_runs/ snapshot for tomorrow yet),
+    but their slug is in the active targets.csv. Archive entries
+    keep priority — this only fills slugs the archive didn't see.
+    """
+    if not targets_path.exists():
+        return
+    _merge_targets_file(targets_path, lookup)
+
+
+def _merge_targets_file(path: Path, lookup: dict[str, dict[str, str]]) -> None:
+    try:
+        with path.open("r", newline="", encoding="utf-8") as fh:
+            for row in csv.DictReader(fh):
+                slug = (row.get("slug") or "").strip()
+                if not slug or slug in lookup:
+                    continue
+                station = (row.get("station_id") or "").strip().upper()
+                unit = (row.get("target_unit") or "").strip().lower()
+                domain = (row.get("source_domain") or "").strip().lower()
+                if station or unit or domain:
+                    lookup[slug] = {
+                        "station_id": station,
+                        "target_unit": unit,
+                        "source_domain": domain,
+                    }
+    except OSError:
+        return
 
 
 def repair_row(row: dict, archive: dict[str, dict[str, str]]) -> dict[str, str]:
@@ -151,6 +169,16 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--portfolio", type=Path, default=PORTFOLIO_PATH)
     parser.add_argument("--archive-root", type=Path, default=ARCHIVE_ROOT)
     parser.add_argument(
+        "--current-targets",
+        type=Path,
+        default=CURRENT_TARGETS_PATH,
+        help=(
+            "Path to the active data/targets.csv. Used as a lower-priority "
+            "fallback when a slug isn't in any archive (e.g. open positions "
+            "for tomorrow that no run has snapshotted yet)."
+        ),
+    )
+    parser.add_argument(
         "--apply",
         action="store_true",
         help="Actually write back. Default is dry-run.",
@@ -172,6 +200,12 @@ def main(argv: list[str] | None = None) -> int:
 
     archive = load_archive_lookup(args.archive_root)
     print(f"loaded {len(archive)} archived slug -> station mappings")
+    if args.current_targets and args.current_targets.exists():
+        before = len(archive)
+        merge_current_targets(archive, args.current_targets)
+        added = len(archive) - before
+        if added > 0:
+            print(f"merged {added} additional mappings from current targets.csv")
 
     # Make sure the identity columns exist in the schema. If they don't,
     # we add them at the end so DictWriter doesn't drop our fixes.
