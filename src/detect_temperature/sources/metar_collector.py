@@ -58,12 +58,25 @@ Schema (selected fields used here):
   altim        : float (hPa)
   visib        : str | float
   rawOb        : str — raw METAR text
+
+Resilience
+----------
+Single-request failures we have seen on Windows: occasional DNS
+flaps from the household ISP, slow Tailscale handshake, TLS reset.
+A 10-minute schedule means one failure = one missed cycle =
+~10 min of latency on the archive, but if it happens to be the
+top of the hour every observation in that cycle is gone. We retry
+DNS / connect / 5xx errors with the same exponential backoff that
+`polymarket._request_with_retries` uses (3 retries × 2s base, max
+~14 s wall time). 4xx errors are NOT retried — those mean we asked
+for something the server refuses.
 """
 from __future__ import annotations
 
 import csv
 import json
 import os
+import time
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -74,6 +87,12 @@ import requests
 
 METAR_ENDPOINT = "https://aviationweather.gov/api/data/metar"
 USER_AGENT = "detect-temperature/0.1 (METAR archive collector)"
+
+# Retry policy for the public endpoint. Same shape as
+# polymarket._request_with_retries: total ~14 s wall time worst-case
+# (2 + 4 + 8 sec backoffs). Caller can override via collect_metar_snapshot.
+DEFAULT_RETRIES = 3
+DEFAULT_BACKOFF_S = 2.0
 
 # CSV column order is part of the on-disk contract. Adding columns is fine,
 # changing order or removing them breaks downstream readers.
@@ -132,11 +151,17 @@ def collect_metar_snapshot(
     timeout_s: int = 30,
     now_utc: datetime | None = None,
     fetcher: "callable | None" = None,
+    retries: int = DEFAULT_RETRIES,
+    backoff_s: float = DEFAULT_BACKOFF_S,
+    sleeper: "callable | None" = None,
 ) -> dict:
     """Fetch latest METAR for every station and append to daily archive.
 
     Returns a small summary dict for logging / health.json.
-    `fetcher` is for tests — defaults to a real HTTP call.
+    `fetcher` is for tests — defaults to a real HTTP call that retries
+    on transient DNS/connection/5xx errors per `retries`/`backoff_s`.
+    `sleeper` is also test-only: pass `lambda _: None` to skip the
+    actual time.sleep between retries.
     """
     station_list = sorted({(s or "").upper().strip() for s in station_ids if s})
     station_list = [s for s in station_list if s]
@@ -144,7 +169,13 @@ def collect_metar_snapshot(
         return {"requested": 0, "received": 0, "appended": 0, "stations": []}
 
     fetched_at = now_utc or datetime.now(timezone.utc)
-    fetch = fetcher or _default_fetcher(endpoint=endpoint, timeout_s=timeout_s)
+    fetch = fetcher or _default_fetcher(
+        endpoint=endpoint,
+        timeout_s=timeout_s,
+        retries=retries,
+        backoff_s=backoff_s,
+        sleeper=sleeper,
+    )
     payload = fetch(station_list)
 
     records: list[MetarRecord] = []
@@ -171,30 +202,71 @@ def collect_metar_snapshot(
     }
 
 
-def _default_fetcher(*, endpoint: str, timeout_s: int):
+def _default_fetcher(
+    *,
+    endpoint: str,
+    timeout_s: int,
+    retries: int = DEFAULT_RETRIES,
+    backoff_s: float = DEFAULT_BACKOFF_S,
+    sleeper: "callable | None" = None,
+):
+    """Build a fetch callable that retries on transient network errors.
+
+    Retries on:
+      - DNS resolution failures (ConnectionError wrapping NameResolutionError),
+      - TLS handshake errors (SSLError),
+      - read/connect timeouts (Timeout),
+      - 5xx responses (server-side flake).
+
+    NEVER retries on 4xx — those mean the request itself is wrong
+    (e.g. a station code the API doesn't know).
+    """
+    sleep = sleeper if sleeper is not None else time.sleep
+
     def fetch(station_list: list[str]) -> list[dict]:
         # The endpoint accepts comma-separated ids. 51 stations fits in a
         # single GET URL well under any sensible URL limit.
-        response = requests.get(
-            endpoint,
-            params={"ids": ",".join(station_list), "format": "json"},
-            headers={"User-Agent": USER_AGENT},
-            timeout=timeout_s,
-        )
-        if response.status_code == 204:
-            return []
-        response.raise_for_status()
-        try:
-            data = response.json()
-        except json.JSONDecodeError:
-            return []
-        if isinstance(data, dict):
-            # API has been seen wrapping in {"data": [...]} historically
-            for key in ("data", "items", "metars"):
-                if isinstance(data.get(key), list):
-                    return data[key]
-            return []
-        return data if isinstance(data, list) else []
+        params = {"ids": ",".join(station_list), "format": "json"}
+        last_exc: Exception | None = None
+        for attempt in range(retries + 1):
+            try:
+                response = requests.get(
+                    endpoint,
+                    params=params,
+                    headers={"User-Agent": USER_AGENT},
+                    timeout=timeout_s,
+                )
+                if response.status_code == 204:
+                    return []
+                if 500 <= response.status_code < 600:
+                    last_exc = requests.HTTPError(
+                        f"{response.status_code} server error", response=response
+                    )
+                else:
+                    response.raise_for_status()
+                    try:
+                        data = response.json()
+                    except json.JSONDecodeError:
+                        return []
+                    if isinstance(data, dict):
+                        # API has been seen wrapping in {"data": [...]} historically
+                        for key in ("data", "items", "metars"):
+                            if isinstance(data.get(key), list):
+                                return data[key]
+                        return []
+                    return data if isinstance(data, list) else []
+            except (
+                requests.exceptions.SSLError,
+                requests.exceptions.ConnectionError,
+                requests.exceptions.Timeout,
+            ) as exc:
+                last_exc = exc
+            if attempt < retries:
+                sleep(backoff_s * (2 ** attempt))
+        if last_exc is None:
+            last_exc = RuntimeError(f"unreachable retry path for {endpoint}")
+        raise last_exc
+
     return fetch
 
 

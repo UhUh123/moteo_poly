@@ -211,3 +211,161 @@ def test_load_station_ids_reads_training_stations_json(tmp_path: Path) -> None:
 
 def test_load_station_ids_returns_empty_for_missing_file(tmp_path: Path) -> None:
     assert load_station_ids(tmp_path / "nope.json") == []
+
+
+# ---- retry behaviour --------------------------------------------------------
+#
+# Why these tests matter: on Windows the household ISP DNS occasionally fails
+# to resolve aviationweather.gov for minutes at a time. Without retries even a
+# 200ms flap turns one collection cycle into a complete miss; ten minutes
+# later the next cycle picks up only the *latest* observation per station,
+# permanently losing the cycle that failed. With retries we bridge most flaps.
+
+
+def _make_fake_response(*, status: int = 200, body=None):
+    class _Resp:
+        status_code = status
+
+        def raise_for_status(self):
+            if 400 <= self.status_code < 600:
+                from requests import HTTPError
+                raise HTTPError(f"{self.status_code} error")
+
+        def json(self):
+            return body or []
+
+    return _Resp()
+
+
+def test_default_fetcher_retries_then_succeeds(tmp_path: Path, monkeypatch) -> None:
+    """ConnectionError on attempt 1 (DNS failure), succeed on attempt 2.
+    Sleeps must be invoked between attempts but with our injected sleeper
+    so the test stays instant."""
+    import requests as _requests
+    from detect_temperature.sources import metar_collector as mc
+
+    attempts = {"calls": 0, "sleeps": []}
+
+    def fake_get(url, **kw):
+        attempts["calls"] += 1
+        if attempts["calls"] == 1:
+            raise _requests.exceptions.ConnectionError("Failed to resolve 'aviationweather.gov'")
+        return _make_fake_response(status=200, body=[_kjfk_payload()])
+
+    monkeypatch.setattr(mc.requests, "get", fake_get)
+
+    summary = collect_metar_snapshot(
+        ["KJFK"],
+        history_root=tmp_path / "metar_history",
+        sleeper=lambda s: attempts["sleeps"].append(s),
+        retries=3,
+        backoff_s=0.1,
+    )
+
+    assert attempts["calls"] == 2
+    assert attempts["sleeps"] == [0.1]
+    assert summary["received"] == 1
+    assert summary["appended"] == 1
+
+
+def test_default_fetcher_gives_up_after_all_retries(tmp_path: Path, monkeypatch) -> None:
+    """Persistent DNS failure: 1 + retries=3 attempts, then raise."""
+    import requests as _requests
+    from detect_temperature.sources import metar_collector as mc
+
+    attempts = {"calls": 0, "sleeps": []}
+
+    def fake_get(url, **kw):
+        attempts["calls"] += 1
+        raise _requests.exceptions.ConnectionError("DNS down")
+
+    monkeypatch.setattr(mc.requests, "get", fake_get)
+
+    with pytest.raises(_requests.exceptions.ConnectionError):
+        collect_metar_snapshot(
+            ["KJFK"],
+            history_root=tmp_path / "metar_history",
+            sleeper=lambda s: attempts["sleeps"].append(s),
+            retries=3,
+            backoff_s=0.1,
+        )
+
+    assert attempts["calls"] == 4, "1 initial + 3 retries"
+    # exponential backoff: 0.1, 0.2, 0.4
+    assert attempts["sleeps"] == pytest.approx([0.1, 0.2, 0.4])
+
+
+def test_default_fetcher_does_not_retry_on_4xx(tmp_path: Path, monkeypatch) -> None:
+    """A 400/404 means the request itself is wrong (e.g. unknown station
+    code). Retrying would just hammer the gov endpoint for nothing."""
+    from detect_temperature.sources import metar_collector as mc
+
+    attempts = {"calls": 0}
+
+    def fake_get(url, **kw):
+        attempts["calls"] += 1
+        return _make_fake_response(status=404)
+
+    monkeypatch.setattr(mc.requests, "get", fake_get)
+
+    from requests import HTTPError
+    with pytest.raises(HTTPError):
+        collect_metar_snapshot(
+            ["KJFK"],
+            history_root=tmp_path / "metar_history",
+            sleeper=lambda s: None,
+            retries=3,
+            backoff_s=0.1,
+        )
+
+    assert attempts["calls"] == 1, "4xx must NOT retry"
+
+
+def test_default_fetcher_retries_on_5xx(tmp_path: Path, monkeypatch) -> None:
+    """Server flake (502/503) is retryable."""
+    from detect_temperature.sources import metar_collector as mc
+
+    attempts = {"calls": 0}
+
+    def fake_get(url, **kw):
+        attempts["calls"] += 1
+        if attempts["calls"] < 3:
+            return _make_fake_response(status=503)
+        return _make_fake_response(status=200, body=[_kjfk_payload()])
+
+    monkeypatch.setattr(mc.requests, "get", fake_get)
+
+    summary = collect_metar_snapshot(
+        ["KJFK"],
+        history_root=tmp_path / "metar_history",
+        sleeper=lambda s: None,
+        retries=3,
+        backoff_s=0.1,
+    )
+
+    assert attempts["calls"] == 3
+    assert summary["received"] == 1
+
+
+def test_default_fetcher_retries_on_timeout(tmp_path: Path, monkeypatch) -> None:
+    import requests as _requests
+    from detect_temperature.sources import metar_collector as mc
+
+    attempts = {"calls": 0}
+
+    def fake_get(url, **kw):
+        attempts["calls"] += 1
+        if attempts["calls"] == 1:
+            raise _requests.exceptions.Timeout("read timeout")
+        return _make_fake_response(status=200, body=[_kjfk_payload()])
+
+    monkeypatch.setattr(mc.requests, "get", fake_get)
+
+    summary = collect_metar_snapshot(
+        ["KJFK"],
+        history_root=tmp_path / "metar_history",
+        sleeper=lambda s: None,
+    )
+
+    assert attempts["calls"] == 2
+    assert summary["received"] == 1
