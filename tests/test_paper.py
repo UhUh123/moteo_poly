@@ -857,3 +857,172 @@ def test_settle_promotes_preliminary_to_authoritative_without_changing_verdict(t
     assert float(day2["pnl_usdc"]) == day1_pnl    # PnL unchanged
     assert float(day2["settle_correction_usdc"]) == 0.0
     assert day2["settle_agreement"] == "agree"
+
+
+def test_settle_does_not_overwrite_settle_agreement_on_frozen_rows(tmp_path, monkeypatch) -> None:
+    """Regression for P2 #6 in the 2026-05-18 audit.
+
+    A row promoted to settle_authority='polymarket_resolved' carries a
+    correctly-computed settle_agreement (from the moment it was promoted).
+    On every subsequent daily_settle, _fetch_polymarket_resolutions
+    rightly skips it (no need to re-query — the verdict is frozen). But
+    the old code still called _annotate_polymarket(polymarket_resolution=
+    None), which writes settle_agreement='no_data' and erases the audit
+    value that was already on the row.
+
+    On the live system this turned 74 of 78 PM-authoritative rows into
+    'no_data' over a few daily_settle cycles. Audit utility went to zero.
+    """
+    portfolio, actuals = _open_one_position(tmp_path)
+    settled_csv = tmp_path / "settled.csv"
+
+    # Day 1: PM finalises with NO won (matches our actuals NO-side bet)
+    from detect_temperature.polymarket_resolution import MarketResolution
+    pm_no_won = MarketResolution(
+        market_slug="highest-temperature-in-test-on-may-5-2026-17c",
+        closed=True, yes_outcome_price=0.0, no_outcome_price=1.0,
+        outcome_prices_raw='["0", "1"]', uma_status="resolved",
+        resolution_source="",
+    )
+    monkeypatch.setattr(
+        "detect_temperature.polymarket_resolution.fetch_event_resolution",
+        lambda slug: {"highest-temperature-in-test-on-may-5-2026-17c": pm_no_won},
+    )
+    settle_paper_portfolio(
+        portfolio_path=portfolio, actuals_path=actuals,
+        output_path=settled_csv, bankroll_usdc=100.0,
+    )
+    day1 = list(csv.DictReader(settled_csv.open(newline="", encoding="utf-8")))[0]
+    assert day1["settle_authority"] == "polymarket_resolved"
+    assert day1["settle_agreement"] == "agree", "first settle records the correct audit"
+    day1_polymarket_yes = day1["polymarket_yes_won"]
+
+    # Day 2..N: every subsequent daily_settle. The fetcher skips this row
+    # because it's already polymarket_resolved (frozen). _settle_position
+    # is still called for it but with polymarket_resolution=None.
+    monkeypatch.setattr(
+        "detect_temperature.polymarket_resolution.fetch_event_resolution",
+        lambda slug: {},  # nothing returned for any slug
+    )
+    for _ in range(3):
+        settle_paper_portfolio(
+            portfolio_path=settled_csv, actuals_path=actuals,
+            output_path=settled_csv, bankroll_usdc=100.0,
+        )
+
+    final = list(csv.DictReader(settled_csv.open(newline="", encoding="utf-8")))[0]
+    # Row stays frozen and the audit MUST be preserved.
+    assert final["settle_authority"] == "polymarket_resolved"
+    assert final["settle_agreement"] == "agree", (
+        "frozen-row settle_agreement was overwritten by 'no_data' across "
+        "subsequent runs; this is exactly the P2 #6 bug"
+    )
+    assert final["polymarket_yes_won"] == day1_polymarket_yes
+    # PnL must also be untouched
+    assert float(final["pnl_usdc"]) == float(day1["pnl_usdc"])
+
+
+def test_settle_recovers_no_data_agreement_on_frozen_row(tmp_path, monkeypatch) -> None:
+    """Companion recovery path for the P2 #6 fix.
+
+    74 of 78 PM-authoritative rows on the live system have
+    settle_agreement='no_data' because of the prior bug. The fix in
+    _settle_position only stops the bleeding — but those rows already
+    have no_data on disk. _fetch_polymarket_resolutions must re-query
+    such rows so the next daily_settle can rebuild the audit value
+    properly (PnL is untouched because the frozen guard still applies).
+
+    This test reproduces that exact scenario: a row already on disk
+    with settle_authority=polymarket_resolved AND settle_agreement=
+    no_data must trigger a fresh PM query and end up with a real
+    'agree' or 'disagree' value. A row already at 'agree' must NOT
+    be re-queried — that would be wasted API calls.
+    """
+    portfolio_path = tmp_path / "portfolio.csv"
+    fieldnames = [
+        "event_slug", "market_slug", "side", "shares", "stake_usdc",
+        "interval_lower", "interval_upper", "interval_unit",
+        "status", "won", "payout_usdc", "pnl_usdc",
+        "settle_authority", "settle_agreement",
+        "polymarket_yes_won", "polymarket_uma_status", "polymarket_outcome_prices",
+    ]
+    rows_in = [
+        # Row A: previously buggy — frozen with no_data, must be re-queried
+        {
+            "event_slug": "highest-temperature-in-test-on-may-5-2026",
+            "market_slug": "highest-temperature-in-test-on-may-5-2026-17c",
+            "side": "BUY_NO", "shares": "1.0", "stake_usdc": "0.25",
+            "interval_lower": "16.5", "interval_upper": "17.5",
+            "interval_unit": "celsius",
+            "status": "won", "won": "1", "payout_usdc": "1.0", "pnl_usdc": "0.75",
+            "settle_authority": "polymarket_resolved",
+            "settle_agreement": "no_data",  # <- the leftover bug state
+            "polymarket_yes_won": "", "polymarket_uma_status": "",
+            "polymarket_outcome_prices": "",
+        },
+        # Row B: clean frozen row with already-correct agreement
+        {
+            "event_slug": "highest-temperature-in-test-on-may-6-2026",
+            "market_slug": "highest-temperature-in-test-on-may-6-2026-18c",
+            "side": "BUY_NO", "shares": "1.0", "stake_usdc": "0.25",
+            "interval_lower": "17.5", "interval_upper": "18.5",
+            "interval_unit": "celsius",
+            "status": "won", "won": "1", "payout_usdc": "1.0", "pnl_usdc": "0.75",
+            "settle_authority": "polymarket_resolved",
+            "settle_agreement": "agree",  # <- already audited correctly
+            "polymarket_yes_won": "0",
+            "polymarket_uma_status": "resolved",
+            "polymarket_outcome_prices": '["0", "1"]',
+        },
+    ]
+    with portfolio_path.open("w", newline="", encoding="utf-8") as fh:
+        writer = csv.DictWriter(fh, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows_in)
+
+    actuals_path = tmp_path / "actuals.csv"
+    actuals_path.write_text("slug,status\n", encoding="utf-8")
+
+    queried_event_slugs: list[str] = []
+    from detect_temperature.polymarket_resolution import MarketResolution
+    pm_no_won = MarketResolution(
+        market_slug="highest-temperature-in-test-on-may-5-2026-17c",
+        closed=True, yes_outcome_price=0.0, no_outcome_price=1.0,
+        outcome_prices_raw='["0", "1"]', uma_status="resolved",
+        resolution_source="",
+    )
+
+    def fake_fetch(slug):
+        queried_event_slugs.append(slug)
+        if slug == "highest-temperature-in-test-on-may-5-2026":
+            return {"highest-temperature-in-test-on-may-5-2026-17c": pm_no_won}
+        return {}
+
+    monkeypatch.setattr(
+        "detect_temperature.polymarket_resolution.fetch_event_resolution",
+        fake_fetch,
+    )
+
+    settled_csv = tmp_path / "settled.csv"
+    settle_paper_portfolio(
+        portfolio_path=portfolio_path, actuals_path=actuals_path,
+        output_path=settled_csv, bankroll_usdc=100.0,
+    )
+
+    # Only the no_data row should have triggered a PM query.
+    assert queried_event_slugs == ["highest-temperature-in-test-on-may-5-2026"]
+
+    settled_rows = list(csv.DictReader(settled_csv.open(newline="", encoding="utf-8")))
+    by_slug = {r["event_slug"]: r for r in settled_rows}
+
+    # Row A: audit recovered, PnL untouched.
+    a = by_slug["highest-temperature-in-test-on-may-5-2026"]
+    assert a["settle_agreement"] == "agree", "no_data row must self-heal once we re-query"
+    assert a["polymarket_yes_won"] == "0"
+    assert a["status"] == "won"
+    assert float(a["pnl_usdc"]) == 0.75
+
+    # Row B: untouched, no wasted API.
+    b = by_slug["highest-temperature-in-test-on-may-6-2026"]
+    assert b["settle_agreement"] == "agree"
+    assert b["polymarket_yes_won"] == "0"

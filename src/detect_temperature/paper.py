@@ -271,7 +271,16 @@ def _fetch_polymarket_resolutions(
         if pos.get("status") in SETTLED_STATUSES:
             authority = pos.get("settle_authority", "")
             if authority == "polymarket_resolved":
-                # Frozen final answer; no need to re-query.
+                # Frozen final answer; we won't change PnL. But if the
+                # audit columns were silently nuked by a prior buggy
+                # daily_settle (P2 #6: _annotate_polymarket called with
+                # polymarket_resolution=None replaces a real verdict
+                # with "no_data"), we re-query so this run can rebuild
+                # the audit. The frozen guard in _settle_position keeps
+                # PnL untouched.
+                agreement = (pos.get("settle_agreement") or "").strip()
+                if agreement in {"", "no_data"}:
+                    eligible_event_slugs.add(event_slug)
                 continue
             # Either we never cross-checked, or the verdict is still
             # only 'actuals_preliminary' and may need reconciling.
@@ -355,12 +364,20 @@ def _settle_position(
             else _settled_row_yes_won(updated)
         )
         if prior_authority == "polymarket_resolved":
-            # Frozen. Only backfill cross-check audit columns and exit.
-            _annotate_polymarket(
-                updated,
-                polymarket_resolution,
-                our_yes_won=our_yes_won_for_audit,
-            )
+            # Frozen. Only refresh audit columns when we ACTUALLY have a
+            # fresh PM response in hand. Without this guard each
+            # daily_settle re-run calls _annotate_polymarket with
+            # polymarket_resolution=None (the fetcher skipped this row
+            # because it's already authoritative), which would overwrite
+            # the correct settle_agreement that was recorded the day
+            # this row was promoted, replacing it with the synthesised
+            # "no_data" value. See P2 #6 in the 2026-05-18 audit.
+            if polymarket_resolution is not None:
+                _annotate_polymarket(
+                    updated,
+                    polymarket_resolution,
+                    our_yes_won=our_yes_won_for_audit,
+                )
             return updated
 
         if pm_authoritative:
