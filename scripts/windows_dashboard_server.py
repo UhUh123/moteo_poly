@@ -120,6 +120,7 @@ def main() -> int:
             root=ROOT,
             bankroll_usdc=BANKROLL_USDC,
             finalization_lag_days=1,
+            logger=logger,
         )
     except KeyboardInterrupt:
         logger.info("dashboard_server stopped by KeyboardInterrupt")

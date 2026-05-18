@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import shutil
 from datetime import datetime, timezone
 from http import HTTPStatus
@@ -55,17 +56,37 @@ def run_server(
     root: str | Path | None = None,
     bankroll_usdc: float = DEFAULT_BANKROLL_USDC,
     finalization_lag_days: int = 1,
+    logger: "logging.Logger | None" = None,
 ) -> None:
     project_root = Path(root or Path.cwd()).resolve()
     handler = _make_handler(
         project_root=project_root,
         bankroll_usdc=bankroll_usdc,
         finalization_lag_days=finalization_lag_days,
+        logger=logger,
     )
     server = ThreadingHTTPServer((host, port), handler)
-    print(f"Paper dashboard: http://{host}:{port}/")
-    print("Press Ctrl+C to stop.")
+    _emit(logger, f"Paper dashboard: http://{host}:{port}/")
+    _emit(logger, "Press Ctrl+C to stop.")
     server.serve_forever()
+
+
+def _emit(logger: "logging.Logger | None", message: str) -> None:
+    """Write a server message either through `logger` or stdout.
+
+    The dashboard server is the only long-running, always-on process in
+    this project. When it crashes (or just churns) we want a real file
+    log on disk; the windows_dashboard_server runner already creates one
+    via logging.FileHandler. But run_server itself was using bare print,
+    so requests, the startup banner, and the Ctrl-C path went only to
+    stdout — which Task Scheduler never writes anywhere. Result:
+    dashboard_server.log was effectively empty (180 bytes for 80h of
+    uptime). See P3 #7 in the 2026-05-18 audit.
+    """
+    if logger is not None:
+        logger.info(message)
+    else:
+        print(message)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -347,7 +368,12 @@ def _station_catalog(project_root: Path) -> CompositeStationCatalog | None:
     return CompositeStationCatalog(catalogs) if catalogs else None
 
 
-def _make_handler(project_root: Path, bankroll_usdc: float, finalization_lag_days: int):
+def _make_handler(
+    project_root: Path,
+    bankroll_usdc: float,
+    finalization_lag_days: int,
+    logger: "logging.Logger | None" = None,
+):
     class PaperDashboardHandler(BaseHTTPRequestHandler):
         server_version = "PaperWeatherDashboard/0.1"
 
@@ -449,7 +475,11 @@ def _make_handler(project_root: Path, bankroll_usdc: float, finalization_lag_day
             self._send_json(payload)
 
         def log_message(self, format: str, *args: Any) -> None:
-            print(f"{self.address_string()} - {format % args}")
+            message = f"{self.address_string()} - {format % args}"
+            if logger is not None:
+                logger.info(message)
+            else:
+                print(message)
 
         def _serve_dashboard(self) -> None:
             dashboard_path = project_root / "artifacts" / "paper_dashboard.html"
