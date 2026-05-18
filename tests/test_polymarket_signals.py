@@ -198,3 +198,81 @@ def test_build_market_signal_emits_kelly_columns() -> None:
     # YES side has positive edge in this fixture, so Kelly must be a positive number
     assert signal["yes_kelly_fraction"] is not None
     assert signal["yes_kelly_fraction"] > 0
+
+
+def test_build_market_signal_carries_identity_columns_from_prediction() -> None:
+    """Regression for the live data-quality bug where 90 paper positions
+    landed on disk with empty target_date / station_id / target_extreme /
+    city columns. These fields exist in the prediction row (originating
+    from targets.csv) but used to be dropped at the signals stage because
+    `base = dict(market)` only carried Polymarket fields. Without them
+    _stuck_paper_targets cannot reconstruct a MarketTarget for a stuck
+    paper position whose slug rotated out of targets.csv."""
+    market_row = flatten_temperature_markets([_event_fixture()])[0].to_record()
+    market_row["best_ask"] = "0.20"
+    market_row["best_bid"] = "0.18"
+    prediction = {
+        "slug": "highest-temperature-in-test-on-may-5-2026",
+        "corrected_prediction_c": "17.0",
+        "model_name": "test-model",
+        "target_date": "2026-05-05",
+        "station_id": "KSFO",
+        "target_extreme": "max",
+        "city": "Test",
+        "target_unit": "celsius",
+        "location_name": "Test Airport",
+        "source_domain": "wunderground.com",
+    }
+
+    signal = build_market_signal(market=market_row, prediction=prediction, sigma_c=1.0, min_edge=0.03)
+
+    assert signal.get("target_date") == "2026-05-05"
+    assert signal.get("station_id") == "KSFO"
+    assert signal.get("target_extreme") == "max"
+    assert signal.get("city") == "Test"
+    assert signal.get("target_unit") == "celsius"
+    assert signal.get("location_name") == "Test Airport"
+    assert signal.get("source_domain") == "wunderground.com"
+
+
+def test_build_market_signal_does_not_overwrite_market_provided_columns() -> None:
+    """If the market row already happens to carry one of these columns
+    (rare but possible in future feeds), the existing value wins. We
+    must not silently rewrite Polymarket-provided data with prediction
+    metadata."""
+    market_row = flatten_temperature_markets([_event_fixture()])[0].to_record()
+    market_row["best_ask"] = "0.20"
+    market_row["best_bid"] = "0.18"
+    market_row["target_date"] = "2099-01-01"  # synthetic, deliberately wrong
+    prediction = {
+        "slug": "highest-temperature-in-test-on-may-5-2026",
+        "corrected_prediction_c": "17.0",
+        "model_name": "test-model",
+        "target_date": "2026-05-05",
+        "station_id": "KSFO",
+    }
+
+    signal = build_market_signal(market=market_row, prediction=prediction, sigma_c=1.0, min_edge=0.03)
+
+    assert signal["target_date"] == "2099-01-01", "market value must win when both sides have it"
+    assert signal["station_id"] == "KSFO", "missing market value falls back to prediction"
+
+
+def test_build_market_signal_handles_missing_prediction_metadata() -> None:
+    """Older prediction rows (pre-fix backfill) lack the new columns.
+    Signal must still be constructed with empty strings, not crash."""
+    market_row = flatten_temperature_markets([_event_fixture()])[0].to_record()
+    market_row["best_ask"] = "0.20"
+    market_row["best_bid"] = "0.18"
+    prediction_old_schema = {
+        "slug": "highest-temperature-in-test-on-may-5-2026",
+        "corrected_prediction_c": "17.0",
+        "model_name": "test-model",
+    }
+
+    signal = build_market_signal(
+        market=market_row, prediction=prediction_old_schema, sigma_c=1.0, min_edge=0.03
+    )
+
+    assert signal.get("target_date", "") == ""
+    assert signal.get("station_id", "") == ""

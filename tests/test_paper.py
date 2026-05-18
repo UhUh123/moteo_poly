@@ -6,6 +6,8 @@ import json
 from detect_temperature.paper import (
     OPEN_STATUSES,
     SETTLED_STATUSES,
+    _position_from_signal,
+    _position_from_strategy_row,
     open_paper_portfolio,
     open_strategy_paper_portfolio,
     settle_paper_portfolio,
@@ -72,6 +74,94 @@ def test_settle_paper_portfolio_marks_wins_and_losses(tmp_path) -> None:
     assert payload["summary"]["settled_positions"] == 2
     assert payload["summary"]["won_positions"] == 1
     assert json.loads(state_path.read_text(encoding="utf-8"))["summary"]["lost_positions"] == 1
+
+
+def test_position_from_signal_carries_identity_columns() -> None:
+    """Regression for the data-quality bug: paper_portfolio.csv had 90 of
+    90 rows missing target_date / station_id / target_extreme / city
+    because _position_from_signal did not copy these fields from the
+    signal row. Without them _stuck_paper_targets cannot reconstruct a
+    MarketTarget for a stuck slug."""
+    signal_row = {
+        "event_slug": "highest-temperature-in-shanghai-on-may-12-2026",
+        "event_title": "Shanghai", "market_slug": "shanghai-26c",
+        "question": "?", "group_item_title": "26C",
+        "paper_side": "BUY_NO", "paper_price": "0.5",
+        "paper_fair_probability": "0.4", "paper_net_edge": "0.05",
+        "yes_fee_per_share": "0.01", "no_fee_per_share": "0.01",
+        "interval_lower": "25.5", "interval_upper": "26.5",
+        "interval_unit": "celsius", "end_date": "2026-05-12T12:00:00Z",
+        # The columns under test:
+        "target_date": "2026-05-12",
+        "station_id": "ZSPD",
+        "target_extreme": "max",
+        "city": "Shanghai",
+        "target_unit": "celsius",
+        "source_domain": "wunderground.com",
+    }
+    pos = _position_from_signal(signal_row, opened_at="2026-05-11T22:00:00Z", stake_usdc=0.25)
+    assert pos["target_date"] == "2026-05-12"
+    assert pos["station_id"] == "ZSPD"
+    assert pos["target_extreme"] == "max"
+    assert pos["city"] == "Shanghai"
+    assert pos["target_unit"] == "celsius"
+    assert pos["source_domain"] == "wunderground.com"
+
+
+def test_position_from_strategy_row_carries_identity_columns() -> None:
+    """Same data-quality regression but on the strategy_lab path,
+    which is the writer actually used by daily_open_trades."""
+    strategy_row = {
+        "candidate_id": "x", "event_slug": "highest-temperature-in-tokyo-on-may-12-2026",
+        "event_title": "Tokyo", "market_slug": "tokyo-25c",
+        "side": "BUY_YES", "stake_usdc": "0.25", "price": "0.4",
+        "execution_price": "0.41", "base_fair_probability": "0.55",
+        "execution_fillable": "1", "execution_fill_ratio": "1.0",
+        "execution_book_levels_used": "1",
+        "execution_book_available_usdc": "10", "execution_token_id": "tok",
+        "interval_lower": "24.5", "interval_upper": "25.5",
+        "interval_unit": "celsius", "end_date": "2026-05-12T12:00:00Z",
+        # The columns under test:
+        "target_date": "2026-05-12",
+        "station_id": "RJTT",
+        "target_extreme": "max",
+        "city": "Tokyo",
+        "target_unit": "celsius",
+        "source_domain": "wunderground.com",
+    }
+    pos = _position_from_strategy_row(
+        strategy_row,
+        opened_at="2026-05-11T22:00:00Z",
+        execution_mode="taker",
+        weather_fee_rate=0.05,
+        maker_fee_rate=0.0,
+    )
+    assert pos is not None
+    assert pos["target_date"] == "2026-05-12"
+    assert pos["station_id"] == "RJTT"
+    assert pos["target_extreme"] == "max"
+    assert pos["city"] == "Tokyo"
+    assert pos["target_unit"] == "celsius"
+    assert pos["source_domain"] == "wunderground.com"
+
+
+def test_position_from_signal_emits_blank_identity_when_signal_predates_fix() -> None:
+    """Older signals.csv files (pre-fix) lack the identity columns. The
+    writer must still produce a position with empty strings for them
+    instead of crashing or emitting None values that blow up CSV writers."""
+    legacy_row = {
+        "event_slug": "highest-temperature-in-test-on-may-5-2026",
+        "event_title": "Test", "market_slug": "test-17c",
+        "question": "?", "group_item_title": "17C",
+        "paper_side": "BUY_YES", "paper_price": "0.2",
+        "paper_fair_probability": "0.6", "paper_net_edge": "0.39",
+        "yes_fee_per_share": "0.008", "no_fee_per_share": "0.008",
+        "interval_lower": "16.5", "interval_upper": "17.5",
+        "interval_unit": "celsius", "end_date": "2099-05-05T12:00:00Z",
+    }
+    pos = _position_from_signal(legacy_row, opened_at="2026-05-04T22:00:00Z", stake_usdc=0.25)
+    for col in ("target_date", "station_id", "target_extreme", "city", "target_unit", "source_domain"):
+        assert pos[col] == "", f"{col} must default to empty string, got {pos[col]!r}"
 
 
 def test_open_strategy_paper_portfolio_tracks_taker_and_maker_modes(tmp_path) -> None:

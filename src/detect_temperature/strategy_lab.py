@@ -371,6 +371,18 @@ def _candidate_row(
         "market_city": context["city"],
         "market_date": context["date"],
         "market_extreme": context["extreme"],
+        # Authoritative identity columns carried over from the signal row
+        # (which got them from the prediction row, which got them from
+        # targets.csv). Distinct from market_city / market_date /
+        # market_extreme above: those are heuristics parsed from the event
+        # title for display, these are the values _stuck_paper_targets and
+        # downstream analysis rely on.
+        "target_date": signal.get("target_date", ""),
+        "station_id": signal.get("station_id", ""),
+        "target_extreme": signal.get("target_extreme", ""),
+        "city": signal.get("city", ""),
+        "target_unit": signal.get("target_unit", ""),
+        "source_domain": signal.get("source_domain", ""),
         "market_slug": signal.get("market_slug", ""),
         "group_item_title": signal.get("group_item_title", ""),
         "side": side,

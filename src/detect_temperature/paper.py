@@ -1118,6 +1118,16 @@ def _position_from_signal(row: dict[str, Any], opened_at: str, stake_usdc: float
         "market_slug": row.get("market_slug", ""),
         "question": row.get("question", ""),
         "group_item_title": row.get("group_item_title", ""),
+        # Identity / classification columns carried from signals row so that
+        # _stuck_paper_targets can later reconstruct a MarketTarget for this
+        # slug without round-tripping through archived targets.csv. Empty
+        # strings are fine if absent (older snapshots predating the fix).
+        "target_date": row.get("target_date", ""),
+        "station_id": row.get("station_id", ""),
+        "target_extreme": row.get("target_extreme", ""),
+        "city": row.get("city", ""),
+        "target_unit": row.get("target_unit", ""),
+        "source_domain": row.get("source_domain", ""),
         "side": side,
         "entry_mode": "taker",
         "paper_source": "signals",
@@ -1202,6 +1212,15 @@ def _position_from_strategy_row(
         "market_slug": row.get("market_slug", ""),
         "question": row.get("event_title", ""),
         "group_item_title": row.get("group_item_title", ""),
+        # Identity / classification columns; same rationale as
+        # _position_from_signal above. The strategy_lab row inherits them
+        # from market_signals.csv via signals.build_market_signal.
+        "target_date": row.get("target_date", ""),
+        "station_id": row.get("station_id", ""),
+        "target_extreme": row.get("target_extreme", ""),
+        "city": row.get("city", ""),
+        "target_unit": row.get("target_unit", ""),
+        "source_domain": row.get("source_domain", ""),
         "side": side,
         "entry_mode": entry_mode,
         "paper_source": "strategy_lab",

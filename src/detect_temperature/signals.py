@@ -136,6 +136,25 @@ def build_market_signal(
     interval = parse_temperature_interval(market.get("question", ""))
     market_has_ended = _market_has_ended(market.get("end_date"))
     base = dict(market)
+    # Carry forward identifying / classification columns from the prediction
+    # row. Without this they get dropped at the signals stage and downstream
+    # paper_portfolio.csv / strategy_lab outputs cannot tell which station,
+    # which target_date, which extreme a row belongs to. That breaks
+    # _stuck_paper_targets recovery (it can't reconstruct station_id) and
+    # any retro analysis grouped by station/city.
+    if prediction is not None:
+        for col in (
+            "target_date",
+            "station_id",
+            "target_extreme",
+            "city",
+            "target_unit",
+            "location_name",
+            "source_domain",
+        ):
+            v = prediction.get(col)
+            if v not in (None, ""):
+                base.setdefault(col, v)
     base.update(
         {
             "matched_prediction_slug": prediction.get("slug", "") if prediction else "",
