@@ -120,6 +120,27 @@ def update_task(
     `alert`, if given, is prepended to `alerts[]` and the list is trimmed.
     `portfolio`, if given, replaces `portfolio` wholesale (caller produces it
     from `summarize_portfolio` or similar).
+
+    Error semantics. We MERGE only when both the prior run and the new
+    run are successful (code 0 / blank / missing). Any other case —
+    new error, prior error, or transition between the two — REPLACES
+    the task section. Concretely:
+
+      - success after success: merge. A partial-field update preserves
+        fields the caller didn't touch this time.
+      - error after success: replace. Drops stale success-side fields
+        like `outcome=snapshot`, `rows_appended`, `snapshot_dir` so the
+        dashboard can't claim `code=2 outcome=snapshot` simultaneously.
+      - success after error: replace. Drops stale error-side fields
+        like `error="DNS failed"` so a recovered run doesn't continue
+        showing a phantom error message.
+      - error after error: replace. Each failure is its own snapshot;
+        we don't want to accumulate diagnostic context from a failure
+        that happened five hours ago into the current one.
+
+    See P1 #4 in the 2026-05-18 audit. The collector_metar DNS outage
+    surfaced this — we saw `code=2 outcome=snapshot` in health.json
+    because the previous success's `outcome` survived a failed run.
     """
     p = Path(path)
     lock_path = p.with_suffix(p.suffix + _LOCK_SUFFIX)
@@ -129,8 +150,18 @@ def update_task(
 
     with _file_lock(lock_path):
         payload = load_health(p)
-        task_section = payload["tasks"].setdefault(task_name, {})
-        task_section.update(fields)
+        new_is_error = _is_error_code(fields.get("code"))
+        prior_section = payload["tasks"].get(task_name, {})
+        prior_is_error = _is_error_code(prior_section.get("code"))
+        merge_only_when_both_success = (
+            not new_is_error
+            and not prior_is_error
+            and task_name in payload["tasks"]
+        )
+        if merge_only_when_both_success:
+            payload["tasks"][task_name].update(fields)
+        else:
+            payload["tasks"][task_name] = dict(fields)
         payload["updated_at"] = _now_iso()
         if portfolio is not None:
             payload["portfolio"] = portfolio
@@ -146,3 +177,19 @@ def update_task(
             fh.write("\n")
         os.replace(tmp_path, p)
     return payload
+
+
+def _is_error_code(value: Any) -> bool:
+    """Treat anything that's not "no error" as an error.
+
+    Numeric `code != 0` is an error (matches Python convention and our
+    callers' `update_task("...", {"code": 2, ...})` pattern). String "0"
+    or "" is OK. Truthy strings like "fail" are also treated as errors so
+    we don't silently swallow caller mistakes that pass non-numeric codes.
+    """
+    if value is None or value == "":
+        return False
+    try:
+        return int(value) != 0
+    except (TypeError, ValueError):
+        return bool(value)
